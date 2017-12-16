@@ -1,0 +1,429 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>WidgetDeviceInformationForm</class>
+ <widget class="QWidget" name="WidgetDeviceInformationForm">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>718</width>
+    <height>613</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QGridLayout" name="gridLayout_4">
+   <property name="leftMargin">
+    <number>0</number>
+   </property>
+   <property name="topMargin">
+    <number>0</number>
+   </property>
+   <property name="rightMargin">
+    <number>0</number>
+   </property>
+   <property name="bottomMargin">
+    <number>0</number>
+   </property>
+   <item row="0" column="0">
+    <widget class="QLabel" name="lTitle">
+     <property name="text">
+      <string>Device Information</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="0">
+    <widget class="Line" name="line">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="0">
+    <widget class="QGroupBox" name="groupBox">
+     <property name="title">
+      <string>Device Information</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout">
+      <item row="2" column="3">
+       <widget class="QLabel" name="label_2">
+        <property name="text">
+         <string>Protocol Version:</string>
+        </property>
+        <property name="buddy">
+         <cstring>leProtocolVersion</cstring>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0" colspan="2">
+       <widget class="QLabel" name="label_3">
+        <property name="text">
+         <string>Fir&amp;mware Version:</string>
+        </property>
+        <property name="buddy">
+         <cstring>leFirmwareVersion</cstring>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0">
+       <widget class="QLabel" name="label">
+        <property name="text">
+         <string>De&amp;vice:</string>
+        </property>
+        <property name="buddy">
+         <cstring>leDevice</cstring>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="4">
+       <widget class="QLineEdit" name="leProtocolVersion">
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
+        <property name="placeholderText">
+         <string>not connected</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0" colspan="2">
+       <widget class="QLabel" name="label_4">
+        <property name="text">
+         <string>Serial &amp;Number:</string>
+        </property>
+        <property name="buddy">
+         <cstring>leSerialNumber</cstring>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="2">
+       <widget class="QLineEdit" name="leFirmwareVersion">
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
+        <property name="placeholderText">
+         <string>not connected</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="2">
+       <widget class="QLineEdit" name="leSerialNumber">
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
+        <property name="placeholderText">
+         <string>not connected</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="2">
+       <widget class="QLineEdit" name="leDevice">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
+        <property name="placeholderText">
+         <string>not connected</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item row="3" column="0">
+    <widget class="QGroupBox" name="groupBox_2">
+     <property name="title">
+      <string>Supported Functions</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_2">
+      <item row="0" column="0">
+       <widget class="QLabel" name="label_9">
+        <property name="text">
+         <string>Sensor Types:</string>
+        </property>
+        <property name="scaledContents">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="FeatureSupportedWidget" name="fSensorAnalog">
+        <property name="toolTip">
+         <string>FeatureSupportedWidget</string>
+        </property>
+        <property name="whatsThis">
+         <string>FeatureSupportedWidget.</string>
+        </property>
+        <property name="featureText">
+         <string>Analog (NTC)</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="2">
+       <widget class="FeatureSupportedWidget" name="fSensorDigital">
+        <property name="toolTip">
+         <string>FeatureSupportedWidget</string>
+        </property>
+        <property name="whatsThis">
+         <string>FeatureSupportedWidget.</string>
+        </property>
+        <property name="featureText">
+         <string>Digital (I2C)</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="label_10">
+        <property name="text">
+         <string>Fan Controllers:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="FeatureSupportedWidget" name="fFCLinear">
+        <property name="toolTip">
+         <string>FeatureSupportedWidget</string>
+        </property>
+        <property name="whatsThis">
+         <string>FeatureSupportedWidget.</string>
+        </property>
+        <property name="featureText">
+         <string>Linear</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="2">
+       <widget class="FeatureSupportedWidget" name="fFCTripPoints">
+        <property name="toolTip">
+         <string>FeatureSupportedWidget</string>
+        </property>
+        <property name="whatsThis">
+         <string>FeatureSupportedWidget.</string>
+        </property>
+        <property name="featureText">
+         <string>Trip Points</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="3">
+       <widget class="FeatureSupportedWidget" name="fFCLinearTripPoints">
+        <property name="toolTip">
+         <string>FeatureSupportedWidget</string>
+        </property>
+        <property name="whatsThis">
+         <string>FeatureSupportedWidget.</string>
+        </property>
+        <property name="featureText">
+         <string>Linear Trip Points</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="4">
+       <widget class="FeatureSupportedWidget" name="fFCPI">
+        <property name="toolTip">
+         <string>FeatureSupportedWidget</string>
+        </property>
+        <property name="whatsThis">
+         <string>FeatureSupportedWidget.</string>
+        </property>
+        <property name="featureText">
+         <string>PI</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="5">
+       <widget class="FeatureSupportedWidget" name="fFCFuzzy">
+        <property name="toolTip">
+         <string>FeatureSupportedWidget</string>
+        </property>
+        <property name="whatsThis">
+         <string>FeatureSupportedWidget.</string>
+        </property>
+        <property name="featureText">
+         <string>Fuzzy</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="label_8">
+        <property name="text">
+         <string>Hardware:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="FeatureSupportedWidget" name="fHWLedStripes">
+        <property name="toolTip">
+         <string>FeatureSupportedWidget</string>
+        </property>
+        <property name="whatsThis">
+         <string>FeatureSupportedWidget.</string>
+        </property>
+        <property name="featureText">
+         <string>LED Stripes</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="2">
+       <widget class="FeatureSupportedWidget" name="fHWFanOutput">
+        <property name="toolTip">
+         <string>FeatureSupportedWidget</string>
+        </property>
+        <property name="whatsThis">
+         <string>FeatureSupportedWidget.</string>
+        </property>
+        <property name="featureText">
+         <string>Fan Output</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0">
+       <widget class="QLabel" name="label_11">
+        <property name="text">
+         <string>Other:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="1">
+       <widget class="FeatureSupportedWidget" name="fOtherUSBWatchdog">
+        <property name="toolTip">
+         <string>FeatureSupportedWidget</string>
+        </property>
+        <property name="whatsThis">
+         <string>FeatureSupportedWidget.</string>
+        </property>
+        <property name="featureText">
+         <string>USB Watchdog</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="2">
+       <widget class="FeatureSupportedWidget" name="fOtherEEMEMUpload">
+        <property name="toolTip">
+         <string>FeatureSupportedWidget</string>
+        </property>
+        <property name="whatsThis">
+         <string>FeatureSupportedWidget.</string>
+        </property>
+        <property name="featureText">
+         <string>EEMEM Upload</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="3">
+       <widget class="FeatureSupportedWidget" name="fOtherPIControllerDebug">
+        <property name="toolTip">
+         <string>FeatureSupportedWidget</string>
+        </property>
+        <property name="whatsThis">
+         <string>FeatureSupportedWidget.</string>
+        </property>
+        <property name="featureText">
+         <string>PI Ctrl Debug</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="3">
+       <widget class="FeatureSupportedWidget" name="fSensorPowerMeter">
+        <property name="toolTip">
+         <string>FeatureSupportedWidget</string>
+        </property>
+        <property name="whatsThis">
+         <string>FeatureSupportedWidget.</string>
+        </property>
+        <property name="featureText">
+         <string>Power Meter</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item row="4" column="0">
+    <spacer name="verticalSpacer">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>518</width>
+       <height>191</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item row="5" column="0">
+    <widget class="QGroupBox" name="groupBox_3">
+     <property name="title">
+      <string>Settings Management</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_3">
+      <item row="0" column="0">
+       <layout class="QHBoxLayout" name="horizontalLayout">
+        <item>
+         <spacer name="horizontalSpacer">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
+         <widget class="QPushButton" name="pbSettingsSave">
+          <property name="text">
+           <string>Save Settings</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="pbSettingsLoad">
+          <property name="text">
+           <string>Reload Settings</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="pbSettingsClear">
+          <property name="text">
+           <string>Clear Settings</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>FeatureSupportedWidget</class>
+   <extends>QWidget</extends>
+   <header>featuresupportedwidget.h</header>
+  </customwidget>
+ </customwidgets>
+ <tabstops>
+  <tabstop>leDevice</tabstop>
+  <tabstop>leFirmwareVersion</tabstop>
+  <tabstop>leProtocolVersion</tabstop>
+  <tabstop>pbSettingsSave</tabstop>
+  <tabstop>pbSettingsLoad</tabstop>
+  <tabstop>pbSettingsClear</tabstop>
+ </tabstops>
+ <resources/>
+ <connections/>
+</ui>

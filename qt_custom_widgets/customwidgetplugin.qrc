@@ -1,0 +1,8 @@
+<RCC>
+    <qresource prefix="/pixmaps">
+        <file>gCrossRed.svg</file>
+        <file>gHookGreen.svg</file>
+        <file>gFanStalled.svg</file>
+        <file>gFanNotStalled.svg</file>
+    </qresource>
+</RCC>

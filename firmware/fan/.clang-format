@@ -1,0 +1,9 @@
+BasedOnStyle: LLVM
+AccessModifierOffset: -4
+BreakBeforeBinaryOperators: false
+ColumnLimit: 140
+Standard: Cpp11
+IndentWidth: 4
+BreakBeforeBraces: Allman
+AllowShortFunctionsOnASingleLine: false
+SortIncludes: false
