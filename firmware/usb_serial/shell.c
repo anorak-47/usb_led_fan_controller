@@ -1,4 +1,5 @@
 
+#include <ledstripe/animation.h>
 #include "shell.h"
 #include "fan_out_type.h"
 #include "fan_type.h"
@@ -9,7 +10,6 @@
 #include "sensor_type.h"
 #include "settings.h"
 #include "uart.h"
-#include "animation.h"
 #include "shell_fan.h"
 #include "shell_fan_out.h"
 #include "shell_ina219.h"
@@ -41,10 +41,13 @@ enum recvStatus recv_status = recvStatusIdle;
 bool cmd_nfo(uint8_t argc, char **argv);
 bool cmd_sns(uint8_t argc, char **argv);
 bool cmd_fan(uint8_t argc, char **argv);
-bool cmd_fao(uint8_t argc, char **argv);
 bool cmd_save_settings(uint8_t argc, char **argv);
 bool cmd_load_settings(uint8_t argc, char **argv);
 bool shell_command_help(uint8_t argc, char **argv);
+
+#if FAN_OUT_SUPPORTED
+bool cmd_fao(uint8_t argc, char **argv);
+#endif
 
 #if DEBUG_FUNCTIONS_SUPPORTED
 bool cmd_i2c(uint8_t argc, char **argv);
@@ -84,6 +87,8 @@ const struct _s_shell_cmd shell_cmd[] PROGMEM = {SHELLCMD("?", shell_command_hel
 #if FAN_CONTROL_SUPPORTED
                                                  SHELLCMD("fan", cmd_fan, "", "fan"),
                                                  SHELLCMD("sns", cmd_sns, "", "sensor"),
+#endif
+#if FAN_OUT_SUPPORTED
                                                  SHELLCMD("fao", cmd_fao, "", "fan out"),
 #endif
 #if LED_PCA8574_SUPPORTED && DEBUG_FUNCTIONS_SUPPORTED
@@ -130,13 +135,26 @@ int freeRam(void)
 
 bool cmd_dbg(uint8_t argc, char **argv)
 {
+	uint16_t size = 0;
     fprintf_P(_vsf, PSTR(".dbg\n"));
     fprintf_P(_vsf, PSTR(".sns %u\n"), sizeof(Sensor) * MAX_SNS);
+    size += sizeof(Sensor) * MAX_SNS;
     fprintf_P(_vsf, PSTR(".fan %u\n"), sizeof(Fan) * MAX_FANS);
+    size += sizeof(Fan) * MAX_FANS;
+
+#if FAN_OUT_SUPPORTED
     fprintf_P(_vsf, PSTR(".fao %u\n"), sizeof(Fan_out) * MAX_FAN_OUTS);
-    fprintf_P(_vsf, PSTR(".tot %u\n"), sizeof(Fan_out) * MAX_FAN_OUTS + sizeof(Fan) * MAX_FANS + sizeof(Sensor) * MAX_SNS);
+    size += sizeof(Fan_out) * MAX_FAN_OUTS;
+#endif
+
+#if FAN_PWM_MAX31790_SUPPORTED
     fprintf_P(_vsf, PSTR(".mx3 %u\n"), sizeof(struct _s_max31790_device));
-    fprintf_P(_vsf, PSTR(".free %d\n"), freeRam());
+    size += sizeof(struct _s_max31790_device);
+#endif
+
+    fprintf_P(_vsf, PSTR(".tot %u\n"), size);
+
+    fprintf_P(_vsf, PSTR(".ram %d\n"), freeRam());
     return true;
 }
 
@@ -178,7 +196,9 @@ bool cmd_fan(uint8_t argc, char **argv)
 {
     return sub_shell_command(fan_shell_cmd, argc, argv);
 }
+#endif
 
+#if FAN_OUT_SUPPORTED
 bool cmd_fao(uint8_t argc, char **argv)
 {
     return sub_shell_command(fan_out_shell_cmd, argc, argv);
@@ -289,7 +309,7 @@ bool shell_command_help(uint8_t argc, char **argv)
 
 bool set_if_match_8(const char *arg, const char *cmd, uint8_t value, uint8_t *variable)
 {
-    if (strcmp_P(cmd, arg) == 0)
+    if (strcmp_P(arg, cmd) == 0)
     {
         *variable = value;
         return true;
@@ -300,7 +320,7 @@ bool set_if_match_8(const char *arg, const char *cmd, uint8_t value, uint8_t *va
 
 bool set_if_match_i8(const char *arg, const char *cmd, int8_t value, int8_t *variable)
 {
-    if (strcmp_P(cmd, arg) == 0)
+    if (strcmp_P(arg, cmd) == 0)
     {
         *variable = value;
         return true;
@@ -311,7 +331,7 @@ bool set_if_match_i8(const char *arg, const char *cmd, int8_t value, int8_t *var
 
 bool set_if_match_i16(const char *arg, const char *cmd, int16_t value, int16_t *variable)
 {
-    if (strcmp_P(cmd, arg) == 0)
+    if (strcmp_P(arg, cmd) == 0)
     {
         *variable = value;
         return true;

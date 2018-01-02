@@ -1,0 +1,3 @@
+[submodule "firmware/extra/FastLED"]
+	path = firmware/extra/FastLED
+	url = https://github.com/FastLED/FastLED.git

@@ -4,6 +4,9 @@
 #include "shell.h"
 #include <avr/pgmspace.h>
 
+#if FAN_OUT_SUPPORTED
+
 extern const struct _s_shell_cmd fan_out_shell_cmd[] PROGMEM;
 
+#endif
 #endif

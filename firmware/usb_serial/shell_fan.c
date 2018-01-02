@@ -162,30 +162,30 @@ bool fan_cmd_cfg(uint8_t argc, char **argv)
     }
     else if (argc == 2)
     {
-        if (strcmp_P(PSTR("fix"), argv[1]) == 0)
+        if (strcmp_P(argv[1], PSTR("fix")) == 0)
         {
             dump_fan_fixed_duty(fan);
         }
 #if FAN_MODE_LINEAR_SUPPORTED
-        else if (strcmp_P(PSTR("lin"), argv[1]) == 0)
+        else if (strcmp_P(argv[1], PSTR("lin")) == 0)
         {
             dump_fan_linear_duty(fan);
         }
 #endif
 #if FAN_MODE_TRIP_POINTS_SUPPORTED || FAN_MODE_LIN_TRIP_POINTS_SUPPORTED
-        else if (strcmp_P(PSTR("tp"), argv[1]) == 0)
+        else if (strcmp_P(argv[1], PSTR("tp")) == 0)
         {
             dump_fan_trip_points(fan);
         }
 #endif
 #if FAN_MODE_PI_SUPPORTED
-        else if (strcmp_P(PSTR("pi"), argv[1]) == 0)
+        else if (strcmp_P(argv[1], PSTR("pi")) == 0)
         {
             dump_fan_pi_control(fan);
         }
 #endif
 #if FAN_MODE_PI_SUPPORTED || FAN_MODE_FUZZY_SUPPORTED
-        else if (strcmp_P(PSTR("sp"), argv[1]) == 0)
+        else if (strcmp_P(argv[1], PSTR("sp")) == 0)
         {
             dump_fan_setpoint(fan);
         }
@@ -229,7 +229,7 @@ bool fan_cmd_cfg(uint8_t argc, char **argv)
         int8_t v = atoi(argv[4]);
         uint8_t d = atoi(argv[5]);
 
-        if (strcmp_P(PSTR("tp"), argv[2]) == 0)
+        if (strcmp_P(argv[2], PSTR("tp")) == 0)
         {
             fans[fan].trip_point[t].value = v;
             fans[fan].trip_point[t].duty = d;
@@ -282,15 +282,15 @@ bool fan_cmd_sta(uint8_t argc, char **argv)
 
     else if (argc == 2)
     {
-        if (strcmp_P(PSTR("rpm"), argv[1]) == 0)
+        if (strcmp_P(argv[1], PSTR("rpm")) == 0)
         {
             fprintf_P(_vsf, PSTR(".rpm %u\n"), fans[fan].rpm);
         }
-        else if (strcmp_P(PSTR("stl"), argv[1]) == 0)
+        else if (strcmp_P(argv[1], PSTR("stl")) == 0)
         {
             fprintf_P(_vsf, PSTR(".stl %u\n"), fans[fan].status.stalled);
         }
-        else if (strcmp_P(PSTR("sns"), argv[1]) == 0)
+        else if (strcmp_P(argv[1], PSTR("sns")) == 0)
         {
             fprintf_P(_vsf, PSTR(".sns %u\n"), sns[fans[fan].config.snsIdx].value);
         }

@@ -47,17 +47,21 @@ void fanControlInit()
     // Configure PWM channels.
     initPwm();
 
+#if FAN_OUT_SUPPORTED
     initFanOut();
+#endif
 }
 
 void fanControlUpdate()
 {
+#if FAN_OUT_SUPPORTED
     setFanOut();
+#endif
 
     if (timer1_ovf_counter >= FREQ_PWM)
     {
         // A second has passed
-    	LS_("fup");
+    	LV_("fup %lu", millis());
 
         // Reset timer1 overflow counter, to allow accurate timing within each second.
         timer1_ovf_counter -= FREQ_PWM;

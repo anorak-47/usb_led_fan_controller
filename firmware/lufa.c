@@ -34,9 +34,9 @@
  *  the demo and is responsible for the initial application hardware configuration.
  */
 
+#include <ledstripe/animation.h>
 #include "lufa.h"
 #include "lufa_virtual_serial.h"
-#include "animation.h"
 #include "fan.h"
 #include "powermeter.h"
 #include "i2cmaster.h"

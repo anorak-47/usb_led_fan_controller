@@ -147,11 +147,11 @@ bool mx_cmd_fan(uint8_t argc, char **argv)
         if (fan >= NR_CHANNEL)
             return false;
 
-        if (strcmp_P(PSTR("cfg"), argv[1]) == 0)
+        if (strcmp_P(argv[1], PSTR("cfg")) == 0)
         {
             dump_fan_config(fan);
         }
-        else if (strcmp_P(PSTR("mod"), argv[1]) == 0)
+        else if (strcmp_P(argv[1], PSTR("mod")) == 0)
         {
             dump_fan_mode(fan);
         }
@@ -168,17 +168,17 @@ bool mx_cmd_fan(uint8_t argc, char **argv)
         if (fan >= NR_CHANNEL)
             return false;
 
-        if (strcmp_P(PSTR("mod"), argv[1]) == 0)
+        if (strcmp_P(argv[1], PSTR("mod")) == 0)
         {
             max31790_set_fan_mode(&max31790device, val, fan);
             dump_fan_mode(fan);
         }
-        else if (strcmp_P(PSTR("pwm"), argv[1]) == 0)
+        else if (strcmp_P(argv[1], PSTR("pwm")) == 0)
         {
             max31790_set_fan_pwm(&max31790device, val, fan);
             dump_fan_duty(fan);
         }
-        else if (strcmp_P(PSTR("rpm"), argv[1]) == 0)
+        else if (strcmp_P(argv[1], PSTR("rpm")) == 0)
         {
             max31790_set_fan_rpm(&max31790device, val, fan);
             dump_fan_duty(fan);

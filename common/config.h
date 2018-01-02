@@ -33,9 +33,9 @@
 
 #define FAN_CONTROL_SUPPORTED               1
 
-#define SNS_ANALOG_SUPPORTED                1   // Support analog NTC sensors
+#define SNS_ANALOG_SUPPORTED                0   // Support analog NTC sensors
 #define SNS_I2C_SUPPORTED                   0   // Support I2C sensors
-#define FAN_OUT_SUPPORTED                   1   // Support simulated tacho signal to motherboard
+#define FAN_OUT_SUPPORTED                   0   // Support simulated tacho signal to motherboard
 #define PWM_EXACT_0_AND_100_PERCENT_DUTY    1   // Force generation of exact 0 & 100% duty cycles for all channels
 #define ENTER_BOOTLOADER_REMOTELY           0   // Enable to enter bootloader for firmware updates from software
 #define EEPROM_UPDOWNLOAD                   0   // Enable up- & download of full eeprom contents.
@@ -44,10 +44,10 @@
 #define FAN_MODE_LINEAR_SUPPORTED           1   // Linear fan control support, using gain/offset.
 #define FAN_MODE_PI_SUPPORTED               1   // PI-controller support.
 #define FAN_MODE_FUZZY_SUPPORTED            1   // Fuzzy conrtroller support. Only prepared, not implemented yet!
-#define FAN_PWM_MAX31790_SUPPORTED          1   // Use a MAX31790 to control and monitor the fans. If disabled, interal fan control is used
+#define FAN_PWM_MAX31790_SUPPORTED          0   // Use a MAX31790 to control and monitor the fans. If disabled, interal fan control is used
 #define FASTLED_SUPPORTED                   1   // Enable FASTled library and animations
 #define POWER_METER_SUPPORTED               0   // Add support for power meters based on INA219 or INA260
-#define LED_PCA8574_SUPPORTED               1   // Enable LED output using PCA8574
+#define LED_PCA8574_SUPPORTED               0   // Enable LED output using PCA8574
 #define CTRL_DEBUG                          1   // Enable extra functions to debug controller behavior.
 
 // If the USB comm watchdog timeout has a value > 0

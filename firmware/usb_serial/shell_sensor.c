@@ -109,7 +109,7 @@ bool sensor_cmd_sta(uint8_t argc, char **argv)
 
     else if (argc == 2)
     {
-        if (strcmp_P(PSTR("val"), argv[1]) == 0)
+        if (strcmp_P(argv[1], PSTR("val")) == 0)
         {
             fprintf_P(_vsf, PSTR(".val %d\n"), sns[channel].value);
         }

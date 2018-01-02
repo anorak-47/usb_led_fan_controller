@@ -11,22 +11,26 @@
 
 # Run "make help" for target help.
 
-MCU          = atmega32u4
-ARCH         = AVR8
-BOARD        = BOARD_NONE
-F_CPU        = 16000000
-F_USB        = $(F_CPU)
-OPTIMIZATION = s
-TARGET       = usb_control
-PROGRAM_CMD  = /home/wenk/bin/hid_bootloader_cli -v -mmcu=$(MCU) $(TARGET).hex
-LUFA_PATH    = ../../lufa/LUFA
-FASTLED_PATH = ../../libFastLed
-FASTLED_INCL = -I$(FASTLED_PATH) -I$(FASTLED_PATH)/arduino-1.0.1/cores/arduino -I$(FASTLED_PATH)/arduino-1.0.1/variants/leonardo -include Arduino.h
-CC_FLAGS     = -DUSE_LUFA_CONFIG_HEADER -I../common/ -IConfig/ -Ii2c/ -Ipower/ -Iled/ -Ifastled/ -Ifan/ -Iusb_serial/ -Iusb_raw/ -Iuart/ $(FASTLED_INCL)
-CPP_FLAGS    = -std=c++11 
-#LD_FLAGS     = -Wl,-u,vfprintf -lprintf_min -L$(FASTLED_PATH)/Release -lFastLed
-LD_FLAGS     = -L$(FASTLED_PATH)/Release -lFastLed
-LUFA_SRC     = $(LUFA_SRC_USB) $(LUFA_SRC_USBCLASS)
+MCU             = atmega32u4
+ARDUINO_VARIANT = leonardo
+ARCH            = AVR8
+BOARD           = BOARD_NONE
+F_CPU           = 16000000
+F_USB           = $(F_CPU)
+OPTIMIZATION    = s
+TARGET          = usb_control
+PROGRAM_CMD     = /home/wenk/bin/hid_bootloader_cli -v -mmcu=$(MCU) $(TARGET).hex
+LUFA_PATH       = ../../lufa/LUFA
+FASTLED_PATH    = extra/FastLED
+ARDUINO_PATH    = extra/arduino-1.0.1
+FASTLED_INCL    = -I$(FASTLED_PATH) -I$(ARDUINO_PATH)/cores/arduino -I$(ARDUINO_PATH)/variants/$(ARDUINO_VARIANT) -include Arduino.h
+CC_FLAGS        = -DUSE_LUFA_CONFIG_HEADER -I../common/ -IConfig/ -Ii2c/ -Ipower/ -Iled/ -Iledstripe/ -Ifan/ -Iusb_serial/ -Iusb_raw/ -Iuart/ $(FASTLED_INCL)
+CPP_FLAGS       = -std=c++11 
+LUFA_SRC        = $(LUFA_SRC_USB) $(LUFA_SRC_USBCLASS)
+
+# Include external build system moduls
+include extra/FastLED.mk
+include extra/arduino.mk
 
 SRC          = \
 	lufa.c \
@@ -41,13 +45,12 @@ SRC          = \
 	power/ina219.c \
 	power/ina260.c \
 	power/power.c \
-	fastled/animation_setup.cpp \
-	fastled/animation_names.cpp \
-	fastled/animation.cpp \
-	fastled/led_stripe_animation.cpp \
-	fastled/animation_rotating_palette.cpp \
-	fastled/animation_rotating_palette_cloud.cpp \
-	fastled/animation_fire2012.cpp \
+	ledstripe/animation_setup.cpp \
+	ledstripe/animation_names.cpp \
+	ledstripe/animation.cpp \
+	ledstripe/led_stripe_animation.cpp \
+	ledstripe/animation_rotating_palette.cpp \
+	ledstripe/animation_fire2012.cpp \
 	usb_serial/shell.c \
 	usb_serial/shell_fan.c \
 	usb_serial/shell_fan_out.c \
@@ -68,6 +71,8 @@ SRC          = \
 	fan/sensor.c \
 	fan/settings.c \
 	fan/timer.c \
+	$(FASTLED_SRC) \
+	$(ARDUINO_SRC) \
 	$(LUFA_SRC)
 
 
@@ -90,6 +95,7 @@ include $(DMBS_PATH)/gcc.mk
 include $(DMBS_PATH)/hid.mk
 include $(DMBS_PATH)/avrdude.mk
 include $(DMBS_PATH)/atprogram.mk
+
 
 # Program the device.  
 program: $(TARGET).hex $(TARGET).eep

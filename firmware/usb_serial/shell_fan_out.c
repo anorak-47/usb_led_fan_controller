@@ -5,6 +5,8 @@
 #include <inttypes.h>
 #include <stdbool.h>
 
+#if FAN_OUT_SUPPORTED
+
 /*
  * Get/set fan out configuration
  *
@@ -105,7 +107,7 @@ bool fanout_cmd_sta(uint8_t argc, char **argv)
 
     else if (argc == 2)
     {
-        if (strcmp_P(PSTR("rpm"), argv[1]) == 0)
+        if (strcmp_P(argv[1], PSTR("rpm")) == 0)
         {
             fprintf_P(_vsf, PSTR(".rpm %u\n"), fan_out[channel].rpm);
         }
@@ -121,3 +123,4 @@ bool fanout_cmd_sta(uint8_t argc, char **argv)
 
     return success;
 }
+#endif
