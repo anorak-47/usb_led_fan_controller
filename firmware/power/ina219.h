@@ -19,6 +19,8 @@
 */
 /**************************************************************************/
 
+#if POWER_METER_INA219
+
 /*=========================================================================
     I2C ADDRESS/BITS
     Adress range is 1000 0000 (A0+A1=GND)
@@ -129,3 +131,5 @@ uint32_t ina219_getBusVoltage_mV(_ina219_device *dev);
 uint32_t ina219_getShuntVoltage_mV(_ina219_device *dev);
 uint32_t ina219_getCurrent_mA(_ina219_device *dev);
 uint32_t ina219_getPower_mW(_ina219_device *dev);
+
+#endif

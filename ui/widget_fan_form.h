@@ -15,7 +15,9 @@ class WidgetFanForm;
 }
 
 class DataFan;
+class SeriesFan;
 class DataSensor;
+class SeriesSensor;
 class QSignalMapper;
 class QSpinBox;
 class QDoubleSpinBox;
@@ -119,7 +121,9 @@ private:
 
     Ui::WidgetFanForm *ui;
     std::shared_ptr<DataFan> _dataFan;
+    std::shared_ptr<SeriesFan> _seriesFan;
     std::shared_ptr<DataSensor> _dataSensor;
+    std::shared_ptr<SeriesSensor> _seriesSensor;
     std::vector<std::shared_ptr<DataSensor>> _dataSensors;
 
     int indexSensorPiController = 0;
@@ -129,16 +133,10 @@ private:
     std::map<FANTYPE, int> _typeToIndex;
     std::map<FANMODE, int> _modeToIndex;
 
-    QT_CHARTS_NAMESPACE::QChart *_chartFan;
-    QT_CHARTS_NAMESPACE::QDateTimeAxis *_axisXFan;
-
+    QT_CHARTS_NAMESPACE::QChart *_chart;
     QT_CHARTS_NAMESPACE::QLineSeries *_seriesLinearController;
     QT_CHARTS_NAMESPACE::QLineSeries *_seriesTripPointController;
-
-    QT_CHARTS_NAMESPACE::QLineSeries *_seriesFanRpm;
-    QT_CHARTS_NAMESPACE::QLineSeries *_seriesFanDuty;
-    QT_CHARTS_NAMESPACE::QLineSeries *_seriesFanSetpoint;
-    QT_CHARTS_NAMESPACE::QLineSeries *_seriesFanSensor;
+    void showSensorSeries();
 };
 
 #endif // WIDGET_FAN_H

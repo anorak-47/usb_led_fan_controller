@@ -1,7 +1,7 @@
 #include "widget_powermeter_container_form.h"
 #include "ui_widget_powermeter_container_form.h"
 #include "widget_powermeter_form.h"
-#include <QtGui/QLayout>
+#include <QLayout>
 
 WidgetPowerMeterContainerForm::WidgetPowerMeterContainerForm(QWidget *parent) :
     QWidget(parent),

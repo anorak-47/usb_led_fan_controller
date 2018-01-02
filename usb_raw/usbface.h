@@ -21,7 +21,7 @@
 #ifndef USBFACE_H_INCLUDED
 #define USBFACE_H_INCLUDED
 
-#include <usb.h>
+#include "hid_device.h"
 #include "types.h" // types exchanged with the USB device
 
 // usbface error codes:
@@ -35,109 +35,99 @@
 #define USBFACE_ERR_MALLOC 7   // Failed to allocate memory
 #define USBFACE_ERR_UNSUPP 8   // Unsupported request
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 const char *usbfaceErrToString(const int err);
 const char *usbfaceSensorTypeToString(const SNSTYPE type);
 const char *usbfaceFanModeToString(const FANMODE mode);
 const char *usbfaceFanOutModeToString(const FANOUTMODE mode);
 const char *usbfaceFanTypeToString(const FANTYPE type, const int desc);
 
-int usbfaceOpen(usb_dev_handle **device);
-int usbfaceClose(usb_dev_handle *device);
-int usbfacePing(usb_dev_handle *device);
-int usbfaceProtocolVersion(usb_dev_handle *device, unsigned char *version);
-int usbfaceFirmwareVersion(usb_dev_handle *device, unsigned char *major, unsigned char *minor);
-int usbfaceFuncsSupportedRead(usb_dev_handle *device, SUPPORTED *funcs);
+int usbfacePing(hid_device *device);
+int usbfaceProtocolVersion(hid_device *device, unsigned char *version);
+int usbfaceFirmwareVersion(hid_device *device, unsigned char *major, unsigned char *minor);
+int usbfaceFuncsSupportedRead(hid_device *device, SUPPORTED *funcs);
 
 int usbfaceGetNrOfFans();
 int usbfaceGetNrOfFanOuts();
 int usbfaceGetNrOfSensors();
 
-int usbfaceFanRpsRead(usb_dev_handle *device, const unsigned char channel, double *rpm);
-int usbfaceFanRpmRead(usb_dev_handle *device, const unsigned char channel, unsigned int *rpm);
+int usbfaceFanRpsRead(hid_device *device, const unsigned char channel, double *rpm);
+int usbfaceFanRpmRead(hid_device *device, const unsigned char channel, unsigned int *rpm);
 
 /// Read the duty cycle of the PWM output for a fan.
 /// \param[in] channel  Fan channel to read duty cycle for.
 /// \param[out] duty    Actual duty cycle for fan. A value of 0 represents 0%, a value of 1 represents 100%.
-int usbfaceFanDutyRead(usb_dev_handle *device, const unsigned char channel, double *duty);
-int usbfaceFanDutyRawRead(usb_dev_handle *device, const unsigned char channel, unsigned char *duty);
+int usbfaceFanDutyRead(hid_device *device, const unsigned char channel, double *duty);
+int usbfaceFanDutyRawRead(hid_device *device, const unsigned char channel, unsigned char *duty);
 
 /// Change the fixed duty cycle of the PWM output for a fan.
 /// \param[in] channel  Fan channel to change duty cycle for.
 /// \param[in] duty     Duty cycle for fan. A value of 0 represents 0%, a value of 1 represents 100%.
-int usbfaceFanDutyFixedWrite(usb_dev_handle *device, const unsigned char channel, const double duty);
-int usbfaceFanDutyFixedRawWrite(usb_dev_handle *device, const unsigned char channel, const unsigned char duty);
-int usbfaceFanDutyFixedRead(usb_dev_handle *device, const unsigned char channel, double *duty);
-int usbfaceFanDutyFixedRawRead(usb_dev_handle *device, const unsigned char channel, unsigned char *duty);
+int usbfaceFanDutyFixedWrite(hid_device *device, const unsigned char channel, const double duty);
+int usbfaceFanDutyFixedRawWrite(hid_device *device, const unsigned char channel, const unsigned char duty);
+int usbfaceFanDutyFixedRead(hid_device *device, const unsigned char channel, double *duty);
+int usbfaceFanDutyFixedRawRead(hid_device *device, const unsigned char channel, unsigned char *duty);
 
-int usbfaceFanTypeWrite(usb_dev_handle *device, const unsigned char channel, const FANTYPE type);
-int usbfaceFanTypeRead(usb_dev_handle *device, const unsigned char channel, FANTYPE *type);
-int usbfaceFanModeWrite(usb_dev_handle *device, const unsigned char channel, const FANMODE mode);
-int usbfaceFanModeRead(usb_dev_handle *device, const unsigned char channel, FANMODE *mode);
-int usbfaceFanSetpointWrite(usb_dev_handle *device, const unsigned char channel, const double setpoint,
+int usbfaceFanTypeWrite(hid_device *device, const unsigned char channel, const FANTYPE type);
+int usbfaceFanTypeRead(hid_device *device, const unsigned char channel, FANTYPE *type);
+int usbfaceFanModeWrite(hid_device *device, const unsigned char channel, const FANMODE mode);
+int usbfaceFanModeRead(hid_device *device, const unsigned char channel, FANMODE *mode);
+int usbfaceFanSetpointWrite(hid_device *device, const unsigned char channel, const double setpoint,
                             const int refsnsidx);
-int usbfaceFanSetpointActualRead(usb_dev_handle *device, const unsigned char channel, double *setpoint);
-int usbfaceFanSetpointRead(usb_dev_handle *device, const unsigned char channel, double *setpoint, int *refsnsidx);
-int usbfaceFanPidWrite(usb_dev_handle *device, const unsigned char channel, const double kp, const double ki,
+int usbfaceFanSetpointActualRead(hid_device *device, const unsigned char channel, double *setpoint);
+int usbfaceFanSetpointRead(hid_device *device, const unsigned char channel, double *setpoint, int *refsnsidx);
+int usbfaceFanPidWrite(hid_device *device, const unsigned char channel, const double kp, const double ki,
                        const double kt);
-int usbfaceFanPidRead(usb_dev_handle *device, const unsigned char channel, double *kp, double *ki, double *kt);
-int usbfaceFanGainOffsWrite(usb_dev_handle *device, const unsigned char channel, const double gain, const double offs);
-int usbfaceFanGainOffsRead(usb_dev_handle *device, const unsigned char channel, double *gain, double *offs);
-int usbfaceFanTripPointRead(usb_dev_handle *device, const unsigned char channel, const unsigned int point, unsigned int *value, unsigned int *duty);
-int usbfaceFanTripPointWrite(usb_dev_handle *device, const unsigned char channel, const unsigned int point, unsigned int value, unsigned int duty);
-int usbfaceFanSensorWrite(usb_dev_handle *device, const unsigned char channel, const int snsidx);
+int usbfaceFanPidRead(hid_device *device, const unsigned char channel, double *kp, double *ki, double *kt);
+int usbfaceFanGainOffsWrite(hid_device *device, const unsigned char channel, const double gain, const double offs);
+int usbfaceFanGainOffsRead(hid_device *device, const unsigned char channel, double *gain, double *offs);
+int usbfaceFanTripPointRead(hid_device *device, const unsigned char channel, const unsigned int point, unsigned int *value, unsigned int *duty);
+int usbfaceFanTripPointWrite(hid_device *device, const unsigned char channel, const unsigned int point, unsigned int value, unsigned int duty);
+int usbfaceFanSensorWrite(hid_device *device, const unsigned char channel, const int snsidx);
 /// Read which sensor is currently used to automatically control the fan.
-int usbfaceFanSensorRead(usb_dev_handle *device, const unsigned char channel, int *snsidx);
-int usbfaceFanMinRpmWrite(usb_dev_handle *device, const unsigned char channel, const double minrpm);
-int usbfaceFanMinRpmRead(usb_dev_handle *device, const unsigned char channel, double *minrpm);
-int usbfaceFanStallRead(usb_dev_handle *device, const unsigned char channel, int *stalled);
-int usbfaceFanStallDetectWrite(usb_dev_handle *device, const unsigned char channel, const int stalldetect);
-int usbfaceFanStallDetectRead(usb_dev_handle *device, const unsigned char channel, int *stalldetect);
+int usbfaceFanSensorRead(hid_device *device, const unsigned char channel, int *snsidx);
+int usbfaceFanMinRpmWrite(hid_device *device, const unsigned char channel, const double minrpm);
+int usbfaceFanMinRpmRead(hid_device *device, const unsigned char channel, double *minrpm);
+int usbfaceFanStallRead(hid_device *device, const unsigned char channel, int *stalled);
+int usbfaceFanStallDetectWrite(hid_device *device, const unsigned char channel, const int stalldetect);
+int usbfaceFanStallDetectRead(hid_device *device, const unsigned char channel, int *stalldetect);
 
-int usbfaceSnsTypeWrite(usb_dev_handle *device, const unsigned char channel, const SNSTYPE type);
-int usbfaceSnsTypeRead(usb_dev_handle *device, const unsigned char channel, SNSTYPE *type);
-int usbfaceSnsTypeIsSupported(usb_dev_handle *device, const SNSTYPE type);
+int usbfaceSnsTypeWrite(hid_device *device, const unsigned char channel, const SNSTYPE type);
+int usbfaceSnsTypeRead(hid_device *device, const unsigned char channel, SNSTYPE *type);
+int usbfaceSnsTypeIsSupported(hid_device *device, const SNSTYPE type);
 int usbfaceSnsTypeIsSupportedByFunctions(int funcs, const SNSTYPE type);
-int usbfaceSnsWrite(usb_dev_handle *device, const unsigned char channel, const double snsvalue);
-int usbfaceSnsRead(usb_dev_handle *device, const unsigned char channel, double *snsvalue);
+int usbfaceSnsWrite(hid_device *device, const unsigned char channel, const double snsvalue);
+int usbfaceSnsRead(hid_device *device, const unsigned char channel, double *snsvalue);
 
-int usbfaceFanOutModeWrite(usb_dev_handle *device, const unsigned char channel, const FANOUTMODE mode);
-int usbfaceFanOutModeRead(usb_dev_handle *device, const unsigned char channel, FANOUTMODE *mode);
-int usbfaceFanOutModeIsSupported(usb_dev_handle *device, const FANOUTMODE mode);
-int usbfaceFanOutRpmRead(usb_dev_handle *device, const unsigned char channel, double *rpm);
+int usbfaceFanOutModeWrite(hid_device *device, const unsigned char channel, const FANOUTMODE mode);
+int usbfaceFanOutModeRead(hid_device *device, const unsigned char channel, FANOUTMODE *mode);
+int usbfaceFanOutModeIsSupported(hid_device *device, const FANOUTMODE mode);
+int usbfaceFanOutRpmRead(hid_device *device, const unsigned char channel, double *rpm);
 
-int usbfaceFastledAnimationIdRead(usb_dev_handle *device, const unsigned char channel, unsigned char *id);
-int usbfaceFastledAnimationIdWrite(usb_dev_handle *device, const unsigned char channel, unsigned char id);
-int usbfaceFastledStateRead(usb_dev_handle *device, const unsigned char channel, unsigned char *running);
-int usbfaceFastledStateWrite(usb_dev_handle *device, const unsigned char channel, unsigned char running);
-int usbfaceFastledColorRead(usb_dev_handle *device, const unsigned char channel, unsigned char colors[6]);
-int usbfaceFastledColorWrite(usb_dev_handle *device, const unsigned char channel, unsigned char colors[6]);
-int usbfaceFastledAutostartRead(usb_dev_handle *device, const unsigned char channel, unsigned char *start);
-int usbfaceFastledAutostartWrite(usb_dev_handle *device, const unsigned char channel, unsigned char start);
-int usbfaceFastledSnsIdRead(usb_dev_handle *device, const unsigned char channel, unsigned char *id);
-int usbfaceFastledSnsIdWrite(usb_dev_handle *device, const unsigned char channel, unsigned char id);
-int usbfaceFastledFPSRead(usb_dev_handle *device, const unsigned char channel, unsigned char *fps);
-int usbfaceFastledFPSWrite(usb_dev_handle *device, const unsigned char channel, unsigned char fps);
+int usbfaceFastledAnimationIdRead(hid_device *device, const unsigned char channel, unsigned char *id);
+int usbfaceFastledAnimationIdWrite(hid_device *device, const unsigned char channel, unsigned char id);
+int usbfaceFastledStateRead(hid_device *device, const unsigned char channel, unsigned char *running);
+int usbfaceFastledStateWrite(hid_device *device, const unsigned char channel, unsigned char running);
+int usbfaceFastledColorRead(hid_device *device, const unsigned char channel, unsigned char colors[6]);
+int usbfaceFastledColorWrite(hid_device *device, const unsigned char channel, unsigned char colors[6]);
+int usbfaceFastledAutostartRead(hid_device *device, const unsigned char channel, unsigned char *start);
+int usbfaceFastledAutostartWrite(hid_device *device, const unsigned char channel, unsigned char start);
+int usbfaceFastledSnsIdRead(hid_device *device, const unsigned char channel, unsigned char *id);
+int usbfaceFastledSnsIdWrite(hid_device *device, const unsigned char channel, unsigned char id);
+int usbfaceFastledFPSRead(hid_device *device, const unsigned char channel, unsigned char *fps);
+int usbfaceFastledFPSWrite(hid_device *device, const unsigned char channel, unsigned char fps);
 
-int usbfacePowerMeterPowerRead(usb_dev_handle *device, const unsigned char channel, unsigned int *milliwatt);
-int usbfacePowerMeterCurrentRead(usb_dev_handle *device, const unsigned char channel, unsigned int *milliampere);
-int usbfacePowerMeterLoadRead(usb_dev_handle *device, const unsigned char channel, unsigned int *millivolt);
+int usbfacePowerMeterPowerRead(hid_device *device, const unsigned char channel, unsigned int *milliwatt);
+int usbfacePowerMeterCurrentRead(hid_device *device, const unsigned char channel, unsigned int *milliampere);
+int usbfacePowerMeterLoadRead(hid_device *device, const unsigned char channel, unsigned int *millivolt);
 
-int usbfaceReadSettings(usb_dev_handle *device);
-int usbfaceWriteSettings(usb_dev_handle *device);
-int usbfaceDefaultSettings(usb_dev_handle *device);
+int usbfaceReadSettings(hid_device *device);
+int usbfaceWriteSettings(hid_device *device);
+int usbfaceDefaultSettings(hid_device *device);
 
 // Enter the bootloader to update firmware. Call a number of times in a row (BOOTLOADER_ENTER_NUM_REQ) to actually enter
 // it!
-int usbfaceEnterBootloader(usb_dev_handle *device);
+int usbfaceEnterBootloader(hid_device *device);
 // Resets the device, causing re-enumeration. The handle will no longer be valid!
-int usbfaceResetDevice(usb_dev_handle *device);
-
-#ifdef __cplusplus
-}; // extern "C"
-#endif
+int usbfaceResetDevice(hid_device *device);
 
 #endif

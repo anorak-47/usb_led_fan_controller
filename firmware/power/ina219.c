@@ -21,11 +21,9 @@
 
 #include "ina219.h"
 #include "wire.h"
+#include "debug.h"
 
-
-#include "lufa_virtual_serial.h"
-
-
+#if POWER_METER_INA219
 
 _ina219_device ina219_device[MAX_POWERMETER];
 
@@ -408,9 +406,11 @@ uint32_t ina219_getPower_mW(_ina219_device *dev)
 {
 	uint32_t valueDec = ina219_getPower_raw(dev);
 
-	fprintf_P(_sf, PSTR("291 pwr %u\n"), valueDec);
-	fprintf_P(_sf, PSTR("291 div %u\n"), dev->powerDivider_mW);
+	//LV_(("291 pwr %u"), valueDec);
+	//LV_(("291 div %u"), dev->powerDivider_mW);
 
 	valueDec /= dev->powerDivider_mW;
 	return valueDec;
 }
+
+#endif

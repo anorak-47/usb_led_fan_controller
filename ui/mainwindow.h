@@ -2,7 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include <QtGui/QSystemTrayIcon>
+#include <QSystemTrayIcon>
 #include <map>
 
 

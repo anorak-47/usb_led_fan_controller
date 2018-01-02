@@ -40,6 +40,8 @@ struct _s_shell_cmd
 
 bool sub_shell_command(const struct _s_shell_cmd *sub_cmd, uint8_t argc, char **argv);
 
+void uart_recv_task(void);
+
 bool set_if_match_8(const char *arg, const char *cmd, uint8_t value, uint8_t *variable);
 bool set_if_match_i8(const char *arg, const char *cmd, int8_t value, int8_t *variable);
 bool set_if_match_i16(const char *arg, const char *cmd, int16_t value, int16_t *variable);

@@ -40,11 +40,7 @@
 #include <avr/pgmspace.h>
 #include <LUFA/Drivers/USB/USB.h>
 
-
-
 #define USB_VIRTUAL_SERIAL_SUPPORTED
-#define USB_GENERIC_HID_RAW_SUPPORTED
-
 
 /* Macros: */
 #ifdef USB_VIRTUAL_SERIAL_SUPPORTED
@@ -93,18 +89,11 @@ typedef struct
 {
     USB_Descriptor_Configuration_Header_t Config;
 
-#ifdef USB_GENERIC_HID_RAW_SUPPORTED
 	// Generic HID Interface
 	USB_Descriptor_Interface_t            HID_Interface;
 	USB_HID_Descriptor_HID_t              HID_GenericHID;
 	USB_Descriptor_Endpoint_t             HID_ReportINEndpoint;
 	USB_Descriptor_Endpoint_t             HID_ReportOUTEndpoint;
-#else
-	// Generic HID Interface
-	USB_Descriptor_Interface_t            HID_Interface;
-	USB_HID_Descriptor_HID_t              HID_GenericHID;
-	USB_Descriptor_Endpoint_t             HID_ReportINEndpoint;
-#endif
 
 #ifdef USB_VIRTUAL_SERIAL_SUPPORTED
     // CDC Control Interface

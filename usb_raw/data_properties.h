@@ -62,6 +62,7 @@ public:
 signals:
     void signalValueUpdated();
     void signalSupportedFunctionsUpdated(int supportedFunctions);
+    void signalPropertiesUpdated();
 
 protected:
     virtual bool handleEvent(CommandEvent *event) override;

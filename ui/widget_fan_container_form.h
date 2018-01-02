@@ -47,6 +47,8 @@ private:
 
     Ui::WidgetFanContainerForm *ui;
 
+    int _xaxis_display_range = 60*60;
+
     QVBoxLayout *_layout;
     std::vector<WidgetFanShowForm*> _widgetFanShowForms;
 
@@ -56,9 +58,6 @@ private:
     QT_CHARTS_NAMESPACE::QValueAxis *_axisY_duty;
     QT_CHARTS_NAMESPACE::QValueAxis *_axisY_rpm;
 
-    std::vector<QT_CHARTS_NAMESPACE::QLineSeries *> _seriesFanRpm;
-    std::vector<QT_CHARTS_NAMESPACE::QLineSeries *> _seriesFanDuty;
-    std::vector<QT_CHARTS_NAMESPACE::QLineSeries *> _seriesFanSensor;
     void toggleSeries(WidgetFanShowForm *fanShowForm, int channel);
 };
 

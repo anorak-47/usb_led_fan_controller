@@ -4,7 +4,6 @@
 #include "config.h"
 #include "types.h"
 #include <inttypes.h>
-#include <avr/eeprom.h>
 
 // Definition of struct to hold all data (configuration, status etc.) for a single fan.
 typedef struct

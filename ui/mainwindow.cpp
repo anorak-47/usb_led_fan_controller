@@ -3,7 +3,7 @@
 #include "command_queue.h"
 #include "command_event.h"
 #include "types.h"
-#include <QtGui/QMessageBox>
+#include <QMessageBox>
 #include <QtGui/QCloseEvent>
 #include <QtCore/QSettings>
 #include <QtCore/QTimer>

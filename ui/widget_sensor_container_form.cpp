@@ -2,11 +2,12 @@
 #include "ui_widget_sensor_container_form.h"
 #include "widget_sensor_form.h"
 #include "data_sensor.h"
+#include "series_sensor.h"
 #include "chart_settings_form.h"
 #include <QtCore/QSignalMapper>
 #include <QtCore/QTimer>
 #include <QtCore/QSettings>
-#include <QtGui/QLayout>
+#include <QLayout>
 #include <QtCharts/QLineSeries>
 #include <QtCharts/QValueAxis>
 #include <QtCharts/QDateTimeAxis>
@@ -40,20 +41,6 @@ WidgetSensorContainerForm::WidgetSensorContainerForm(QWidget *parent) :
     connect(_signalMapperColorGraph, SIGNAL(mapped(QWidget*)), this, SLOT(on_colorGraphUpdated(QWidget*)));
 
     createSensorChart();
-
-
-
-
-
-    //QTimer *timer = new QTimer(this);
-    //connect(timer, SIGNAL(timeout()), this, SLOT(on_timeout()));
-    //timer->start(1000);
-
-
-
-
-
-
     //readSettings();
 }
 
@@ -79,7 +66,6 @@ void WidgetSensorContainerForm::saveSettings()
 void WidgetSensorContainerForm::readSettings()
 {
     QSettings settings("Anorak", "ULFControl");
-    //ui->splitter->restoreGeometry(settings.value("SensorContainer/splitter").toByteArray());
     restoreSplitter();
 }
 
@@ -144,7 +130,7 @@ void WidgetSensorContainerForm::addWidgetSensor(WidgetSensorForm *sensor, bool h
 {
     _widgetSensorForms.push_back(sensor);
 
-    _sensorLayout->addWidget(sensor);    
+    _sensorLayout->addWidget(sensor);
 
     if (hasSuccessor)
     {
@@ -167,89 +153,44 @@ void WidgetSensorContainerForm::addWidgetSensor(WidgetSensorForm *sensor, bool h
     connect(sensor, SIGNAL(signalGraphColorChanged()), _signalMapperColorGraph, SLOT(map()));
     _signalMapperColorGraph->setMapping(sensor, sensor);
 
-    //if (sensor->dataSensor()->channel() == 0 || sensor->dataSensor()->channel() == 1)
-    {
-
-        /*
-        QLineSeries *newLineSeries = new QLineSeries();
-        newLineSeries->setName(sensor->dataSensor()->name());
-        _lineSeries.insert(std::pair<QWidget*, QT_CHARTS_NAMESPACE::QLineSeries *>(sensor, newLineSeries));
-
-
-
-        QContiguousCache<TimeSeriesData> series = sensor->dataSensor()->series();
-        qDebug() << "add series data " << series.count();
-
-
-        for (int i = 0; i < series.count(); i++)
-        {
-            qDebug() << "  " << series[i].dt.toMSecsSinceEpoch() << " x " << series[i].value;
-            newLineSeries->append(series[i].dt.toMSecsSinceEpoch(), series[i].value);
-        }
-
-        _chart->addSeries(newLineSeries);
-
-        newLineSeries->attachAxis(axisX);
-        newLineSeries->hide();
-        */
-
-        if (sensor->showInGraph())
-        {
-            addSensorSeriesToGraph(sensor);
-            /*
-            QLineSeries *newLineSeries = new QLineSeries();
-            newLineSeries->setName(QString("%1 - %2").arg(sensor->dataSensor()->channel()).arg(sensor->dataSensor()->description()));
-            _lineSeries.insert(std::pair<QWidget*, QT_CHARTS_NAMESPACE::QLineSeries *>(sensor, newLineSeries));
-
-            _firstLineSeries = newLineSeries;
-
-            QContiguousCache<TimeSeriesData> series = sensor->dataSensor()->series();
-            qDebug() << "add series data " << series.count();
-
-            for (int i = 0; i < series.count(); i++)
-            {
-                newLineSeries->append(series[i].dt.toMSecsSinceEpoch(), series[i].value);
-            }
-
-            _chart->addSeries(newLineSeries);
-
-            newLineSeries->attachAxis(axisX);
-            */
-        }
-    }
+    addSensorSeriesToGraph(sensor);
 }
 
 void WidgetSensorContainerForm::on_sensorValueUpdated(QWidget *sensorWidget)
-{
+{	
     WidgetSensorForm *sensorFromWidget = static_cast<WidgetSensorForm *>(sensorWidget);
 
-    qDebug() << "on_sensorValueUpdated " << sensorFromWidget->dataSensor()->fullName();
+    //qDebug() << "on_sensorValueUpdated " << sensorFromWidget->dataSensor()->fullName();
 
+    /*
     QLineSeries *lineSeries = _lineSeries[sensorWidget];
     QContiguousCache<TimeSeriesData> series = sensorFromWidget->dataSensor()->series();
 
     lineSeries->append(series.last().dt.toMSecsSinceEpoch(), series.last().value);
+    */
 }
 
-QString WidgetSensorContainerForm::getNameForSeries(WidgetSensorForm *sensorFromWidget)
+QString WidgetSensorContainerForm::getNameForSeries(WidgetSensorForm *sensorFormWidget)
 {
     //return QString("%1 - %2").arg(sensorFromWidget->dataSensor()->channel() + 1).arg(sensorFromWidget->dataSensor()->description());
-    return QString("%1 - %2").arg(sensorFromWidget->dataSensor()->channel() + 1).arg(sensorFromWidget->getDescription());
+    return QString("%1 - %2").arg(sensorFormWidget->dataSensor()->channel() + 1).arg(sensorFormWidget->getDescription());
 }
 
-void WidgetSensorContainerForm::addSensorSeriesToGraph(WidgetSensorForm *sensorFromWidget)
+void WidgetSensorContainerForm::addSensorSeriesToGraph(WidgetSensorForm *sensorFormWidget)
 {
+    std::shared_ptr<SeriesSensor> series = sensorFormWidget->seriesSensor();
+
+    series->setXAxis(_axisX);
+    series->setYAxis(_axisY);
+    series->addSeries(_chart);
+
+	/*
     QDateTime xmin = _axisX->min();
     QLineSeries *newLineSeries = new QLineSeries();
     newLineSeries->setName(getNameForSeries(sensorFromWidget));
     newLineSeries->setColor(sensorFromWidget->getGraphColor());
+
     _lineSeries.insert(std::pair<QWidget*, QT_CHARTS_NAMESPACE::QLineSeries *>(sensorFromWidget, newLineSeries));
-
-
-
-    _firstLineSeries = newLineSeries;
-
-
 
     QContiguousCache<TimeSeriesData> series = sensorFromWidget->dataSensor()->series();
 
@@ -261,6 +202,7 @@ void WidgetSensorContainerForm::addSensorSeriesToGraph(WidgetSensorForm *sensorF
 
     newLineSeries->attachAxis(_axisX);
     newLineSeries->attachAxis(_axisY);
+    */
 }
 
 void WidgetSensorContainerForm::on_showGraphUpdated(QWidget *sensorWidget)
@@ -272,6 +214,7 @@ void WidgetSensorContainerForm::on_showGraphUpdated(QWidget *sensorWidget)
 
     qDebug() << "on_showGraphUpdated " << sensorFromWidget->dataSensor()->fullName();
 
+    /*
     auto it = _lineSeries.find(sensorWidget);
     if (it != _lineSeries.end())
     {
@@ -285,30 +228,35 @@ void WidgetSensorContainerForm::on_showGraphUpdated(QWidget *sensorWidget)
     {
         addSensorSeriesToGraph(sensorFromWidget);
     }
+    */
 }
 
 void WidgetSensorContainerForm::on_nameGraphUpdated(QWidget *sensorWidget)
 {
     WidgetSensorForm *sensorFromWidget = static_cast<WidgetSensorForm *>(sensorWidget);
 
+    /*
     auto it = _lineSeries.find(sensorWidget);
     if (it != _lineSeries.end())
     {
            QLineSeries *lineSeries = it->second;
            lineSeries->setName(getNameForSeries(sensorFromWidget));
     }
+    */
 }
 
 void WidgetSensorContainerForm::on_colorGraphUpdated(QWidget *sensorWidget)
 {
     WidgetSensorForm *sensorFromWidget = static_cast<WidgetSensorForm *>(sensorWidget);
 
+    /*
     auto it = _lineSeries.find(sensorWidget);
     if (it != _lineSeries.end())
     {
            QLineSeries *lineSeries = it->second;
            lineSeries->setColor(sensorFromWidget->getGraphColor());
     }
+    */
 }
 
 void WidgetSensorContainerForm::on_timeRangeChanged(QTime timerange)
@@ -338,49 +286,4 @@ void WidgetSensorContainerForm::on_pause(bool paused)
     {
         _chart->setTitle(tr("Sensors - Update Paused"));
     }
-}
-
-void WidgetSensorContainerForm::on_timeout()
-{
-    if (_chart_paused)
-        return;
-
-    qDebug() << "on_timeout";
-    //qDebug() << "w " << _chart->plotArea().width();
-    //qDebug() << "t " << axisX->tickCount();
-
-    if (!_firstLineSeries || _firstLineSeries->count() < 2)
-        return;
-
-    QDateTime now = QDateTime::currentDateTime();
-
-    QDateTime xmin = _axisX->min();
-    QDateTime xmax = _axisX->max();
-
-
-    /*
-    if (xmin.secsTo(now) < 60*60)
-    {
-        xmax = now;
-    }
-    else
-    {
-        xmax = now;
-        xmin = now.addSecs(-60*60);
-    }
-    */
-
-    xmax = now;
-
-    //qreal x = _chart->plotArea().width() / axisX->tickCount();
-    //qDebug() << "x " << x;
-
-    double v = _firstLineSeries->at(_firstLineSeries->count()-1).y();
-    v += random() % 2 ? +random() % 2 : -random() % 2;
-
-    _firstLineSeries->append(now.toMSecsSinceEpoch(), v);
-    //_chart->scroll(x, 0);
-
-    _axisX->setRange(now.addSecs(-_time_range_secs), now);
-    _axisY->setRange(-20, 20);
 }

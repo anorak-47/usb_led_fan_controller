@@ -22,7 +22,8 @@ PROGRAM_CMD  = /home/wenk/bin/hid_bootloader_cli -v -mmcu=$(MCU) $(TARGET).hex
 LUFA_PATH    = ../../lufa/LUFA
 FASTLED_PATH = ../../libFastLed
 FASTLED_INCL = -I$(FASTLED_PATH) -I$(FASTLED_PATH)/arduino-1.0.1/cores/arduino -I$(FASTLED_PATH)/arduino-1.0.1/variants/leonardo -include Arduino.h
-CC_FLAGS     = -DUSE_LUFA_CONFIG_HEADER -I../common/ -IConfig/ -Ii2c/ -Ipower/ -Iled/ -Ifastled/ -Ifan/ -Iusb_serial/ -Iusb_raw/ $(FASTLED_INCL) 
+CC_FLAGS     = -DUSE_LUFA_CONFIG_HEADER -I../common/ -IConfig/ -Ii2c/ -Ipower/ -Iled/ -Ifastled/ -Ifan/ -Iusb_serial/ -Iusb_raw/ -Iuart/ $(FASTLED_INCL)
+CPP_FLAGS    = -std=c++11 
 #LD_FLAGS     = -Wl,-u,vfprintf -lprintf_min -L$(FASTLED_PATH)/Release -lFastLed
 LD_FLAGS     = -L$(FASTLED_PATH)/Release -lFastLed
 LUFA_SRC     = $(LUFA_SRC_USB) $(LUFA_SRC_USBCLASS)
@@ -30,7 +31,9 @@ LUFA_SRC     = $(LUFA_SRC_USB) $(LUFA_SRC_USBCLASS)
 SRC          = \
 	lufa.c \
 	lufa_virtual_serial.c \
+	debug.c \
 	descriptors.c \
+	uart/uart.c \
 	i2c/twimaster.c \
 	i2c/i2c.c \
 	led/led.c \
@@ -38,21 +41,29 @@ SRC          = \
 	power/ina219.c \
 	power/ina260.c \
 	power/power.c \
-	fastled/led_control.cpp \
+	fastled/animation_setup.cpp \
+	fastled/animation_names.cpp \
 	fastled/animation.cpp \
+	fastled/led_stripe_animation.cpp \
+	fastled/animation_rotating_palette.cpp \
+	fastled/animation_rotating_palette_cloud.cpp \
+	fastled/animation_fire2012.cpp \
 	usb_serial/shell.c \
 	usb_serial/shell_fan.c \
 	usb_serial/shell_fan_out.c \
 	usb_serial/shell_sensor.c \
 	usb_serial/shell_max31790.c \
 	usb_serial/shell_ina219.c \
+	usb_serial/shell_ina260.c \
 	usb_serial/shell_powermeter.c \
+	usb_serial/shell_animation.c \
 	usb_raw/usb_generic_hid.c \
 	fan/ctrl.c \
 	fan/fan.c \
 	fan/fan_out.c \
 	fan/max31790.c \
 	fan/mcp980x.c \
+	fan/powermeter.c \
 	fan/pwm.c \
 	fan/sensor.c \
 	fan/settings.c \

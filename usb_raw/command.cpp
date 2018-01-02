@@ -78,7 +78,7 @@ void CommandUpdateDeviceProperties::_exec()
     qDebug() << "CommandUpdateDeviceProperties " << _properties->fullName();
 
     bool success = true;
-    usb_dev_handle *dev = _co->getDevHandle();
+    hid_device *dev = _co->getDevHandle();
 
     SUPPORTED funcs = SUPPORTED_NONE;
     int rc = usbfaceFuncsSupportedRead(dev, &funcs);
@@ -138,7 +138,7 @@ CommandSettingsSave::CommandSettingsSave(DataDeviceProperties *caller)
 void CommandSettingsSave::_exec()
 {
     qDebug() << "CommandSettingsSave " << _properties->fullName();
-    usb_dev_handle *dev = _co->getDevHandle();
+    hid_device *dev = _co->getDevHandle();
 
     int rc = usbfaceWriteSettings(dev);
     if (USBFACE_SUCCESS == rc)
@@ -160,7 +160,7 @@ CommandSettingsLoad::CommandSettingsLoad(bool clearSettings, DataDevicePropertie
 void CommandSettingsLoad::_exec()
 {
     qDebug() << "CommandSettingsLoad " << _properties->fullName();
-    usb_dev_handle *dev = _co->getDevHandle();
+    hid_device *dev = _co->getDevHandle();
     int rc;
 
     if (_clearSettings)
@@ -242,7 +242,7 @@ void CommandUpdateSensor::_exec()
     qDebug() << "CommandUpdateSensor " << _sensor->fullName();
 
     bool updated = true;
-    usb_dev_handle *dev = _co->getDevHandle();
+    hid_device *dev = _co->getDevHandle();
 
     SNSTYPE type;
     int rc = usbfaceSnsTypeRead(dev, _channel, &type);
@@ -286,14 +286,14 @@ void CommandUpdateSensorValue::_exec()
 {
     qDebug() << "CommandUpdateSensorValue " << _sensor->fullName();
 
-    usb_dev_handle *dev = _co->getDevHandle();
+    hid_device *dev = _co->getDevHandle();
 
     double snsvalue;
     int rc = usbfaceSnsRead(dev, _channel, &snsvalue);
     if (USBFACE_SUCCESS == rc)
     {
         QMutexLocker l(_sensor->mutex());
-        _sensor->data().value = round(snsvalue);
+        _sensor->setValue(round(snsvalue));
         postEvent(CommandEvents::EventValueUpdated);
     }
     else
@@ -311,7 +311,7 @@ void CommandSetSensorType::_exec()
 {
     qDebug() << "CommandSetSensorType " << _sensor->fullName();
 
-    usb_dev_handle *dev = _co->getDevHandle();
+    hid_device *dev = _co->getDevHandle();
     SNSTYPE type;
 
     _sensor->mutex()->lock();
@@ -335,7 +335,7 @@ void CommandSetSensorValue::_exec()
 {
     qDebug() << "CommandSetSensorValue " << _sensor->fullName();
 
-    usb_dev_handle *dev = _co->getDevHandle();
+    hid_device *dev = _co->getDevHandle();
     double value;
 
     _sensor->mutex()->lock();
@@ -361,10 +361,8 @@ CommandUpdateFanOut::CommandUpdateFanOut(DataFanOut *fanout)
 
 void CommandUpdateFanOut::_exec()
 {
-    qDebug() << "CommandUpdateFanOut " << _fanout->fullName();
-
     bool updated = true;
-    usb_dev_handle *dev = _co->getDevHandle();
+    hid_device *dev = _co->getDevHandle();
 
     FANOUTMODE mode;
     int rc = usbfaceFanOutModeRead(dev, _channel, &mode);
@@ -426,7 +424,7 @@ void CommandUpdateFanOutValue::_exec()
 {
     qDebug() << "CommandUpdateFanOutValue " << _fanout->fullName();
 
-    usb_dev_handle *dev = _co->getDevHandle();
+    hid_device *dev = _co->getDevHandle();
 
     double rpm;
     int rc = usbfaceFanOutRpmRead(dev, _channel, &rpm);
@@ -451,7 +449,7 @@ CommandUpdateFanOutStallDetection::CommandUpdateFanOutStallDetection(DataFanOut 
 void CommandUpdateFanOutStallDetection::_exec()
 {
     qDebug() << "CommandUpdateFanOutStallDetection " << _fanout->fullName();
-    usb_dev_handle *dev = _co->getDevHandle();
+    hid_device *dev = _co->getDevHandle();
 
     for (int i = 0; i < MAX_FANS; i++)
     {
@@ -473,7 +471,7 @@ void CommandSetFanOutMode::_exec()
 {
     qDebug() << "CommandSetFanOutMode " << _fanout->fullName();
 
-    usb_dev_handle *dev = _co->getDevHandle();
+    hid_device *dev = _co->getDevHandle();
     FANOUTMODE mode;
 
     _fanout->mutex()->lock();
@@ -500,7 +498,7 @@ CommandUpdateFan::CommandUpdateFan(DataFan *fan)
 void CommandUpdateFan::_exec()
 {
     bool updated = true;
-    usb_dev_handle *dev = _co->getDevHandle();
+    hid_device *dev = _co->getDevHandle();
 
     FANMODE mode;
     int rc = usbfaceFanModeRead(dev, _channel, &mode);
@@ -570,7 +568,7 @@ void CommandUpdateFan::_exec()
     rc = usbfaceFanDutyRead(dev, _channel, &duty);
     if (USBFACE_SUCCESS == rc)
     {
-        _fan->setScaledDuty(duty);
+        _fan->setScaledDuty(duty * 100.0);
     }
     else
     {
@@ -582,7 +580,7 @@ void CommandUpdateFan::_exec()
     rc = usbfaceFanDutyFixedRead(dev, _channel, &fixedduty);
     if (USBFACE_SUCCESS == rc)
     {
-        _fan->setScaledFixedDuty(fixedduty);
+        _fan->setScaledFixedDuty(fixedduty * 100.0);
     }
     else
     {
@@ -600,7 +598,7 @@ void CommandUpdateFan::_exec()
         _fan->data().snsSetp.snsIdx = (SNSTYPE)refsnsidx;
         _fan->setPiSetpointOffset(setpoint);
     }
-    else
+    else if (USBFACE_ERR_UNSUPP != rc)
     {
         postUsbCommunicationErrorEvent(rc, "usbfaceFanSetpointRead");
         updated = false;
@@ -612,7 +610,7 @@ void CommandUpdateFan::_exec()
     {
         _fan->setSetpointValue(setpointValue);
     }
-    else
+    else if (USBFACE_ERR_UNSUPP != rc)
     {
         postUsbCommunicationErrorEvent(rc, "usbfaceFanSetpointActualRead");
         updated = false;
@@ -626,7 +624,7 @@ void CommandUpdateFan::_exec()
     {
         _fan->setPiControllerParameters(kp, ki, kt);
     }
-    else
+    else if (USBFACE_ERR_UNSUPP != rc)
     {
         postUsbCommunicationErrorEvent(rc, "usbfaceFanPidRead");
         updated = false;
@@ -640,7 +638,7 @@ void CommandUpdateFan::_exec()
         _fan->setLinearGain(gain);
         _fan->setLinearOffset(offs);
     }
-    else
+    else if (USBFACE_ERR_UNSUPP != rc)
     {
         postUsbCommunicationErrorEvent(rc, "usbfaceFanGainOffsRead");
         updated = false;
@@ -681,7 +679,7 @@ void CommandUpdateFan::_exec()
             _fan->data().trip_point[p].duty = duty;
             _fan->data().trip_point[p].value = value;
         }
-        else
+        else if (USBFACE_ERR_UNSUPP != rc)
         {
             postUsbCommunicationErrorEvent(rc, "usbfaceFanTripPointRead");
             updated = false;
@@ -690,7 +688,7 @@ void CommandUpdateFan::_exec()
 
     /* fan_out
     int stalldetect;
-    rc = usbfaceFanStallDetectRead(usb_dev_handle *device, _channel, &stalldetect);
+    rc = usbfaceFanStallDetectRead(hid_device *device, _channel, &stalldetect);
     if (USBFACE_SUCCESS == rc)
     {
         QMutexLocker l(_fan->mutex());
@@ -723,7 +721,7 @@ void CommandUpdateFanValue::_exec()
     qDebug() << "CommandUpdateFanValue " << _fan->fullName();
 
     bool updated = true;
-    usb_dev_handle *dev = _co->getDevHandle();
+    hid_device *dev = _co->getDevHandle();
 
     unsigned int rpm;
     int rc = usbfaceFanRpmRead(dev, _channel, &rpm);
@@ -741,7 +739,7 @@ void CommandUpdateFanValue::_exec()
     rc = usbfaceFanDutyRead(dev, _channel, &duty);
     if (USBFACE_SUCCESS == rc)
     {
-        _fan->setScaledDuty(duty);
+        _fan->setScaledDuty(duty * 100.0);
     }
     else
     {
@@ -762,16 +760,19 @@ void CommandUpdateFanValue::_exec()
         updated = false;
     }
 
-    double setpointValue;
-    rc = usbfaceFanSetpointActualRead(dev, _channel, &setpointValue);
-    if (USBFACE_SUCCESS == rc)
+    if (_fan->data().config.fanMode == FANMODE_PI)
     {
-        _fan->setSetpointValue(setpointValue);
-    }
-    else
-    {
-        postUsbCommunicationErrorEvent(rc, "usbfaceFanSetpointActualRead");
-        updated = false;
+        double setpointValue;
+        rc = usbfaceFanSetpointActualRead(dev, _channel, &setpointValue);
+        if (USBFACE_SUCCESS == rc)
+        {
+            _fan->setSetpointValue(setpointValue);
+        }
+        else
+        {
+            postUsbCommunicationErrorEvent(rc, "usbfaceFanSetpointActualRead");
+            updated = false;
+        }
     }
 
     if (updated)
@@ -789,7 +790,7 @@ void CommandSetFanConfig::_exec()
 {
     qDebug() << "CommandSetFanConfig " << _fan->fullName();
 
-    usb_dev_handle *dev = _co->getDevHandle();
+    hid_device *dev = _co->getDevHandle();
     FANMODE mode;
     FANTYPE type;
     int snsidx;
@@ -838,12 +839,14 @@ void CommandSetFanFixedDutyController::_exec()
 {
     qDebug() << "CommandSetFanFixedDutyController " << _fan->fullName();
 
-    usb_dev_handle *dev = _co->getDevHandle();
+    hid_device *dev = _co->getDevHandle();
     double duty;
 
     _fan->mutex()->lock();
     duty = _fan->getScaledFixedDuty() / 100.0;
     _fan->mutex()->unlock();
+
+    qDebug() << "CommandSetFanFixedDutyController " << duty;
 
     int rc = usbfaceFanDutyFixedWrite(dev, _channel, duty);
     if (USBFACE_SUCCESS != rc)
@@ -861,7 +864,7 @@ void CommandSetFanLinearController::_exec()
 {
     qDebug() << "CommandSetFanLinearController " << _fan->fullName();
 
-    usb_dev_handle *dev = _co->getDevHandle();
+    hid_device *dev = _co->getDevHandle();
     double gain;
     double offset;
 
@@ -886,7 +889,7 @@ void CommandSetFanTripPointController::_exec()
 {
     qDebug() << "CommandSetFanTripPointController " << _fan->fullName();
 
-    usb_dev_handle *dev = _co->getDevHandle();
+    hid_device *dev = _co->getDevHandle();
 
     for (int p = 0; p < MAX_TRIP_POINTS; p++)
     {
@@ -915,7 +918,7 @@ void CommandSetFanPiController::_exec()
 {
     qDebug() << "CommandSetFanPiController " << _fan->fullName();
 
-    usb_dev_handle *dev = _co->getDevHandle();
+    hid_device *dev = _co->getDevHandle();
 
     double kp;
     double ki;
@@ -959,7 +962,7 @@ void CommandUpdateFastLed::_exec()
     qDebug() << "CommandUpdateFastLed " << _fastled->fullName();
 
     bool updated = true;
-    usb_dev_handle *dev = _co->getDevHandle();
+    hid_device *dev = _co->getDevHandle();
 
     unsigned char id;
     int rc = usbfaceFastledAnimationIdRead(dev, _channel, &id);
@@ -1052,7 +1055,7 @@ CommandUpdateFastLedState::CommandUpdateFastLedState(DataFastLed *fastled) : Com
 
 void CommandUpdateFastLedState::_exec()
 {
-    usb_dev_handle *dev = _co->getDevHandle();
+    hid_device *dev = _co->getDevHandle();
     bool updatedState = true;
     bool updateAll = true;
 
@@ -1173,7 +1176,7 @@ CommandSetFastLedAnimationId::CommandSetFastLedAnimationId(DataFastLed *fastled)
 
 void CommandSetFastLedAnimationId::_exec()
 {
-    usb_dev_handle *dev = _co->getDevHandle();
+    hid_device *dev = _co->getDevHandle();
     unsigned char id;
 
     _fastled->mutex()->lock();
@@ -1194,7 +1197,7 @@ CommandSetFastLedState::CommandSetFastLedState(DataFastLed *fastled) : CommandUp
 
 void CommandSetFastLedState::_exec()
 {
-    usb_dev_handle *dev = _co->getDevHandle();
+    hid_device *dev = _co->getDevHandle();
     unsigned char running;
 
     _fastled->mutex()->lock();
@@ -1215,7 +1218,7 @@ CommandSetFastLedConfiguration::CommandSetFastLedConfiguration(DataFastLed *fast
 
 void CommandSetFastLedConfiguration::_exec()
 {
-    usb_dev_handle *dev = _co->getDevHandle();
+    hid_device *dev = _co->getDevHandle();
 
     unsigned char id;
     unsigned char fps;
@@ -1287,7 +1290,7 @@ void CommandUpdatePowerMeter::_exec()
     qDebug() << "CommandUpdatePowerMeter " << _power->fullName();
 
     bool updated = true;
-    usb_dev_handle *dev = _co->getDevHandle();
+    hid_device *dev = _co->getDevHandle();
 
     unsigned int milliwatt;
     int rc = usbfacePowerMeterPowerRead(dev, _channel, &milliwatt);
@@ -1314,7 +1317,7 @@ void CommandUpdatePowerMeter::_exec()
     }
 
     unsigned int milliampere;
-    rc = usbfacePowerMeterLoadRead(dev, _channel, &milliampere);
+    rc = usbfacePowerMeterCurrentRead(dev, _channel, &milliampere);
     if (USBFACE_SUCCESS == rc)
     {
         _power->setCurrent_mA(milliampere);
@@ -1327,6 +1330,6 @@ void CommandUpdatePowerMeter::_exec()
 
     if (updated)
     {
-        postEvent(CommandEvents::EventAllDataUpdated);
+        postEvent(CommandEvents::EventValueUpdated);
     }
 }

@@ -34,13 +34,13 @@ bool mx_cmd_cfg(uint8_t argc, char **argv)
     }
     else
     {
-    	fprintf_P(_sf, PSTR(".cfg\n"));
-        fprintf_P(_sf, PSTR(".raw %b\n"), max31790device.config.config.raw);
-        fprintf_P(_sf, PSTR(".OSC %u\n"), max31790device.config.config.ext_OSC);
-        fprintf_P(_sf, PSTR(".WDt %u\n"), max31790device.config.config.i2c_WD_time);
-        fprintf_P(_sf, PSTR(".ibt %u\n"), max31790device.config.config.i2c_bus_timeout);
-        fprintf_P(_sf, PSTR(".WDf %u\n"), max31790device.config.config.wd_fault);
-        fprintf_P(_sf, PSTR(".frq %u\n"), max31790device.config.fan_freq.raw);
+    	fprintf_P(_vsf, PSTR(".cfg\n"));
+        fprintf_P(_vsf, PSTR(".raw %b\n"), max31790device.config.config.raw);
+        fprintf_P(_vsf, PSTR(".OSC %u\n"), max31790device.config.config.ext_OSC);
+        fprintf_P(_vsf, PSTR(".WDt %u\n"), max31790device.config.config.i2c_WD_time);
+        fprintf_P(_vsf, PSTR(".ibt %u\n"), max31790device.config.config.i2c_bus_timeout);
+        fprintf_P(_vsf, PSTR(".WDf %u\n"), max31790device.config.config.wd_fault);
+        fprintf_P(_vsf, PSTR(".frq %u\n"), max31790device.config.fan_freq.raw);
     }
 
     return true;
@@ -48,41 +48,41 @@ bool mx_cmd_cfg(uint8_t argc, char **argv)
 
 void dump_fan_config(uint8_t fan)
 {
-    fprintf_P(_sf, PSTR(".fan %u\n"), fan);
-    fprintf_P(_sf, PSTR(".raw %b\n"), max31790device.fan_config[fan].fan_config.raw);
-    fprintf_P(_sf, PSTR(".mod %u\n"), max31790device.fan_config[fan].fan_config.mode);
-    fprintf_P(_sf, PSTR(".spi %u\n"), max31790device.fan_config[fan].fan_config.spin_up);
-    fprintf_P(_sf, PSTR(".ien %u\n"), max31790device.fan_config[fan].fan_config.tach_input_en);
-    fprintf_P(_sf, PSTR(".pwm %u\n"), max31790device.fan_config[fan].fan_config.pwm_tach);
-    fprintf_P(_sf, PSTR(".dyn %b\n"), max31790device.fan_config[fan].fan_dynamics.raw);
+    fprintf_P(_vsf, PSTR(".fan %u\n"), fan);
+    fprintf_P(_vsf, PSTR(".raw %b\n"), max31790device.fan_config[fan].fan_config.raw);
+    fprintf_P(_vsf, PSTR(".mod %u\n"), max31790device.fan_config[fan].fan_config.mode);
+    fprintf_P(_vsf, PSTR(".spi %u\n"), max31790device.fan_config[fan].fan_config.spin_up);
+    fprintf_P(_vsf, PSTR(".ien %u\n"), max31790device.fan_config[fan].fan_config.tach_input_en);
+    fprintf_P(_vsf, PSTR(".pwm %u\n"), max31790device.fan_config[fan].fan_config.pwm_tach);
+    fprintf_P(_vsf, PSTR(".dyn %b\n"), max31790device.fan_config[fan].fan_dynamics.raw);
 }
 
 void dump_fan_status(uint8_t fan)
 {
-    fprintf_P(_sf, PSTR(".fan %u\n"), fan);
-    fprintf_P(_sf, PSTR(".tac %u\n"), max31790device.fan_status[fan].tach[0]);
-    fprintf_P(_sf, PSTR(".tac %u\n"), max31790device.fan_status[fan].tach[1]);
-    fprintf_P(_sf, PSTR(".dty %u\n"), max31790device.fan_status[fan].duty);
-    fprintf_P(_sf, PSTR(".pwm %u\n"), max31790device.fan_status[fan].pwm);
-    fprintf_P(_sf, PSTR(".sr %u\n"), max31790device.fan_status[fan].sr);
+    fprintf_P(_vsf, PSTR(".fan %u\n"), fan);
+    fprintf_P(_vsf, PSTR(".tac %u\n"), max31790device.fan_status[fan].tach[0]);
+    fprintf_P(_vsf, PSTR(".tac %u\n"), max31790device.fan_status[fan].tach[1]);
+    fprintf_P(_vsf, PSTR(".dty %u\n"), max31790device.fan_status[fan].duty);
+    fprintf_P(_vsf, PSTR(".pwm %u\n"), max31790device.fan_status[fan].pwm);
+    fprintf_P(_vsf, PSTR(".sr %u\n"), max31790device.fan_status[fan].sr);
 
-    fprintf_P(_sf, PSTR(".rpm %u\n"), max31790_get_fan_rpm(&max31790device, fan));
-    fprintf_P(_sf, PSTR(".pwm %u\n"), max31790_get_fan_pwm(&max31790device, fan));
+    fprintf_P(_vsf, PSTR(".rpm %u\n"), max31790_get_fan_rpm(&max31790device, fan));
+    fprintf_P(_vsf, PSTR(".pwm %u\n"), max31790_get_fan_pwm(&max31790device, fan));
 }
 
 void dump_fan_duty(uint8_t fan)
 {
-    fprintf_P(_sf, PSTR(".fan %u\n"), fan);
-    fprintf_P(_sf, PSTR(".rpm %u\n"), max31790_get_fan_rpm(&max31790device, fan));
-    fprintf_P(_sf, PSTR(".rmt %u\n"), max31790_get_fan_rpm_target(&max31790device, fan));
-    fprintf_P(_sf, PSTR(".pwm %u\n"), max31790_get_fan_pwm(&max31790device, fan));
-    fprintf_P(_sf, PSTR(".dty %u\n"), max31790_get_fan_duty(&max31790device, fan));
+    fprintf_P(_vsf, PSTR(".fan %u\n"), fan);
+    fprintf_P(_vsf, PSTR(".rpm %u\n"), max31790_get_fan_rpm(&max31790device, fan));
+    fprintf_P(_vsf, PSTR(".rmt %u\n"), max31790_get_fan_rpm_target(&max31790device, fan));
+    fprintf_P(_vsf, PSTR(".pwm %u\n"), max31790_get_fan_pwm(&max31790device, fan));
+    fprintf_P(_vsf, PSTR(".dty %u\n"), max31790_get_fan_duty(&max31790device, fan));
 }
 
 void dump_fan_mode(uint8_t fan)
 {
-	fprintf_P(_sf, PSTR(".fan %u\n"), fan);
-    fprintf_P(_sf, PSTR(".mod %u\n"), max31790_get_fan_mode(&max31790device, fan));
+	fprintf_P(_vsf, PSTR(".fan %u\n"), fan);
+    fprintf_P(_vsf, PSTR(".mod %u\n"), max31790_get_fan_mode(&max31790device, fan));
 }
 
 bool mx_cmd_reset(uint8_t argc, char **argv)

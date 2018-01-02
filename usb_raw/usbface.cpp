@@ -20,57 +20,85 @@
 */
 
 #include "usbface.h"
-#include "opendevice.h"
+#include "hid_device.h"
 #include "requests.h" // from firmware
+#include <QtCore/QDebug>
 #include <string.h>   // malloc, free
 #include <assert.h>   // assert
 
-#define USB_VID USB_VID_OBDEV_SHARED
-#define USB_PID USB_PID_OBDEV_SHARED_CUSTOM
-const char *USB_VENDOR_NAME = "emmission.nl"; // Must match USB_CFG_VENDOR_NAME in firmware's usbconfig.h
-const char *USB_PRODUCT_NAME = "UsbFanCtrl";  // Must match USB_CFG_DEVICE_NAME in firmware's usbconfig.h
 #define TIMEOUT 5000
 
-int usbRequest(usb_dev_handle *device, const CUSTOM_RQ req, const int value, const int index, const int len, int *val)
+#define DATASIZE (sizeof(unsigned char) + sizeof(int))
+
+int usbRequest(hid_device *device, const CUSTOM_RQ req, const int value, const int index, const int len, int *val)
 {
-    char *buff = (char *)malloc(len);
+    int respMsgLen = len + 1;
+    uint8_t *buff = (uint8_t *)malloc(respMsgLen);
     int ret = USBFACE_SUCCESS;
-    int read;
+    bool read;
     assert(device != NULL);
-    read = usb_control_msg(device, USB_TYPE_VENDOR | USB_RECIP_DEVICE | USB_ENDPOINT_IN, req, value, index, buff, len,
-                           TIMEOUT);
+
+    uint8_t data[DATASIZE];
+    memset(data, 0xFE, sizeof(data));
+
+    data[0] = index;
+    int *vp = (int*)&data[1];
+    *vp = value;
+
+    //qDebug() << "usbRequest: req: " << req << ", channel: " << index << ", value: " << value << ", len: " << len;
+
+    read = hid_send_message(device, req, data, DATASIZE, buff, respMsgLen);
+
     if (val)
         *val = 0;
-    if (read < 0 || read != len)
+
+    if (!read)
+    {
+        ret = USBFACE_ERR_IO;
+        qDebug() << "usbRequest: req: " << req << ", channel: " << index << ", value: " << value << ", len: " << len;
+        qDebug() << "usbRequest: USBFACE_ERR_IO";
+    }
+    else if (respMsgLen > 0 && buff[0] == CUSTOM_RQ_UNSUPPORTED)
+    {
+        ret = USBFACE_ERR_UNSUPP;
+        qDebug() << "usbRequest: req: " << req << ", channel: " << index << ", value: " << value << ", len: " << len;
+        qDebug() << "usbRequest: USBFACE_ERR_UNSUPP";
+    }
+    else if (respMsgLen > 0 && buff[0] != req)
     {
         ret = USBFACE_ERR_READ;
+        qDebug() << "usbRequest: req: " << req << ", channel: " << index << ", value: " << value << ", len: " << len;
+        qDebug() << "usbRequest: USBFACE_ERR_READ";
     }
-    else if (val)
+    else
     {
-        switch (len)
+        if (val)
         {
-        case 0:
-            break; // nothing to read
-        case 1:
-            *val = *buff;
-            break;
-        case 2:
-            *val = *((unsigned short *)buff);
-            break;
-        case 4:
-            *val = *((unsigned int *)buff);
-            break;
-        default:
-            ret = USBFACE_ERR_READ;
-            break;
+            switch (len)
+            {
+            case 0:
+                break; // nothing to read
+            case 1:
+                *val = buff[1];
+                break;
+            case 2:
+                *val = *((unsigned short *)&buff[1]);
+                break;
+            case 4:
+                *val = *((unsigned int *)&buff[1]);
+                break;
+            default:
+                ret = USBFACE_ERR_READ;
+                break;
+            }
         }
     }
+
     free(buff);
     return ret;
 }
 
-
-int usbRequestData(usb_dev_handle *device, const CUSTOM_RQ req, const int index, const int input_len, unsigned char *input_data, const int output_len, unsigned char *output_data)
+int usbRequestData(hid_device *device, const CUSTOM_RQ req, const int index, const int input_len, unsigned char *input_data, const int output_len, unsigned char *output_data)
 {
     int ret = USBFACE_SUCCESS;
     assert(device != NULL);
@@ -80,33 +108,17 @@ int usbRequestData(usb_dev_handle *device, const CUSTOM_RQ req, const int index,
 
 // ---- Interface open/close/test ---------------------------------------------
 
-int usbfaceOpen(usb_dev_handle **device)
-{
-    *device = NULL;
-    usb_init();
-    return usbOpenDevice(device, USB_VID, (char *)USB_VENDOR_NAME, USB_PID, (char *)USB_PRODUCT_NAME, NULL, NULL, NULL);
-}
-
-int usbfaceClose(usb_dev_handle *device)
-{
-    if (device)
-    {
-        return usb_close(device);
-    }
-    return USBFACE_SUCCESS;
-}
-
-int usbfacePing(usb_dev_handle *device)
+int usbfacePing(hid_device *device)
 {
     int check = 0xAAAA5555;
     int read;
-    int res = usbRequest(device, CUSTOM_RQ_PROTOCOL_VERSION, check >> 16, check & 0xffff, 4, &read);
+    int res = usbRequest(device, CUSTOM_RQ_ECHO, check >> 16, check & 0xffff, 4, &read);
     if (res == USBFACE_SUCCESS && read != check)
         return USBFACE_ERR_READ;
     return res;
 }
 
-int usbfaceProtocolVersion(usb_dev_handle *device, unsigned char *version)
+int usbfaceProtocolVersion(hid_device *device, unsigned char *version)
 {
     int read;
     int res = usbRequest(device, CUSTOM_RQ_PROTOCOL_VERSION, 0, 0, 1, &read);
@@ -114,20 +126,20 @@ int usbfaceProtocolVersion(usb_dev_handle *device, unsigned char *version)
     return res;
 }
 
-int usbfaceFirmwareVersion(usb_dev_handle *device, unsigned char *major, unsigned char *minor)
+int usbfaceFirmwareVersion(hid_device *device, unsigned char *major, unsigned char *minor)
 {
     unsigned char read[2];
-    int res = usbRequest(device, CUSTOM_RQ_PROTOCOL_VERSION, 0, 0, 2, (int*)&read[0]);
+    int res = usbRequest(device, CUSTOM_RQ_FIRMWARE_VERSION, 0, 0, 2, (int*)&read[0]);
     *major = read[0];
     *minor = read[1];
     return res;
 }
 
-int usbfaceFuncsSupportedRead(usb_dev_handle *device, SUPPORTED *funcs)
+int usbfaceFuncsSupportedRead(hid_device *device, SUPPORTED *funcs)
 {
     int res = USBFACE_SUCCESS;
     int read;
-    static usb_dev_handle *cached_device = NULL;
+    static hid_device *cached_device = NULL;
     static SUPPORTED cached_funcs = (SUPPORTED)0;
     // Cache the supported functions until the device handle changes (device gets reconnected),
     // as this function might get called a lot of times.
@@ -158,7 +170,7 @@ int usbfaceGetNrOfSensors()
     return MAX_SNS;
 }
 
-int usbfaceFanRpsRead(usb_dev_handle *device, const unsigned char channel, double *rpm)
+int usbfaceFanRpsRead(hid_device *device, const unsigned char channel, double *rpm)
 {
     int read;
     int res = usbRequest(device, CUSTOM_RQ_FANRPS_READ, 0, channel, 2, &read);
@@ -166,7 +178,7 @@ int usbfaceFanRpsRead(usb_dev_handle *device, const unsigned char channel, doubl
     return res;
 }
 
-int usbfaceFanRpmRead(usb_dev_handle *device, const unsigned char channel, unsigned int *rpm)
+int usbfaceFanRpmRead(hid_device *device, const unsigned char channel, unsigned int *rpm)
 {
     int read;
     int res = usbRequest(device, CUSTOM_RQ_FANRPM_READ, 0, channel, 2, &read);
@@ -174,16 +186,16 @@ int usbfaceFanRpmRead(usb_dev_handle *device, const unsigned char channel, unsig
     return res;
 }
 
-int usbfaceFanDutyRead(usb_dev_handle *device, const unsigned char channel, double *duty)
+int usbfaceFanDutyRead(hid_device *device, const unsigned char channel, double *duty)
 {
     int read;
-    int res = usbRequest(device, CUSTOM_RQ_FANDUTY_READ, 0, channel, 1, &read);
+    int res = usbRequest(device, CUSTOM_RQ_FANDUTY_READ, 0, channel, 1, &read);    
     // Buffer returned contains single byte indicating duty cycle; [0..255] = [0%..100%]
     *duty = ((double)(unsigned char)read) / 255.0;
     return res;
 }
 
-int usbfaceFanDutyRawRead(usb_dev_handle *device, const unsigned char channel, unsigned char *duty)
+int usbfaceFanDutyRawRead(hid_device *device, const unsigned char channel, unsigned char *duty)
 {
     int read;
     int res = usbRequest(device, CUSTOM_RQ_FANDUTY_READ, 0, channel, 1, &read);
@@ -191,17 +203,17 @@ int usbfaceFanDutyRawRead(usb_dev_handle *device, const unsigned char channel, u
     return res;
 }
 
-int usbfaceFanDutyFixedWrite(usb_dev_handle *device, const unsigned char channel, const double duty)
+int usbfaceFanDutyFixedWrite(hid_device *device, const unsigned char channel, const double duty)
 {
     return usbRequest(device, CUSTOM_RQ_FANDUTYFIXED_WRITE, (unsigned char)(255.0 * (double)duty), channel, 0, NULL);
 }
 
-int usbfaceFanDutyFixedRawWrite(usb_dev_handle *device, const unsigned char channel, const unsigned char duty)
-{
+int usbfaceFanDutyFixedRawWrite(hid_device *device, const unsigned char channel, const unsigned char duty)
+{    
     return usbRequest(device, CUSTOM_RQ_FANDUTYFIXED_WRITE, duty, channel, 0, NULL);
 }
 
-int usbfaceFanDutyFixedRead(usb_dev_handle *device, const unsigned char channel, double *duty)
+int usbfaceFanDutyFixedRead(hid_device *device, const unsigned char channel, double *duty)
 {
     int read;
     int res = usbRequest(device, CUSTOM_RQ_FANDUTYFIXED_READ, 0, channel, 1, &read);
@@ -210,7 +222,7 @@ int usbfaceFanDutyFixedRead(usb_dev_handle *device, const unsigned char channel,
     return res;
 }
 
-int usbfaceFanDutyFixedRawRead(usb_dev_handle *device, const unsigned char channel, unsigned char *duty)
+int usbfaceFanDutyFixedRawRead(hid_device *device, const unsigned char channel, unsigned char *duty)
 {
     int read;
     int res = usbRequest(device, CUSTOM_RQ_FANDUTYFIXED_READ, 0, channel, 1, &read);
@@ -219,12 +231,12 @@ int usbfaceFanDutyFixedRawRead(usb_dev_handle *device, const unsigned char chann
     return res;
 }
 
-int usbfaceFanTypeWrite(usb_dev_handle *device, const unsigned char channel, const FANTYPE type)
+int usbfaceFanTypeWrite(hid_device *device, const unsigned char channel, const FANTYPE type)
 {
     return usbRequest(device, CUSTOM_RQ_FANTYPE_WRITE, (int)type, channel, 0, NULL);
 }
 
-int usbfaceFanTypeRead(usb_dev_handle *device, const unsigned char channel, FANTYPE *type)
+int usbfaceFanTypeRead(hid_device *device, const unsigned char channel, FANTYPE *type)
 {
     int read;
     int res = usbRequest(device, CUSTOM_RQ_FANTYPE_READ, 0, channel, 1, &read);
@@ -232,12 +244,12 @@ int usbfaceFanTypeRead(usb_dev_handle *device, const unsigned char channel, FANT
     return res;
 }
 
-int usbfaceFanModeWrite(usb_dev_handle *device, const unsigned char channel, const FANMODE mode)
+int usbfaceFanModeWrite(hid_device *device, const unsigned char channel, const FANMODE mode)
 {
     return usbRequest(device, CUSTOM_RQ_FANMODE_WRITE, (int)mode, channel, 0, NULL);
 }
 
-int usbfaceFanModeRead(usb_dev_handle *device, const unsigned char channel, FANMODE *mode)
+int usbfaceFanModeRead(hid_device *device, const unsigned char channel, FANMODE *mode)
 {
     int read;
     int res = usbRequest(device, CUSTOM_RQ_FANMODE_READ, 0, channel, 1, &read);
@@ -245,13 +257,13 @@ int usbfaceFanModeRead(usb_dev_handle *device, const unsigned char channel, FANM
     return res;
 }
 
-int usbfaceFanMinRpmWrite(usb_dev_handle *device, const unsigned char channel, const double minrpm)
+int usbfaceFanMinRpmWrite(hid_device *device, const unsigned char channel, const double minrpm)
 {
     // Value should contain revolutions/sec -> convert from rpm to rps
     return usbRequest(device, CUSTOM_RQ_FANMINRPS_WRITE, (int)(0.5 + minrpm / 60.0), channel, 0, NULL);
 }
 
-int usbfaceFanMinRpmRead(usb_dev_handle *device, const unsigned char channel, double *minrpm)
+int usbfaceFanMinRpmRead(hid_device *device, const unsigned char channel, double *minrpm)
 {
     int read;
     int res = usbRequest(device, CUSTOM_RQ_FANMINRPS_READ, 0, channel, 1, &read);
@@ -260,7 +272,7 @@ int usbfaceFanMinRpmRead(usb_dev_handle *device, const unsigned char channel, do
     return res;
 }
 
-int usbfaceFanSetpointWrite(usb_dev_handle *device, const unsigned char channel, const double setpoint,
+int usbfaceFanSetpointWrite(hid_device *device, const unsigned char channel, const double setpoint,
                             const int refsnsidx)
 {
     int res = usbRequest(device, CUSTOM_RQ_FANSETP_DELTA_WRITE, (unsigned char)setpoint, channel, 0, NULL);
@@ -269,7 +281,7 @@ int usbfaceFanSetpointWrite(usb_dev_handle *device, const unsigned char channel,
     return res;
 }
 
-int usbfaceFanSetpointActualRead(usb_dev_handle *device, const unsigned char channel, double *setpoint)
+int usbfaceFanSetpointActualRead(hid_device *device, const unsigned char channel, double *setpoint)
 {
     int read;
     int res = usbRequest(device, CUSTOM_RQ_FANSETP_READ, 0, channel, 1, &read);
@@ -277,7 +289,7 @@ int usbfaceFanSetpointActualRead(usb_dev_handle *device, const unsigned char cha
     return res;
 }
 
-int usbfaceFanSetpointRead(usb_dev_handle *device, const unsigned char channel, double *setpoint, int *refsnsidx)
+int usbfaceFanSetpointRead(hid_device *device, const unsigned char channel, double *setpoint, int *refsnsidx)
 {
     int read;
     int res = usbRequest(device, CUSTOM_RQ_FANSETP_DELTA_READ, 0, channel, 1, &read);
@@ -290,7 +302,7 @@ int usbfaceFanSetpointRead(usb_dev_handle *device, const unsigned char channel, 
     return res;
 }
 
-int usbfaceFanPidWrite(usb_dev_handle *device, const unsigned char channel, const double kp, const double ki,
+int usbfaceFanPidWrite(hid_device *device, const unsigned char channel, const double kp, const double ki,
                        const double kt)
 {
     int res = usbRequest(device, CUSTOM_RQ_FANKP_WRITE, (int)(kp + 0.5), channel, 0, NULL);
@@ -301,7 +313,7 @@ int usbfaceFanPidWrite(usb_dev_handle *device, const unsigned char channel, cons
     return res;
 }
 
-int usbfaceFanPidRead(usb_dev_handle *device, const unsigned char channel, double *kp, double *ki, double *kt)
+int usbfaceFanPidRead(hid_device *device, const unsigned char channel, double *kp, double *ki, double *kt)
 {
     int read, res;
     *kp = 0.0;
@@ -319,7 +331,7 @@ int usbfaceFanPidRead(usb_dev_handle *device, const unsigned char channel, doubl
     return res;
 }
 
-int usbfaceFanGainOffsWrite(usb_dev_handle *device, const unsigned char channel, const double gain, const double offs)
+int usbfaceFanGainOffsWrite(hid_device *device, const unsigned char channel, const double gain, const double offs)
 {
     // Gain & offset are multiplied by 256/100, because one expects a gain of 1 and offset 0 to result in the same
     // duty cycle value as the sensor input (e.g. 24 degrees results in 24% PWM)
@@ -330,7 +342,7 @@ int usbfaceFanGainOffsWrite(usb_dev_handle *device, const unsigned char channel,
     return res;
 }
 
-int usbfaceFanGainOffsRead(usb_dev_handle *device, const unsigned char channel, double *gain, double *offs)
+int usbfaceFanGainOffsRead(hid_device *device, const unsigned char channel, double *gain, double *offs)
 {
     // Gain & offset are divided by 256/100, because one expects a gain of 1 and offset 0 to result in the same
     // duty cycle value as the sensor input (e.g. 24 degrees results in 24% PWM)
@@ -346,7 +358,7 @@ int usbfaceFanGainOffsRead(usb_dev_handle *device, const unsigned char channel, 
     return res;
 }
 
-int usbfaceFanTripPointRead(usb_dev_handle *device, const unsigned char channel, const unsigned int point, unsigned int *value, unsigned int *duty)
+int usbfaceFanTripPointRead(hid_device *device, const unsigned char channel, const unsigned int point, unsigned int *value, unsigned int *duty)
 {
     unsigned char read[2];
 	int res;
@@ -357,7 +369,7 @@ int usbfaceFanTripPointRead(usb_dev_handle *device, const unsigned char channel,
 	return res;
 }
 
-int usbfaceFanTripPointWrite(usb_dev_handle *device, const unsigned char channel, const unsigned int point, unsigned int value, unsigned int duty)
+int usbfaceFanTripPointWrite(hid_device *device, const unsigned char channel, const unsigned int point, unsigned int value, unsigned int duty)
 {
     unsigned char data[3];
     data[0] = point;
@@ -367,12 +379,12 @@ int usbfaceFanTripPointWrite(usb_dev_handle *device, const unsigned char channel
 	return res;
 }
 
-int usbfaceFanSensorWrite(usb_dev_handle *device, const unsigned char channel, const int snsidx)
+int usbfaceFanSensorWrite(hid_device *device, const unsigned char channel, const int snsidx)
 {
     return usbRequest(device, CUSTOM_RQ_FANSNS_WRITE, snsidx, channel, 0, NULL);
 }
 
-int usbfaceFanSensorRead(usb_dev_handle *device, const unsigned char channel, int *snsidx)
+int usbfaceFanSensorRead(hid_device *device, const unsigned char channel, int *snsidx)
 {
     int read;
     int res = usbRequest(device, CUSTOM_RQ_FANSNS_READ, 0, channel, 1, &read);
@@ -380,7 +392,7 @@ int usbfaceFanSensorRead(usb_dev_handle *device, const unsigned char channel, in
     return res;
 }
 
-int usbfaceFanStallRead(usb_dev_handle *device, const unsigned char channel, int *stalled)
+int usbfaceFanStallRead(hid_device *device, const unsigned char channel, int *stalled)
 {
     int read;
     int res = usbRequest(device, CUSTOM_RQ_FANSTALL_READ, 0, channel, 1, &read);
@@ -388,12 +400,12 @@ int usbfaceFanStallRead(usb_dev_handle *device, const unsigned char channel, int
     return res;
 }
 
-int usbfaceFanStallDetectWrite(usb_dev_handle *device, const unsigned char channel, const int stalldetect)
+int usbfaceFanStallDetectWrite(hid_device *device, const unsigned char channel, const int stalldetect)
 {
     return usbRequest(device, CUSTOM_RQ_FANSTALLDETECT_WRITE, stalldetect != 0, channel, 0, NULL);
 }
 
-int usbfaceFanStallDetectRead(usb_dev_handle *device, const unsigned char channel, int *stalldetect)
+int usbfaceFanStallDetectRead(hid_device *device, const unsigned char channel, int *stalldetect)
 {
     int read;
     int res = usbRequest(device, CUSTOM_RQ_FANSTALLDETECT_READ, 0, channel, 1, &read);
@@ -401,12 +413,12 @@ int usbfaceFanStallDetectRead(usb_dev_handle *device, const unsigned char channe
     return res;
 }
 
-int usbfaceSnsTypeWrite(usb_dev_handle *device, const unsigned char channel, const SNSTYPE type)
+int usbfaceSnsTypeWrite(hid_device *device, const unsigned char channel, const SNSTYPE type)
 {
     return usbRequest(device, CUSTOM_RQ_SNSTYPE_WRITE, (int)type, channel, 0, NULL);
 }
 
-int usbfaceSnsTypeRead(usb_dev_handle *device, const unsigned char channel, SNSTYPE *type)
+int usbfaceSnsTypeRead(hid_device *device, const unsigned char channel, SNSTYPE *type)
 {
     int read;
     int res = usbRequest(device, CUSTOM_RQ_SNSTYPE_READ, 0, channel, 1, &read);
@@ -457,7 +469,7 @@ int usbfaceSnsTypeIsSupportedByFunctions(int funcs, const SNSTYPE type)
     }
 }
 
-int usbfaceSnsTypeIsSupported(usb_dev_handle *device, const SNSTYPE type)
+int usbfaceSnsTypeIsSupported(hid_device *device, const SNSTYPE type)
 {
     SUPPORTED funcs;
     if (USBFACE_SUCCESS != usbfaceFuncsSupportedRead(device, &funcs))
@@ -468,12 +480,12 @@ int usbfaceSnsTypeIsSupported(usb_dev_handle *device, const SNSTYPE type)
     return usbfaceSnsTypeIsSupportedByFunctions(funcs, type);
 }
 
-int usbfaceSnsWrite(usb_dev_handle *device, const unsigned char channel, const double snsvalue)
+int usbfaceSnsWrite(hid_device *device, const unsigned char channel, const double snsvalue)
 {
     return usbRequest(device, CUSTOM_RQ_SNS_WRITE, (unsigned char)(snsvalue + 0.5), channel, 0, NULL);
 }
 
-int usbfaceSnsRead(usb_dev_handle *device, const unsigned char channel, double *snsvalue)
+int usbfaceSnsRead(hid_device *device, const unsigned char channel, double *snsvalue)
 {
     int read;
     int res = usbRequest(device, CUSTOM_RQ_SNS_READ, 0, channel, 1, &read);
@@ -481,12 +493,12 @@ int usbfaceSnsRead(usb_dev_handle *device, const unsigned char channel, double *
     return res;
 }
 
-int usbfaceFanOutModeWrite(usb_dev_handle *device, const unsigned char channel, const FANOUTMODE mode)
+int usbfaceFanOutModeWrite(hid_device *device, const unsigned char channel, const FANOUTMODE mode)
 {
     return usbRequest(device, CUSTOM_RQ_FANOUTMODE_WRITE, (int)mode, channel, 0, NULL);
 }
 
-int usbfaceFanOutModeRead(usb_dev_handle *device, const unsigned char channel, FANOUTMODE *mode)
+int usbfaceFanOutModeRead(hid_device *device, const unsigned char channel, FANOUTMODE *mode)
 {
     int read;
     int res = usbRequest(device, CUSTOM_RQ_FANOUTMODE_READ, 0, channel, 1, &read);
@@ -494,8 +506,10 @@ int usbfaceFanOutModeRead(usb_dev_handle *device, const unsigned char channel, F
     return res;
 }
 
-int usbfaceFanOutModeIsSupported(usb_dev_handle *device, const FANOUTMODE mode)
+int usbfaceFanOutModeIsSupported(hid_device *device, const FANOUTMODE mode)
 {
+    Q_UNUSED(mode);
+
     SUPPORTED funcs;
     if (USBFACE_SUCCESS != usbfaceFuncsSupportedRead(device, &funcs))
     {
@@ -505,7 +519,7 @@ int usbfaceFanOutModeIsSupported(usb_dev_handle *device, const FANOUTMODE mode)
     return funcs && SUPPORTED_FAN_OUT;
 }
 
-int usbfaceFanOutRpmRead(usb_dev_handle *device, const unsigned char channel, double *rpm)
+int usbfaceFanOutRpmRead(hid_device *device, const unsigned char channel, double *rpm)
 {
     int read;
     int res = usbRequest(device, CUSTOM_RQ_FANOUTRPM_READ, 0, (int)channel, 2, &read);
@@ -513,7 +527,7 @@ int usbfaceFanOutRpmRead(usb_dev_handle *device, const unsigned char channel, do
     return res;
 }
 
-int usbfaceFastledAnimationIdRead(usb_dev_handle *device, const unsigned char channel, unsigned char *id)
+int usbfaceFastledAnimationIdRead(hid_device *device, const unsigned char channel, unsigned char *id)
 {
     int read;
     int res = usbRequest(device, CUSTOM_RQ_FASTLEDANIID_READ, 0, (int)channel, 1, &read);
@@ -521,12 +535,12 @@ int usbfaceFastledAnimationIdRead(usb_dev_handle *device, const unsigned char ch
     return res;
 }
 
-int usbfaceFastledAnimationIdWrite(usb_dev_handle *device, const unsigned char channel, unsigned char id)
+int usbfaceFastledAnimationIdWrite(hid_device *device, const unsigned char channel, unsigned char id)
 {
 	return usbRequest(device, CUSTOM_RQ_FASTLEDANIID_WRITE, (int)id, (int)channel, 0, NULL);
 }
 
-int usbfaceFastledStateRead(usb_dev_handle *device, const unsigned char channel, unsigned char *running)
+int usbfaceFastledStateRead(hid_device *device, const unsigned char channel, unsigned char *running)
 {
     int read;
     int res = usbRequest(device, CUSTOM_RQ_FASTLEDSTATE_READ, 0, (int)channel, 1, &read);
@@ -534,22 +548,22 @@ int usbfaceFastledStateRead(usb_dev_handle *device, const unsigned char channel,
     return res;
 }
 
-int usbfaceFastledStateWrite(usb_dev_handle *device, const unsigned char channel, unsigned char running)
+int usbfaceFastledStateWrite(hid_device *device, const unsigned char channel, unsigned char running)
 {
 	return usbRequest(device, CUSTOM_RQ_FASTLEDSTATE_WRITE, (int)running, (int)channel, 0, NULL);
 }
 
-int usbfaceFastledColorRead(usb_dev_handle *device, const unsigned char channel, unsigned char colors[6])
+int usbfaceFastledColorRead(hid_device *device, const unsigned char channel, unsigned char colors[6])
 {
 	return usbRequestData(device, CUSTOM_RQ_FASTLEDCOLOR_READ, channel, 6, colors, 0, 0);
 }
 
-int usbfaceFastledColorWrite(usb_dev_handle *device, const unsigned char channel, unsigned char colors[6])
+int usbfaceFastledColorWrite(hid_device *device, const unsigned char channel, unsigned char colors[6])
 {
 	return usbRequestData(device, CUSTOM_RQ_FASTLEDCOLOR_WRITE, channel, 0, 0, 6, colors);
 }
 
-int usbfaceFastledAutostartRead(usb_dev_handle *device, const unsigned char channel, unsigned char *start)
+int usbfaceFastledAutostartRead(hid_device *device, const unsigned char channel, unsigned char *start)
 {
     int read;
     int res = usbRequest(device, CUSTOM_RQ_FASTLEDASTART_READ, 0, (int)channel, 1, &read);
@@ -557,12 +571,12 @@ int usbfaceFastledAutostartRead(usb_dev_handle *device, const unsigned char chan
     return res;
 }
 
-int usbfaceFastledAutostartWrite(usb_dev_handle *device, const unsigned char channel, unsigned char start)
+int usbfaceFastledAutostartWrite(hid_device *device, const unsigned char channel, unsigned char start)
 {
 	return usbRequest(device, CUSTOM_RQ_FASTLEDASTART_WRITE, (int)start, (int)channel, 0, NULL);
 }
 
-int usbfaceFastledSnsIdRead(usb_dev_handle *device, const unsigned char channel, unsigned char *id)
+int usbfaceFastledSnsIdRead(hid_device *device, const unsigned char channel, unsigned char *id)
 {
     int read;
     int res = usbRequest(device, CUSTOM_RQ_FASTLEDSNSID_READ, 0, (int)channel, 1, &read);
@@ -570,12 +584,12 @@ int usbfaceFastledSnsIdRead(usb_dev_handle *device, const unsigned char channel,
     return res;
 }
 
-int usbfaceFastledSnsIdWrite(usb_dev_handle *device, const unsigned char channel, unsigned char id)
+int usbfaceFastledSnsIdWrite(hid_device *device, const unsigned char channel, unsigned char id)
 {
 	return usbRequest(device, CUSTOM_RQ_FASTLEDSNSID_WRITE, (int)id, (int)channel, 0, NULL);
 }
 
-int usbfaceFastledFPSRead(usb_dev_handle *device, const unsigned char channel, unsigned char *fps)
+int usbfaceFastledFPSRead(hid_device *device, const unsigned char channel, unsigned char *fps)
 {
     int read;
     int res = usbRequest(device, CUSTOM_RQ_FASTLEDFPS_READ, 0, (int)channel, 1, &read);
@@ -583,58 +597,60 @@ int usbfaceFastledFPSRead(usb_dev_handle *device, const unsigned char channel, u
     return res;
 }
 
-int usbfacePowerMeterPowerRead(usb_dev_handle *device, const unsigned char channel, unsigned int *milliwatt)
+int usbfaceFastledFPSWrite(hid_device *device, const unsigned char channel, unsigned char fps)
+{
+    return usbRequest(device, CUSTOM_RQ_FASTLEDFPS_WRITE, (int)fps, (int)channel, 0, NULL);
+}
+
+int usbfacePowerMeterPowerRead(hid_device *device, const unsigned char channel, unsigned int *milliwatt)
 {
     int read;
-    int res = usbRequest(device, CUSTOM_RQ_FASTLEDFPS_READ, 0, (int)channel, 2, &read);
+    int res = usbRequest(device, CUSTOM_RQ_POWERMTR_POWER_READ, 0, (int)channel, 2, &read);
     *milliwatt = read;
     return res;
 }
 
-int usbfacePowerMeterCurrentRead(usb_dev_handle *device, const unsigned char channel, unsigned int *milliampere)
+int usbfacePowerMeterCurrentRead(hid_device *device, const unsigned char channel, unsigned int *milliampere)
 {
     int read;
-    int res = usbRequest(device, CUSTOM_RQ_FASTLEDFPS_READ, 0, (int)channel, 2, &read);
+    int res = usbRequest(device, CUSTOM_RQ_POWERMTR_CURRENT_READ, 0, (int)channel, 2, &read);
     *milliampere = read;
     return res;
 }
 
-int usbfacePowerMeterLoadRead(usb_dev_handle *device, const unsigned char channel, unsigned int *millivolt)
+int usbfacePowerMeterLoadRead(hid_device *device, const unsigned char channel, unsigned int *millivolt)
 {
     int read;
-    int res = usbRequest(device, CUSTOM_RQ_FASTLEDFPS_READ, 0, (int)channel, 2, &read);
+    int res = usbRequest(device, CUSTOM_RQ_POWERMTR_LOAD_READ, 0, (int)channel, 2, &read);
     *millivolt = read;
     return res;
 }
 
-int usbfaceFastledFPSWrite(usb_dev_handle *device, const unsigned char channel, unsigned char fps)
-{
-	return usbRequest(device, CUSTOM_RQ_FASTLEDFPS_WRITE, (int)fps, (int)channel, 0, NULL);
-}
-
-int usbfaceReadSettings(usb_dev_handle *device)
+int usbfaceReadSettings(hid_device *device)
 {
     return usbRequest(device, CUSTOM_RQ_EEPROM_READ, 0, 0, 0, NULL);
 }
 
-int usbfaceWriteSettings(usb_dev_handle *device)
+int usbfaceWriteSettings(hid_device *device)
 {
     return usbRequest(device, CUSTOM_RQ_EEPROM_WRITE, 0, 0, 0, NULL);
 }
 
-int usbfaceDefaultSettings(usb_dev_handle *device)
+int usbfaceDefaultSettings(hid_device *device)
 {
     return usbRequest(device, CUSTOM_RQ_LOAD_DEFAULTS, 0, 0, 0, NULL);
 }
 
-int usbfaceEnterBootloader(usb_dev_handle *device)
+int usbfaceEnterBootloader(hid_device *device)
 {
     return usbRequest(device, CUSTOM_RQ_ENTER_BOOTLOAD, 0, 0, 0, NULL);
 }
 
-int usbfaceResetDevice(usb_dev_handle *device)
+int usbfaceResetDevice(hid_device *device)
 {
-    return usb_reset(device);
+    Q_UNUSED(device);
+    //return usb_reset(device);
+    return USBFACE_ERR_ACCESS;
 }
 
 // ---- Miscellaneous ---------------------------------------------------------

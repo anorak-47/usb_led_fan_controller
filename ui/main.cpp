@@ -1,17 +1,21 @@
 #include "mainwindow.h"
-
+#include "hid_device.h"
 #include "command_consumer.h"
 #include "command_queue.h"
 #include "usb_connection.h"
 #include "data_sensor.h"
+#include "series_sensor.h"
 #include "data_fan.h"
+#include "series_fan.h"
 #include "data_fan_out.h"
+#include "series_fanout.h"
 #include "data_fastled.h"
 #include "data_properties.h"
 #include "data_powermeter.h"
+#include "series_powermeter.h"
 #include "connection_watcher.h"
 #include "value_updater.h"
-
+#include "value_updater_test.h"
 #include "widget_fan_container_form.h"
 #include "widget_fan_form.h"
 #include "widget_fan_show_form.h"
@@ -26,8 +30,8 @@
 #include "widget_powermeter_container_form.h"
 
 #include <QApplication>
-#include <QtGui/QTabWidget>
-#include <QtGui/QLayout>
+#include <QTabWidget>
+#include <QLayout>
 #include <QtCore/QObject>
 #include <QtCore/QDebug>
 #include <memory>
@@ -49,9 +53,10 @@ int main(int argc, char *argv[])
 
 	ConnectionWatcher watcher;
 	ValueUpdater updater;
+    ValueUpdaterTest tester;
 
     std::shared_ptr<DataDeviceProperties> properties = std::make_shared<DataDeviceProperties>();
-    watcher.registerDataObject(properties);
+    watcher.registerPropertyDataObject(properties);
     // properties has no values that need an update on a regular basis, so no registration with updater
 
     WidgetDeviceInformationForm *devinfo = new WidgetDeviceInformationForm(properties);
@@ -84,6 +89,12 @@ int main(int argc, char *argv[])
         watcher.registerDataObject(sensor);
         updater.registerDataObject(sensor);
 
+
+
+        tester.registerDataObject(sensor);
+
+
+
         WidgetSensorForm *wsf = new WidgetSensorForm(sensor);
         sensorListWidget->addWidgetSensor(wsf, i != MAX_SNS - 1);
 
@@ -108,6 +119,12 @@ int main(int argc, char *argv[])
         watcher.registerDataObject(fan);
         updater.registerDataObject(fan);
         dataFans.push_back(fan);
+
+
+
+        tester.registerDataObject(fan);
+
+
 
         WidgetFanForm *wf = new WidgetFanForm(fan);
         wf->setDataSensors(dataSensors);
@@ -177,9 +194,6 @@ int main(int argc, char *argv[])
 
 
 
-    //w.setCentralWidget(tabWidget);
-
-
     QObject::connect(usbConnection.get(), SIGNAL(signalConnectionChanged(bool)), &watcher, SLOT(on_usbConectionChanged(bool)));
     QObject::connect(usbConnection.get(), SIGNAL(signalConnectionChanged(bool)), &updater, SLOT(on_usbConectionChanged(bool)));
     QObject::connect(usbConnection.get(), SIGNAL(signalConnectionChanged(bool)), &w, SLOT(on_usbConectionChanged(bool)));
@@ -189,12 +203,14 @@ int main(int argc, char *argv[])
     QObject::connect(&w, SIGNAL(signalSettingsLoad()), devinfo, SLOT(on_settingsLoad()));
     QObject::connect(&w, SIGNAL(signalSettingsClear()), devinfo, SLOT(on_settingsClear()));
 
-    usbConnection->connectToDevice();
-
     w.readSettings();
     w.show();
 
     sensorListWidget->readSettings();
+
+    //tester.startUpdates();
+
+    usbConnection->connectToDevice();
 
     int rc = a.exec();
 
@@ -204,6 +220,7 @@ int main(int argc, char *argv[])
     CommandQueueInstance().requestInterruption();
     consumer.wait();
 
+    tester.stopUpdates();
     updater.stopUpdates();
     usbConnection->disconnectFromDevice();
 

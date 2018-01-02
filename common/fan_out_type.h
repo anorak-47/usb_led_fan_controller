@@ -4,7 +4,6 @@
 #include "config.h"
 #include "types.h"
 #include <inttypes.h>
-#include <avr/eeprom.h>
 
 #if FAN_OUT_SUPPORTED
 

@@ -1,6 +1,7 @@
 #include "widget_powermeter_form.h"
 #include "ui_widget_powermeter_form.h"
 #include "data_powermeter.h"
+#include "series_powermeter.h"
 #include "types.h"
 #include <QtCharts/QChartView>
 #include <QtCharts/QLineSeries>
@@ -17,6 +18,7 @@ WidgetPowerMeterForm::WidgetPowerMeterForm(std::shared_ptr<DataPowerMeter> dataP
 {
     ui->setupUi(this);
     ui->lTitle->setText(dataPowerMeter->fullName());
+    _seriesPowerMeter = std::shared_ptr<SeriesPowerMeter>(new SeriesPowerMeter(_dataPowerMeter));
 
     on_supportedFunctionsUpdated(SUPPORTED_NONE);
 
@@ -46,13 +48,6 @@ void WidgetPowerMeterForm::on_dataUpdated()
     ui->spCurrent->setValue(_dataPowerMeter->getCurrent_mA());
     ui->spLoad->setValue(_dataPowerMeter->getLoad_mV() / 1000.0);
     ui->spPower->setValue(_dataPowerMeter->getPower_mW());
-
-    appendLastValueToSeries(_seriesCurrent, _dataPowerMeter->seriesCurrent());
-    appendLastValueToSeries(_seriesLoad, _dataPowerMeter->seriesLoad());
-    appendLastValueToSeries(_seriesPower, _dataPowerMeter->seriesPower());
-
-    QDateTime now = QDateTime::currentDateTime();
-    _axisX->setRange(now.addSecs(-60*60), now);
 }
 
 void WidgetPowerMeterForm::on_valueUpdated()
@@ -62,6 +57,14 @@ void WidgetPowerMeterForm::on_valueUpdated()
 
 void WidgetPowerMeterForm::createChart()
 {
+    QChartView *chartView = _seriesPowerMeter->createChartView();
+
+    QGridLayout *cLayout = new QGridLayout();
+    cLayout->setContentsMargins(0, 0, 0, 0);
+    ui->wChart->setLayout(cLayout);
+    cLayout->addWidget(chartView);
+
+	/*
     QValueAxis *axisY_mA = new QValueAxis();
     axisY_mA->setLabelFormat("%d");
     axisY_mA->setTitleText("Current [mA]");
@@ -121,4 +124,5 @@ void WidgetPowerMeterForm::createChart()
     axisY_mA->setRange(0.0, 1000.0);
     axisY_mW->setRange(0.0, 5000.0);
     axisY_V->setRange(0.0, 14.0);
+    */
 }

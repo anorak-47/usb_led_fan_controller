@@ -76,53 +76,53 @@ const struct _s_shell_cmd fan_shell_cmd[] PROGMEM = {SHELLCMD("cfg", fan_cmd_cfg
 
 static void dump_fan_config(uint8_t fan)
 {
-    fprintf_P(_sf, PSTR(".fan %u\n"), fan);
-    fprintf_P(_sf, PSTR(".typ %u\n"), fans[fan].config.fanType);
-    fprintf_P(_sf, PSTR(".mod %u\n"), fans[fan].config.fanMode);
-    fprintf_P(_sf, PSTR(".sns %u\n"), fans[fan].config.snsIdx);
-    fprintf_P(_sf, PSTR(".sty %u\n"), sns[fans[fan].config.snsIdx].type);
-    fprintf_P(_sf, PSTR(".sva %u\n"), sns[fans[fan].config.snsIdx].status.valid);
-    fprintf_P(_sf, PSTR(".min %u\n"), fans[fan].dutyMin);
-    fprintf_P(_sf, PSTR(".max %u\n"), fans[fan].dutyMax);
-    fprintf_P(_sf, PSTR(".mrs %u\n"), fans[fan].min_rps);
+    fprintf_P(_vsf, PSTR(".fan %u\n"), fan);
+    fprintf_P(_vsf, PSTR(".typ %u\n"), fans[fan].config.fanType);
+    fprintf_P(_vsf, PSTR(".mod %u\n"), fans[fan].config.fanMode);
+    fprintf_P(_vsf, PSTR(".sns %u\n"), fans[fan].config.snsIdx);
+    fprintf_P(_vsf, PSTR(".sty %u\n"), sns[fans[fan].config.snsIdx].type);
+    fprintf_P(_vsf, PSTR(".sva %u\n"), sns[fans[fan].config.snsIdx].status.valid);
+    fprintf_P(_vsf, PSTR(".min %u\n"), fans[fan].dutyMin);
+    fprintf_P(_vsf, PSTR(".max %u\n"), fans[fan].dutyMax);
+    fprintf_P(_vsf, PSTR(".mrs %u\n"), fans[fan].min_rps);
 }
 
 static void dump_fan_fixed_duty(uint8_t fan)
 {
-    fprintf_P(_sf, PSTR(".fan %u\n"), fan);
-    fprintf_P(_sf, PSTR(".fix %u\n"), fans[fan].dutyFixed);
+    fprintf_P(_vsf, PSTR(".fan %u\n"), fan);
+    fprintf_P(_vsf, PSTR(".fix %u\n"), fans[fan].dutyFixed);
 }
 
 #if FAN_MODE_TRIP_POINTS_SUPPORTED || FAN_MODE_LIN_TRIP_POINTS_SUPPORTED
 static void dump_fan_trip_points(uint8_t fan)
 {
-    fprintf_P(_sf, PSTR(".fan %u\n"), fan);
+    fprintf_P(_vsf, PSTR(".fan %u\n"), fan);
     for (uint8_t t = 0; t < MAX_TRIP_POINTS; ++t)
-        fprintf_P(_sf, PSTR(".tp %u %d %u\n"), t, fans[fan].trip_point[t].value, fans[fan].trip_point[t].duty);
+        fprintf_P(_vsf, PSTR(".tp %u %d %u\n"), t, fans[fan].trip_point[t].value, fans[fan].trip_point[t].duty);
 }
 #endif
 
 #if FAN_MODE_LINEAR_SUPPORTED
 static void dump_fan_linear_duty(uint8_t fan)
 {
-    fprintf_P(_sf, PSTR(".fan %u\n"), fan);
-    fprintf_P(_sf, PSTR(".gin %u\n"), fans[fan].dutyGain);
-    fprintf_P(_sf, PSTR(".off %u\n"), fans[fan].dutyOffs);
+    fprintf_P(_vsf, PSTR(".fan %u\n"), fan);
+    fprintf_P(_vsf, PSTR(".gin %u\n"), fans[fan].dutyGain);
+    fprintf_P(_vsf, PSTR(".off %u\n"), fans[fan].dutyOffs);
 }
 #endif
 
 #if FAN_MODE_PI_SUPPORTED
 static void dump_fan_pi_control(uint8_t fan)
 {
-    fprintf_P(_sf, PSTR(".fan %u\n"), fan);
-    fprintf_P(_sf, PSTR(".Ki %d\n"), fans[fan].Ki);
-    fprintf_P(_sf, PSTR(".Kp %d\n"), fans[fan].Kp);
-    fprintf_P(_sf, PSTR(".Kt %d\n"), fans[fan].Kt);
-    fprintf_P(_sf, PSTR(".es %d\n"), fans[fan].es);
-    fprintf_P(_sf, PSTR(".i %d\n"), fans[fan].i);
+    fprintf_P(_vsf, PSTR(".fan %u\n"), fan);
+    fprintf_P(_vsf, PSTR(".Ki %d\n"), fans[fan].Ki);
+    fprintf_P(_vsf, PSTR(".Kp %d\n"), fans[fan].Kp);
+    fprintf_P(_vsf, PSTR(".Kt %d\n"), fans[fan].Kt);
+    fprintf_P(_vsf, PSTR(".es %d\n"), fans[fan].es);
+    fprintf_P(_vsf, PSTR(".i %d\n"), fans[fan].i);
 #if CTRL_DEBUG
-    fprintf_P(_sf, PSTR(".e %d\n"), fans_dbg[fan].e);
-    fprintf_P(_sf, PSTR(".p %d\n"), fans_dbg[fan].p);
+    fprintf_P(_vsf, PSTR(".e %d\n"), fans_dbg[fan].e);
+    fprintf_P(_vsf, PSTR(".p %d\n"), fans_dbg[fan].p);
 #endif
 }
 #endif
@@ -130,12 +130,12 @@ static void dump_fan_pi_control(uint8_t fan)
 #if FAN_MODE_PI_SUPPORTED || FAN_MODE_FUZZY_SUPPORTED
 static void dump_fan_setpoint(uint8_t fan)
 {
-    fprintf_P(_sf, PSTR(".fan %u\n"), fan);
-    fprintf_P(_sf, PSTR(".sns %u\n"), fans[fan].snsSetp.snsIdx);
-    fprintf_P(_sf, PSTR(".dlt %d\n"), fans[fan].snsSetp.delta);
-    fprintf_P(_sf, PSTR(".val %d\n"), sns[fans[fan].snsSetp.snsIdx].value);
+    fprintf_P(_vsf, PSTR(".fan %u\n"), fan);
+    fprintf_P(_vsf, PSTR(".sns %u\n"), fans[fan].snsSetp.snsIdx);
+    fprintf_P(_vsf, PSTR(".dlt %d\n"), fans[fan].snsSetp.delta);
+    fprintf_P(_vsf, PSTR(".val %d\n"), sns[fans[fan].snsSetp.snsIdx].value);
     // setpoint: actual value; sum of reference sensor value & delta
-    fprintf_P(_sf, PSTR(".stp %d\n"), sns[fans[fan].snsSetp.snsIdx].value + fans[fan].snsSetp.delta);
+    fprintf_P(_vsf, PSTR(".stp %d\n"), sns[fans[fan].snsSetp.snsIdx].value + fans[fan].snsSetp.delta);
 }
 #endif
 
@@ -250,12 +250,12 @@ bool fan_cmd_cfg(uint8_t argc, char **argv)
 
 static void dump_fan_status(uint8_t fan)
 {
-    fprintf_P(_sf, PSTR(".fan %u\n"), fan);
-    fprintf_P(_sf, PSTR(".dty %u\n"), fans[fan].duty);
-    fprintf_P(_sf, PSTR(".rps %u\n"), fans[fan].rps);
-    fprintf_P(_sf, PSTR(".rpm %u\n"), fans[fan].rpm);
-    fprintf_P(_sf, PSTR(".stl %u\n"), fans[fan].status.stalled);
-    fprintf_P(_sf, PSTR(".sns %u\n"), sns[fans[fan].config.snsIdx].value);
+    fprintf_P(_vsf, PSTR(".fan %u\n"), fan);
+    fprintf_P(_vsf, PSTR(".dty %u\n"), fans[fan].duty);
+    fprintf_P(_vsf, PSTR(".rps %u\n"), fans[fan].rps);
+    fprintf_P(_vsf, PSTR(".rpm %u\n"), fans[fan].rpm);
+    fprintf_P(_vsf, PSTR(".stl %u\n"), fans[fan].status.stalled);
+    fprintf_P(_vsf, PSTR(".sns %u\n"), sns[fans[fan].config.snsIdx].value);
 }
 
 bool fan_cmd_sta(uint8_t argc, char **argv)
@@ -284,15 +284,15 @@ bool fan_cmd_sta(uint8_t argc, char **argv)
     {
         if (strcmp_P(PSTR("rpm"), argv[1]) == 0)
         {
-            fprintf_P(_sf, PSTR(".rpm %u\n"), fans[fan].rpm);
+            fprintf_P(_vsf, PSTR(".rpm %u\n"), fans[fan].rpm);
         }
         else if (strcmp_P(PSTR("stl"), argv[1]) == 0)
         {
-            fprintf_P(_sf, PSTR(".stl %u\n"), fans[fan].status.stalled);
+            fprintf_P(_vsf, PSTR(".stl %u\n"), fans[fan].status.stalled);
         }
         else if (strcmp_P(PSTR("sns"), argv[1]) == 0)
         {
-            fprintf_P(_sf, PSTR(".sns %u\n"), sns[fans[fan].config.snsIdx].value);
+            fprintf_P(_vsf, PSTR(".sns %u\n"), sns[fans[fan].config.snsIdx].value);
         }
         else
         {

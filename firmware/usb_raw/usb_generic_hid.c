@@ -6,9 +6,11 @@
 #include "fan.h"
 #include "sensor.h"
 #include "fan_out.h"
+#include "powermeter.h"
 #include "settings.h"
 #include "ctrl.h"
-#include "lufa_virtual_serial.h"
+//#include "animation.h"
+#include "debug.h"
 
 #if EEPROM_UPDOWNLOAD
 static uint16_t usbFunctionBytesRemain;
@@ -25,7 +27,7 @@ static uint8_t responseBuffer[GENERIC_REPORT_SIZE]; // buffer must stay valid wh
 void ProcessGenericHIDReport(uint8_t* DataArray)
 {
     uint8_t requestId = DataArray[0];
-    int channel = DataArray[1]; // Most calls use rq->wIndex.bytes[0] as fan/sensor index; store in i.
+    int channel = DataArray[1]; // Most calls use rq->wIndex.bytes[0] as fan/sensor index; store in channel.
     uint8_t *requestData = &DataArray[2];
 
     memset(responseBuffer, 0xFE, GENERIC_REPORT_SIZE);
@@ -33,10 +35,9 @@ void ProcessGenericHIDReport(uint8_t* DataArray)
     responseBuffer[0] = requestId;
     uint8_t *dataBuffer = &responseBuffer[1];
 
-    fprintf_P(_sf, PSTR("req id %u\n"), requestId);
-    fprintf_P(_sf, PSTR("channel %u\n"), channel);
-    fprintf_P(_sf, PSTR("req data %x %x %x %x\n"), requestData[0], requestData[1], requestData[2], requestData[3]);
-
+    LV_("req %u", requestId);
+    LV_("chnl %u", channel);
+    LV_("data %x %x %x %x", requestData[0], requestData[1], requestData[2], requestData[3]);
 
 #if (USB_COMM_WATCHDOG_TIMEOUT > 0)
     // Reset the usb communication watchdog timer.
@@ -82,6 +83,9 @@ void ProcessGenericHIDReport(uint8_t* DataArray)
 #if SNS_I2C_SUPPORTED
                                     | SUPPORTED_SNS_I2C
 #endif
+#if POWER_METER_SUPPORTED
+                                    | SUPPORTED_SNS_POWER
+#endif
 #if FAN_OUT_SUPPORTED
                                     | SUPPORTED_FAN_OUT
 #endif
@@ -100,6 +104,15 @@ void ProcessGenericHIDReport(uint8_t* DataArray)
 #if FAN_MODE_FUZZY_SUPPORTED
                                     | SUPPORTED_FANMODE_FUZZY
 #endif
+#if FAN_MODE_TRIP_POINTS_SUPPORTED
+                                    | SUPPORTED_FANMODE_TP
+#endif
+#if FAN_MODE_LIN_TRIP_POINTS_SUPPORTED
+                                    | SUPPORTED_FANMODE_LIN_TP
+#endif
+#if FASTLED_SUPPORTED
+                                    | SUPPORTED_LED_FASTLED
+#endif
 #if EEPROM_UPDOWNLOAD
                                     | SUPPORTED_EEPROM_UPDOWNLD
 #endif
@@ -108,6 +121,13 @@ void ProcessGenericHIDReport(uint8_t* DataArray)
     case CUSTOM_RQ_STATUS_READ:
         *dataBuffer = getStatus();
         break;
+    case CUSTOM_RQ_PROTOCOL_VERSION:
+    	*dataBuffer = USB_PROTOCOL_VERSION;
+    	break;
+    case CUSTOM_RQ_FIRMWARE_VERSION:
+    	dataBuffer[0] = VERSION_MAJOR;
+    	dataBuffer[1] = VERSION_MINOR;
+    	break;
     case CUSTOM_RQ_FANRPS_READ:
         // rq->wIndex.bytes[0]   Channel
         *((uint16_t *)dataBuffer) = fans[channel].rps;
@@ -170,7 +190,7 @@ void ProcessGenericHIDReport(uint8_t* DataArray)
     case CUSTOM_RQ_FANKP_WRITE:
         // rq->wIndex.bytes[0]   Channel
         // rq->wValue.word       Kp
-        fans[channel].Kp = (uint16_t)requestData[0];
+        fans[channel].Kp = *((uint16_t*)requestData);
         break;
     case CUSTOM_RQ_FANKP_READ:
         *((uint16_t *)dataBuffer) = fans[channel].Kp;
@@ -178,7 +198,7 @@ void ProcessGenericHIDReport(uint8_t* DataArray)
     case CUSTOM_RQ_FANKI_WRITE:
         // rq->wIndex.bytes[0]   Channel
         // rq->wValue.word       Ki
-        fans[channel].Ki = (uint16_t)requestData[0];
+        fans[channel].Ki = *((uint16_t*)requestData);
         break;
     case CUSTOM_RQ_FANKI_READ:
         *((uint16_t *)dataBuffer) = fans[channel].Ki;
@@ -186,7 +206,7 @@ void ProcessGenericHIDReport(uint8_t* DataArray)
     case CUSTOM_RQ_FANKT_WRITE:
         // rq->wIndex.bytes[0]   Channel
         // rq->wValue.word       Kt
-        fans[channel].Kt = (uint16_t)requestData[0];
+        fans[channel].Kt = *((uint16_t*)requestData);
         break;
     case CUSTOM_RQ_FANKT_READ:
         *((uint16_t *)dataBuffer) = fans[channel].Kt;
@@ -205,7 +225,7 @@ void ProcessGenericHIDReport(uint8_t* DataArray)
     case CUSTOM_RQ_FANGAIN_WRITE:
         // rq->wIndex.bytes[0]   Channel
         // rq->wValue.word       Gain, lower 6 bits contain fraction
-        fans[channel].dutyGain = (uint16_t)requestData[0];
+        fans[channel].dutyGain = *((uint16_t*)requestData);
         break;
     case CUSTOM_RQ_FANGAIN_READ:
         *((int16_t *)dataBuffer) = fans[channel].dutyGain;
@@ -213,11 +233,21 @@ void ProcessGenericHIDReport(uint8_t* DataArray)
     case CUSTOM_RQ_FANOFFS_WRITE:
         // rq->wIndex.bytes[0]   Channel
         // rq->wValue.word       Offset
-        fans[channel].dutyOffs = (uint16_t)requestData[0];
+        fans[channel].dutyOffs = *((uint16_t*)requestData);
         break;
     case CUSTOM_RQ_FANOFFS_READ:
         *((int16_t *)dataBuffer) = fans[channel].dutyOffs;
         break;
+#endif
+#if FAN_MODE_PI_SUPPORTED || FAN_MODE_LIN_TRIP_POINTS_SUPPORTED
+    case CUSTOM_RQ_FANTRIPPOINT_READ:
+    	dataBuffer[0] = fans[channel].trip_point[requestData[0]].value;
+    	dataBuffer[1] = fans[channel].trip_point[requestData[0]].duty;
+    	break;
+    case CUSTOM_RQ_FANTRIPPOINT_WRITE:
+    	fans[channel].trip_point[requestData[0]].value = dataBuffer[1];
+    	fans[channel].trip_point[requestData[0]].value = dataBuffer[2];
+    	break;
 #endif
     case CUSTOM_RQ_FANSNS_WRITE:
         // rq->wIndex.bytes[0]   Channel
@@ -275,7 +305,7 @@ void ProcessGenericHIDReport(uint8_t* DataArray)
     case CUSTOM_RQ_FANOUTMODE_WRITE:
     	// rq->wIndex.bytes[0]   Channel
         // requestData[1]   Mode, see FANOUTMODE
-        fan_out[channel].mode = requestData[1];
+        fan_out[channel].mode = requestData[0];
         break;
     case CUSTOM_RQ_FANOUTMODE_READ:
     	// rq->wIndex.bytes[0]   Channel
@@ -289,6 +319,21 @@ void ProcessGenericHIDReport(uint8_t* DataArray)
     	// rq->wIndex.bytes[0]   Channel
     	*((uint16_t *)dataBuffer) = fan_out[channel].rpm;
         break;
+#endif
+#if POWER_METER_SUPPORTED
+    case CUSTOM_RQ_POWERMTR_POWER_READ:
+    	*((uint16_t *)dataBuffer) = powermeters[channel].power;
+    	break;
+    case CUSTOM_RQ_POWERMTR_CURRENT_READ:
+    	*((uint16_t *)dataBuffer) = powermeters[channel].current;
+    	break;
+    case CUSTOM_RQ_POWERMTR_LOAD_READ:
+    	*((uint16_t *)dataBuffer) = powermeters[channel].bus;
+    	break;
+#endif
+#if FASTLED_SUPPORTED
+    case CUSTOM_RQ_FASTLEDASTART_WRITE:
+    	break;
 #endif
     case CUSTOM_RQ_EEPROM_READ:
         // Load settings from eeprom, or revert to defaults when eeprom is invalid.
@@ -322,6 +367,7 @@ void ProcessGenericHIDReport(uint8_t* DataArray)
         break;
 #endif
     default:
+    	LS_("unsupported");
     	responseBuffer[0] = CUSTOM_RQ_UNSUPPORTED;
     	responseBuffer[1] = channel;
     	break;

@@ -55,9 +55,9 @@ bool ina219_cmd_load(uint8_t argc, char **argv)
     if (channel >= MAX_POWERMETER)
         return false;
 
-    fprintf_P(_sf, PSTR(".ina %u\n"), channel);
-    fprintf_P(_sf, PSTR(".bus %u\n"), ina219_getBusVoltage_mV(&ina219_device[channel]));
-    fprintf_P(_sf, PSTR(".sht %u\n"), ina219_getShuntVoltage_mV(&ina219_device[channel]));
+    fprintf_P(_vsf, PSTR(".ina %u\n"), channel);
+    fprintf_P(_vsf, PSTR(".bus %u\n"), ina219_getBusVoltage_mV(&ina219_device[channel]));
+    fprintf_P(_vsf, PSTR(".sht %u\n"), ina219_getShuntVoltage_mV(&ina219_device[channel]));
 
     return true;
 }
@@ -71,8 +71,8 @@ bool ina219_cmd_power(uint8_t argc, char **argv)
     if (channel >= MAX_POWERMETER)
         return false;
 
-    fprintf_P(_sf, PSTR(".ina %u\n"), channel);
-    fprintf_P(_sf, PSTR(".pwr %u\n"), ina219_getPower_mW(&ina219_device[channel]));
+    fprintf_P(_vsf, PSTR(".ina %u\n"), channel);
+    fprintf_P(_vsf, PSTR(".pwr %u\n"), ina219_getPower_mW(&ina219_device[channel]));
 
     return true;
 }
@@ -86,8 +86,8 @@ bool ina219_cmd_current(uint8_t argc, char **argv)
     if (channel >= MAX_POWERMETER)
         return false;
 
-    fprintf_P(_sf, PSTR(".ina %u\n"), channel);
-    fprintf_P(_sf, PSTR(".cur %u\n"), ina219_getCurrent_mA(&ina219_device[channel]));
+    fprintf_P(_vsf, PSTR(".ina %u\n"), channel);
+    fprintf_P(_vsf, PSTR(".cur %u\n"), ina219_getCurrent_mA(&ina219_device[channel]));
 
     return true;
 }

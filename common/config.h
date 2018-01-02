@@ -24,7 +24,13 @@
 #define VERSION_MAJOR (2)
 #define VERSION_MINOR (0)
 
+#define USB_PROTOCOL_VERSION (1)
+
 #define DEBUG_FUNCTIONS_SUPPORTED           1
+#define DEBUG_OUTPUT_SUPPORTED              1
+#define DEBUG_OUTPUT_USE_UART               1
+#define DEBUG_OUTPUT_USE_USB                0
+
 #define FAN_CONTROL_SUPPORTED               1
 
 #define SNS_ANALOG_SUPPORTED                1   // Support analog NTC sensors
@@ -40,7 +46,7 @@
 #define FAN_MODE_FUZZY_SUPPORTED            1   // Fuzzy conrtroller support. Only prepared, not implemented yet!
 #define FAN_PWM_MAX31790_SUPPORTED          1   // Use a MAX31790 to control and monitor the fans. If disabled, interal fan control is used
 #define FASTLED_SUPPORTED                   1   // Enable FASTled library and animations
-#define POWER_METER_SUPPORTED               1   // Add support for power meters based on INA219 or INA260
+#define POWER_METER_SUPPORTED               0   // Add support for power meters based on INA219 or INA260
 #define LED_PCA8574_SUPPORTED               1   // Enable LED output using PCA8574
 #define CTRL_DEBUG                          1   // Enable extra functions to debug controller behavior.
 
@@ -99,7 +105,8 @@
 #define MAX_TRIP_POINTS (5)        // Total number of trip points supported.
 #define MAX_FANS        (6)        // Total number of fans supported.
 #define MAX_FAN_OUTS    (2)        // Total number of fan outputs supported.
-#define MAX_POWERMETER  (2)        // Total number of power meters supported.
+#define MAX_POWERMETER  (3)        // Total number of power meters supported.
+#define MAX_LED_STRIPES (3)        // Total number of power meters supported.
 
 #define PWM_DUTY_0           (0)     // Value representing 0% duty cycle
 #define PWM_DUTY_100         (255)   // Value representing 100% duty cycle
@@ -287,8 +294,8 @@
 
 
 #if POWER_METER_SUPPORTED
-#define POWER_METER_INA219 1
-#define POWER_METER_INA260 0
+#define POWER_METER_INA219 0
+#define POWER_METER_INA260 1
 #endif
 
 #if SNS_I2C_SUPPORTED

@@ -12,7 +12,7 @@ CommandQueue::CommandQueue() :
 
 void CommandQueue::enqueue(std::unique_ptr<Command> cmd)
 {
-    //qDebug() << "enqueue";
+    //qDebug() << "enqueue " << cmd->getName();
 
     mutex.lock();
     if (_queue.size() > MAX_COMSUMER_QUEUE_SIZE)
@@ -21,20 +21,16 @@ void CommandQueue::enqueue(std::unique_ptr<Command> cmd)
 
     mutex.lock();
     _queue.push(std::move(cmd));
+    //qDebug() << "enqueue " << _queue.size();
     bufferNotEmpty.wakeAll();
     mutex.unlock();
 }
 
 std::unique_ptr<Command> CommandQueue::dequeue()
 {
-    //qDebug() << "dequeue";
-
     mutex.lock();
     if (_queue.empty())
         bufferNotEmpty.wait(&mutex);
-
-    //mutex.unlock();
-    //mutex.lock();
 
     if (_interruptionRequested)
     {
@@ -45,6 +41,9 @@ std::unique_ptr<Command> CommandQueue::dequeue()
 
     std::unique_ptr<Command> cmd = std::move(_queue.front());
     _queue.pop();
+
+    //qDebug() << "dequeue " << cmd->getName();
+    //qDebug() << "dequeue " << _queue.size();
 
     bufferNotFull.wakeAll();
     mutex.unlock();

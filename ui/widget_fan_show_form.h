@@ -9,7 +9,9 @@ class WidgetFanShowForm;
 }
 
 class DataFan;
+class SeriesFan;
 class DataSensor;
+class SeriesSensor;
 
 class WidgetFanShowForm : public QWidget
 {
@@ -30,7 +32,9 @@ public:
     QColor colorSensor() const;
 
     std::shared_ptr<DataFan> dataFan() const;
+    std::shared_ptr<SeriesFan> seriesFan() const;
     std::shared_ptr<DataSensor> dataSensor() const;
+    std::shared_ptr<SeriesSensor> seriesSensor() const;
 
 signals:
     void signalGraphColorChanged();
@@ -41,6 +45,8 @@ public slots:
     void on_nameChanged(QString const& name);
 
 private slots:
+    void on_valueUpdated();
+
     void on_checkBox_clicked();
     void on_checkBox_2_clicked();
     void on_checkBox_3_clicked();
@@ -52,10 +58,13 @@ private slots:
 private:
     void readSettings();
     void saveSettings();
+    void showSensorSeries(int index);
 
     Ui::WidgetFanShowForm *ui;
 
     std::shared_ptr<DataFan> _dataFan;
+    std::shared_ptr<SeriesFan> _seriesFan;
+    std::shared_ptr<SeriesSensor> _seriesSensor;
     std::vector<std::shared_ptr<DataSensor>> _dataSensors;
 };
 

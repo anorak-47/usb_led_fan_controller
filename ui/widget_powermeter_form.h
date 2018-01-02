@@ -18,6 +18,7 @@ class QDateTimeAxis;
 }
 
 class DataPowerMeter;
+class SeriesPowerMeter;
 
 class WidgetPowerMeterForm : public QWidget
 {
@@ -40,14 +41,7 @@ private:
 
     Ui::WidgetPowerMeterForm *ui;
     std::shared_ptr<DataPowerMeter> _dataPowerMeter;
-
-    QT_CHARTS_NAMESPACE::QChart *_chart;
-
-    QT_CHARTS_NAMESPACE::QDateTimeAxis *_axisX;
-
-    QT_CHARTS_NAMESPACE::QLineSeries *_seriesPower;
-    QT_CHARTS_NAMESPACE::QLineSeries *_seriesCurrent;
-    QT_CHARTS_NAMESPACE::QLineSeries *_seriesLoad;
+    std::shared_ptr<SeriesPowerMeter> _seriesPowerMeter;
 };
 
 #endif // WIDGET_POWERMETER_FORM_H

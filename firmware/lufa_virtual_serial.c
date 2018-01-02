@@ -8,11 +8,13 @@
  * VIRTUAL SERIAL
  ******************************************************************************/
 
+//#define VIRTUAL_SERIAL_STDOUT_ONLY
+
 /** Standard file stream for the CDC interface when set up, so that the virtual CDC COM port can be
  *  used like any regular character stream in the C APIs.
  */
 static FILE USBSerialStream;
-FILE *_sf;
+FILE *_vsf;
 
 extern USB_ClassInfo_CDC_Device_t VirtualSerial_CDC_Interface;
 
@@ -21,34 +23,31 @@ void virtser_init(void)
 	VirtualSerial_CDC_Interface.State.ControlLineStates.DeviceToHost = CDC_CONTROL_LINE_IN_DSR;
     CDC_Device_SendControlLineStateChange(&VirtualSerial_CDC_Interface);
 
+#ifdef VIRTUAL_SERIAL_STDOUT_ONLY
+    //fdev_setup_stream(&USBSerialStream, virtser_putchar, NULL, _FDEV_SETUP_WRITE);
+    USBSerialStream = (FILE)FDEV_SETUP_STREAM(virtser_putchar, NULL, _FDEV_SETUP_WRITE);
+#else
 	/* Create a regular character stream for the interface so that it can be used with the stdio.h functions */
 	//CDC_Device_CreateStream(&VirtualSerial_CDC_Interface, &USBSerialStream);
     CDC_Device_CreateStream(&VirtualSerial_CDC_Interface, &USBSerialStream);
-    _sf = &USBSerialStream;
-
-    //fdev_setup_stream(_sf, virtser_putchar, NULL, _FDEV_SETUP_WRITE);
+#endif
+    _vsf = &USBSerialStream;
 }
 
 void virtser_recv(uint8_t c) __attribute__((weak));
 void virtser_recv(uint8_t c)
 {
-	fputc(c, &USBSerialStream);
     // Echoed by default
+#ifdef VIRTUAL_SERIAL_STDOUT_ONLY
+	virtser_putchar(c, 0);
+#else
+	fputc(c, &USBSerialStream);
+#endif
 }
 
 void virtser_recv_task(void)
 {
-	//fputs(".", &USBSerialStream);
-	//fprintf_P(_sf, PSTR("."));
-
-	int c = fgetc(&USBSerialStream);
-	if (c != EOF)
-	{
-		//fprintf_P(&USBSerialStream, PSTR("%c"), c);
-		virtser_recv(c);
-	}
-
-	/*
+#ifdef VIRTUAL_SERIAL_STDOUT_ONLY
 	uint8_t ch;
     uint16_t count = CDC_Device_BytesReceived(&VirtualSerial_CDC_Interface);
 
@@ -57,10 +56,16 @@ void virtser_recv_task(void)
         ch = CDC_Device_ReceiveByte(&VirtualSerial_CDC_Interface);
         virtser_recv(ch);
     }
-    */
+#else
+	int c = fgetc(&USBSerialStream);
+	if (c != EOF)
+	{
+		virtser_recv(c);
+	}
+#endif
 }
 
-#if 0
+#ifdef VIRTUAL_SERIAL_STDOUT_ONLY
 int virtser_putchar(char c, FILE *unused)
 {
     uint8_t timeout = 255;
@@ -89,9 +94,9 @@ int virtser_putchar(char c, FILE *unused)
         }
 
         Endpoint_SelectEndpoint(ep);
-        return 0;
+        return 1;
     }
 
-    return 1;
+    return 0;
 }
 #endif

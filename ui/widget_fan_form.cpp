@@ -1,7 +1,9 @@
 #include "widget_fan_form.h"
 #include "ui_widget_fan_form.h"
 #include "data_fan.h"
+#include "series_fan.h"
 #include "data_sensor.h"
+#include "series_sensor.h"
 #include "usbface.h"
 #include <QtCharts/QChartView>
 #include <QtCharts/QLineSeries>
@@ -9,6 +11,7 @@
 #include <QtCharts/QDateTimeAxis>
 #include <QtCore/QSettings>
 #include <QtCore/QDebug>
+#include <math.h>
 
 QT_CHARTS_USE_NAMESPACE
 
@@ -17,16 +20,14 @@ WidgetFanForm::WidgetFanForm(std::shared_ptr<DataFan> dataFan, QWidget *parent) 
 {
     ui->setupUi(this);
 
+    _seriesFan = std::shared_ptr<SeriesFan>(new SeriesFan(_dataFan));
+
     showFanTypes();
-    on_supportedFunctionsUpdated(SUPPORTED_NONE | SUPPORTED_FANMODE_LINEAR | SUPPORTED_FANMODE_TP| SUPPORTED_FANMODE_LIN_TP);
+    on_supportedFunctionsUpdated(SUPPORTED_NONE);
 
     indexSensorLinear = dataFan->data().config.snsIdx;
     indexSensorPiController = dataFan->data().config.snsIdx;
     indexSensorTripPoints = dataFan->data().config.snsIdx;
-
-    connect(_dataFan.get(), SIGNAL(signalChanged()), this, SLOT(on_dataUpdated()));
-    connect(_dataFan.get(), SIGNAL(signalValueChanged()), this, SLOT(on_valueUpdated()));
-
 
 
 
@@ -51,6 +52,9 @@ WidgetFanForm::WidgetFanForm(std::shared_ptr<DataFan> dataFan, QWidget *parent) 
 
     readSettings();
     setTitle(dataFan);
+
+    connect(_dataFan.get(), SIGNAL(signalChanged()), this, SLOT(on_dataUpdated()));
+    connect(_dataFan.get(), SIGNAL(signalValueChanged()), this, SLOT(on_valueUpdated()));
 }
 
 WidgetFanForm::~WidgetFanForm()
@@ -82,72 +86,13 @@ void WidgetFanForm::readSettings()
 
 void WidgetFanForm::createFanChart()
 {
-    QValueAxis *axisY = new QValueAxis();
-    axisY->setLabelFormat("%d");
-    axisY->setTitleText("Value");
-
-    QValueAxis *axisY_duty = new QValueAxis();
-    axisY_duty->setLabelFormat("%d");
-    axisY_duty->setTitleText("Duty Cycle [%]");
-
-    QValueAxis *axisY_rpm = new QValueAxis();
-    axisY_rpm->setLabelFormat("%d");
-    axisY_rpm->setTitleText("RPM [1/s]");
-
-    _axisXFan = new QDateTimeAxis;
-    //axisX->setFormat("dd-MM-yyyy h:mm");
-    _axisXFan->setFormat("h:mm");
-    //axisX_fan->setTitleText("Time");
-
-    QDateTime now = QDateTime::currentDateTime();
-    _axisXFan->setRange(now.addSecs(-60*60), now);
-
-    _chartFan = new QChart();
-    //fanChart->legend()->hide();
-    //_chartFan->setTitle(_dataFan->fullName());
-    _chartFan->setTheme(QChart::ChartTheme::ChartThemeBlueNcs);
-
-    _chartFan->addAxis(axisY, Qt::AlignLeft);
-    _chartFan->addAxis(axisY_duty, Qt::AlignLeft);
-    _chartFan->addAxis(axisY_rpm, Qt::AlignRight);
-
-    _chartFan->setAxisX(_axisXFan);
-
-    QChartView *chartView = new QChartView(_chartFan);
-    chartView->setRenderHint(QPainter::Antialiasing);
+    _chart = _seriesFan->createChart();
+    QChartView *chartView = _seriesFan->createChartView(_chart);
 
     QGridLayout *cLayout = new QGridLayout();
     cLayout->setContentsMargins(0, 0, 0, 0);
     ui->wChart->setLayout(cLayout);
     cLayout->addWidget(chartView);
-
-    _seriesFanRpm = new QLineSeries();
-    _seriesFanRpm->setName("Fan RPM");
-    _chartFan->addSeries(_seriesFanRpm);
-    _seriesFanRpm->attachAxis(_axisXFan);
-    _seriesFanRpm->attachAxis(axisY_rpm);
-
-    _seriesFanDuty = new QLineSeries();
-    _seriesFanDuty->setName("Fan Duty Cycle");
-    _chartFan->addSeries(_seriesFanDuty);
-    _seriesFanDuty->attachAxis(_axisXFan);
-    _seriesFanDuty->attachAxis(axisY_duty);
-
-    _seriesFanSetpoint = new QLineSeries();
-    _seriesFanSetpoint->setName("PI Setpoint");
-    _chartFan->addSeries(_seriesFanSetpoint);
-    _seriesFanSetpoint->attachAxis(_axisXFan);
-    _seriesFanSetpoint->attachAxis(axisY);
-
-    _seriesFanSensor = new QLineSeries();
-    _seriesFanSensor->setName("Sensor");
-    _chartFan->addSeries(_seriesFanSensor);
-    _seriesFanSensor->attachAxis(_axisXFan);
-    _seriesFanSensor->attachAxis(axisY);
-
-    axisY->setRange(0.0, 50.0);
-    axisY_duty->setRange(0.0, 100.0);
-    axisY_rpm->setRange(0.0, 5000.0);
 }
 
 void WidgetFanForm::updateTripPointControllerChart()
@@ -293,64 +238,81 @@ void WidgetFanForm::setDataSensors(std::vector<std::shared_ptr<DataSensor> > dat
     on_dataUpdated();
 }
 
+void WidgetFanForm::showSensorSeries()
+{
+    _seriesSensor = std::shared_ptr<SeriesSensor>(new SeriesSensor(_dataSensor));
+    _seriesSensor->copyFromTimeSeries(_dataSensor->timeDataSeries());
+    _seriesSensor->setXAxis(_seriesFan->getXAxis());
+    _seriesSensor->setYAxis(_seriesFan->getYAxis());
+    _seriesSensor->addSeries(_chart);
+}
+
 void WidgetFanForm::showSeriesByMode()
 {
     switch (_dataFan->data().config.fanMode)
     {
     case FANMODE_LINEAR:
-        indexSensorLinear = _dataFan->data().config.snsIdx;
+        _dataFan->updateSensorIndex(indexSensorLinear);
         _dataSensor = _dataSensors[indexSensorLinear];
-        _seriesFanSensor->show();
-        _seriesFanSetpoint->hide();
+        _seriesFan->setVisible(SeriesFan::SeriesType::setpoint, false);
+        showSensorSeries();
         break;
     case FANMODE_LINEAR_TRIP_POINTS:
     case FANMODE_TRIP_POINTS:
-        indexSensorTripPoints = _dataFan->data().config.snsIdx;
+        _dataFan->updateSensorIndex(indexSensorTripPoints);
         _dataSensor = _dataSensors[indexSensorTripPoints];
-        _seriesFanSensor->show();
-        _seriesFanSetpoint->hide();
+        _seriesFan->setVisible(SeriesFan::SeriesType::setpoint, false);
+        showSensorSeries();
         break;
     case FANMODE_PI:
-        indexSensorPiController = _dataFan->data().config.snsIdx;
+        _dataFan->updateSensorIndex(indexSensorPiController);
         _dataSensor = _dataSensors[indexSensorPiController];
-        _seriesFanSensor->show();
-        _seriesFanSetpoint->show();
+        _seriesFan->setVisible(SeriesFan::SeriesType::setpoint, true);
+        showSensorSeries();
         break;
     default:
-        _seriesFanSensor->hide();
-        _seriesFanSetpoint->hide();
+        _seriesFan->setVisible(SeriesFan::SeriesType::setpoint, false);
+        if (_seriesSensor)
+        {
+            _seriesSensor->setVisible(false);
+            _seriesSensor.reset();
+        }
         _dataSensor = _dataSensors.front();
         break;
     }
 
-    if (_seriesFanSensor && _dataSensor)
-        _seriesFanSensor->setName(_dataSensor->fullName());
+
+
+    if (_seriesSensor && _dataSensor)
+        _seriesSensor->setName(_dataSensor->fullName());
 }
 
 void WidgetFanForm::on_dataUpdated()
 {
-    qDebug() << "on_dataUpdated " << _dataFan->name();
+    qDebug() << "WidgetFanForm::on_dataUpdated " << _dataFan->name();
 
     setTitle(_dataFan);
 
-    QSignalBlocker ct(ui->cbType);
+    QSignalBlocker ct(ui->cbType);    
+    qDebug() << "WidgetFanForm::on_dataUpdated index " << _typeToIndex[_dataFan->data().config.fanType] << " type " << _dataFan->data().config.fanType;
     ui->cbType->setCurrentIndex(_typeToIndex[_dataFan->data().config.fanType]);
 
     QSignalBlocker cm(ui->cbMode);
+    qDebug() << "WidgetFanForm::on_dataUpdated index " << _modeToIndex[_dataFan->data().config.fanMode] << " mode " << _dataFan->data().config.fanMode;
     ui->cbMode->setCurrentIndex(_modeToIndex[_dataFan->data().config.fanMode]);
 
 
     QSignalBlocker spf(ui->spFixedDuty);
-    ui->spFixedDuty->setValue(round(_dataFan->getScaledFixedDuty() * 100.0));
+    ui->spFixedDuty->setValue(round(_dataFan->getScaledFixedDuty()));
 
     QSignalBlocker hs(ui->hsFixedDuty);
-    ui->hsFixedDuty->setValue(round(_dataFan->getScaledFixedDuty() * 100.0));
+    ui->hsFixedDuty->setValue(round(_dataFan->getScaledFixedDuty()));
 
     QSignalBlocker ss(ui->spMinRpmStall);
     ui->spMinRpmStall->setValue(_dataFan->getMinRpmStalled());
 
-    ui->spValueRpm->setValue(_dataFan->data().rpm);
-    ui->spValueDuty->setValue(_dataFan->data().duty);
+    ui->spValueRpm->setValue(_dataFan->getRPM());
+    ui->spValueDuty->setValue(_dataFan->getScaledDuty());
 
     updateSpinBox(ui->tbValue_1, _dataFan->data().trip_point[0].value);
     updateSpinBox(ui->tbValue_2, _dataFan->data().trip_point[1].value);
@@ -370,9 +332,16 @@ void WidgetFanForm::on_dataUpdated()
 
     updateDoubleSpinBox(ui->spPiSetpointOffset, _dataFan->getPiSetpointOffset());
 
+    updateDoubleSpinBox(ui->spLinearOffset, _dataFan->getLinearOffset());
+    updateDoubleSpinBox(ui->spLinearGain, _dataFan->getLinearGain());
+
     QSignalBlocker sl(ui->cbSensorLinear);
     QSignalBlocker sp(ui->cbSensorPiController);
     QSignalBlocker st(ui->cbSensorTripPoints);
+
+    indexSensorLinear = _dataFan->data().config.snsIdx;
+    indexSensorPiController = _dataFan->data().config.snsIdx;
+    indexSensorTripPoints = _dataFan->data().config.snsIdx;
 
     ui->cbSensorLinear->setCurrentIndex(indexSensorLinear);
     ui->cbSensorPiController->setCurrentIndex(indexSensorPiController);
@@ -391,8 +360,10 @@ void WidgetFanForm::appendLastValueToSeries(QLineSeries *series, QContiguousCach
 
 void WidgetFanForm::on_valueUpdated()
 {
-    ui->spValueRpm->setValue(_dataFan->data().rpm);
-    ui->spValueDuty->setValue(_dataFan->data().duty);
+    //qDebug() << __PRETTY_FUNCTION__;
+
+    ui->spValueRpm->setValue(_dataFan->getRPM());
+    ui->spValueDuty->setValue(_dataFan->getScaledDuty());
     ui->statusFanStalled->setFanIsStalled(_dataFan->data().status.stalled);
 
     int sensorIndex = _dataFan->data().config.snsIdx;
@@ -404,14 +375,6 @@ void WidgetFanForm::on_valueUpdated()
             break;
         }
     }
-
-    appendLastValueToSeries(_seriesFanRpm, _dataFan->seriesRpm());
-    appendLastValueToSeries(_seriesFanDuty, _dataFan->seriesDuty());
-    appendLastValueToSeries(_seriesFanSetpoint, _dataFan->seriesSetpoint());
-    appendLastValueToSeries(_seriesFanSensor, _dataSensor->series());
-
-    QDateTime now = QDateTime::currentDateTime();
-    _axisXFan->setRange(now.addSecs(-60*60), now);
 }
 
 void WidgetFanForm::on_cbType_currentIndexChanged(int index)
@@ -436,6 +399,7 @@ void WidgetFanForm::on_cbMode_currentIndexChanged(int index)
     setTitle(_dataFan);
 
     showSeriesByMode();
+    //ui->tabWidget->setCurrentIndex(index);
 
     qDebug() << "on_cbMode_currentIndexChanged " << index << " " << _dataFan->data().config.fanMode;
     qDebug() << "on_cbMode_currentIndexChanged " << index << " " << _dataFan->fullName();
@@ -445,7 +409,7 @@ void WidgetFanForm::on_cbMode_currentIndexChanged(int index)
 
 void WidgetFanForm::on_spFixedDuty_valueChanged(int duty)
 {
-    _dataFan->setScaledFixedDuty(duty/100.0);
+    _dataFan->setScaledFixedDuty(duty);
     _dataFan->updateFixedDuty(duty);
     QSignalBlocker b(ui->hsFixedDuty);
     ui->hsFixedDuty->setValue(duty);
@@ -453,7 +417,7 @@ void WidgetFanForm::on_spFixedDuty_valueChanged(int duty)
 
 void WidgetFanForm::on_hsFixedDuty_valueChanged(int duty)
 {
-    _dataFan->setScaledFixedDuty(duty/100.0);
+    _dataFan->setScaledFixedDuty(duty);
     _dataFan->updateFixedDuty(duty);
     QSignalBlocker b(ui->spFixedDuty);
     ui->spFixedDuty->setValue(duty);
@@ -743,7 +707,7 @@ void WidgetFanForm::showFanModes(int supportedFunctions)
     ui->cbMode->clear();
     _modeToIndex.clear();
 
-    addFanModeToComboBox(FANMODE_FIXED_DUTY, index);
+    addFanModeToComboBox(FANMODE_FIXED_DUTY, index++);
 
     if (supportedFunctions & SUPPORTED_FANMODE_LINEAR)
         addFanModeToComboBox(FANMODE_LINEAR, index++);
@@ -798,8 +762,8 @@ void WidgetFanForm::updateSensorSelectors()
     ui->cbSensorTripPoints->setCurrentIndex(indexSensorTripPoints);
     ui->cbPiSetpoint->setCurrentIndex(currentPiSetpointSensor);
 
-    if (_seriesFanSensor && _dataSensor)
-        _seriesFanSensor->setName(_dataSensor->fullName());
+    if (_seriesSensor && _dataSensor)
+        _seriesSensor->setName(_dataSensor->fullName());
 }
 
 void WidgetFanForm::on_spPiSetpointOffset_valueChanged(double arg1)
@@ -834,26 +798,44 @@ void WidgetFanForm::on_spMaxRpm_valueChanged(int arg1)
 
 void WidgetFanForm::on_cbSensorTripPoints_currentIndexChanged(int index)
 {
-    _dataFan->updateSensorIndex(index);
     indexSensorTripPoints = index;
+
+    if (_dataFan->data().config.fanMode != FANMODE_TRIP_POINTS && _dataFan->data().config.fanMode != FANMODE_LINEAR_TRIP_POINTS)
+        return;
+
+    _dataFan->updateSensorIndex(index);
     _dataSensor = _dataSensors[index];
-    _seriesFanSensor->setName(_dataSensor->fullName());
+    _seriesSensor.reset();
+    showSensorSeries();
+    _seriesSensor->setName(_dataSensor->fullName());
 }
 
 void WidgetFanForm::on_cbSensorLinear_currentIndexChanged(int index)
 {
-    _dataFan->updateSensorIndex(index);
     indexSensorLinear = index;
+
+    if (_dataFan->data().config.fanMode != FANMODE_LINEAR)
+        return;
+
+    _dataFan->updateSensorIndex(index);
     _dataSensor = _dataSensors[index];
-    _seriesFanSensor->setName(_dataSensor->fullName());
+    _seriesSensor.reset();
+    showSensorSeries();
+    _seriesSensor->setName(_dataSensor->fullName());
 }
 
 void WidgetFanForm::on_cbSensorPiController_currentIndexChanged(int index)
 {
-    _dataFan->updateSensorIndex(index);
     indexSensorPiController = index;
+
+    if (_dataFan->data().config.fanMode != FANMODE_PI)
+        return;
+
+    _dataFan->updateSensorIndex(index);
     _dataSensor = _dataSensors[index];
-    _seriesFanSensor->setName(_dataSensor->fullName());
+    _seriesSensor.reset();
+    showSensorSeries();
+    _seriesSensor->setName(_dataSensor->fullName());
 }
 
 void WidgetFanForm::on_cbPiSetpoint_currentIndexChanged(int index)

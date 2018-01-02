@@ -30,11 +30,11 @@ const struct _s_shell_cmd fan_out_shell_cmd[] PROGMEM = {SHELLCMD("cfg", fanout_
 
 static void dump_fanout_config(uint8_t channel)
 {
-    fprintf_P(_sf, PSTR(".fao %u\n"), channel);
-    fprintf_P(_sf, PSTR(".mod %u\n"), fan_out[channel].mode);
-    fprintf_P(_sf, PSTR(".stl %u\n"), fan_out[channel].fanStallDetect);
+    fprintf_P(_vsf, PSTR(".fao %u\n"), channel);
+    fprintf_P(_vsf, PSTR(".mod %u\n"), fan_out[channel].mode);
+    fprintf_P(_vsf, PSTR(".stl %u\n"), fan_out[channel].fanStallDetect);
 #ifdef CTRL_DEBUG
-    fprintf_P(_sf, PSTR(".ovf %u\n"), ovf_interval(channel));
+    fprintf_P(_vsf, PSTR(".ovf %u\n"), ovf_interval(channel));
 #endif
 }
 
@@ -75,9 +75,9 @@ bool fanout_cmd_cfg(uint8_t argc, char **argv)
 
 static void dump_fanout_status(uint8_t channel)
 {
-    fprintf_P(_sf, PSTR(".fao %u\n"), channel);
-    fprintf_P(_sf, PSTR(".rps %u\n"), fan_out[channel].rps);
-    fprintf_P(_sf, PSTR(".rpm %u\n"), fan_out[channel].rpm);
+    fprintf_P(_vsf, PSTR(".fao %u\n"), channel);
+    fprintf_P(_vsf, PSTR(".rps %u\n"), fan_out[channel].rps);
+    fprintf_P(_vsf, PSTR(".rpm %u\n"), fan_out[channel].rpm);
 }
 
 bool fanout_cmd_sta(uint8_t argc, char **argv)
@@ -107,7 +107,7 @@ bool fanout_cmd_sta(uint8_t argc, char **argv)
     {
         if (strcmp_P(PSTR("rpm"), argv[1]) == 0)
         {
-            fprintf_P(_sf, PSTR(".rpm %u\n"), fan_out[channel].rpm);
+            fprintf_P(_vsf, PSTR(".rpm %u\n"), fan_out[channel].rpm);
         }
         else
         {

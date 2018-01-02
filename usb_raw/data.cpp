@@ -5,7 +5,7 @@
 #include <QtCore/QDebug>
 
 DataObject::DataObject()
-    : _mutex(new QMutex())
+    : _mutex(new QMutex(QMutex::RecursionMode::Recursive))
 {
 }
 
@@ -37,13 +37,15 @@ void DataObject::on_update()
 
 bool DataObject::event(QEvent *event)
 {
+    //qDebug() << "DataObject::event " << event->type();
+
     if (event->type() >= (QEvent::Type)CommandEvents::EventAllDataUpdated)
     {
         CommandEvent *myEvent = static_cast<CommandEvent *>(event);
 
         if ((event->type() == (QEvent::Type)CommandEvents::EventAllDataUpdated))
         {
-            qDebug() << " EventAllDataUpdated event, channel: " << myEvent->getChannel();
+            //qDebug() << " EventAllDataUpdated event, channel: " << myEvent->getChannel();
             emit signalChanged();
             return true;
         }
@@ -51,7 +53,7 @@ bool DataObject::event(QEvent *event)
         if (event->type() == (QEvent::Type)CommandEvents::EventUsbCommunicationError)
         {
             CommandEventUsbError *usbErrorEvent = static_cast<CommandEventUsbError *>(event);
-            qDebug() << " EventUsbCommunicationError event, rc: " << usbErrorEvent->errorCode() << " " << usbErrorEvent->errorMsg();
+            //qDebug() << " EventUsbCommunicationError event, rc: " << usbErrorEvent->errorCode() << " " << usbErrorEvent->errorMsg();
             emit signalUsbCommunicationFailed(usbErrorEvent->errorCode(), usbErrorEvent->errorMsg());
             return true;
         }
@@ -79,6 +81,8 @@ int DataWithAChannel::channel() const
 
 bool DataWithAChannel::event(QEvent *event)
 {
+    //qDebug() << "DataWithAChannel::event " << event->type();
+
     if (event->type() >= (QEvent::Type)CommandEvents::EventAllDataUpdated)
     {
         CommandEvent *myEvent = static_cast<CommandEvent *>(event);

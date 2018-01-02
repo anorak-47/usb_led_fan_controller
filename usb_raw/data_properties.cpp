@@ -98,27 +98,6 @@ void DataDeviceProperties::setSupportedFunctions(int funcs)
     _funcs = funcs;
 }
 
-bool DataDeviceProperties::handleEvent(CommandEvent *event)
-{
-    if (event->type() == (QEvent::Type)CommandEvents::EventPropertiesUpdated)
-    {
-        qDebug() << " EventPropertiesUpdated event";
-
-        emit signalChanged();
-        emit signalSupportedFunctionsUpdated(_funcs);
-        return true;
-    }
-    if (event->type() == (QEvent::Type)CommandEvents::EventCommandFinished)
-    {
-        qDebug() << " EventCommandFinished event";
-
-        emit signalFinished();
-        return true;
-    }
-
-    return false;
-}
-
 QString DataDeviceProperties::getDeviceDevice() const
 {
     return _device_device;
@@ -192,4 +171,26 @@ unsigned char DataDeviceProperties::getVersionFirmwareMajor() const
 void DataDeviceProperties::setVersionFirmwareMajor(unsigned char version_firmware_major)
 {
     _version_firmware_major = version_firmware_major;
+}
+
+bool DataDeviceProperties::handleEvent(CommandEvent *event)
+{
+    if (event->type() == (QEvent::Type)CommandEvents::EventPropertiesUpdated)
+    {
+        qDebug() << " EventPropertiesUpdated event";
+
+        emit signalChanged();
+        emit signalSupportedFunctionsUpdated(_funcs);
+        emit signalPropertiesUpdated();
+        return true;
+    }
+    if (event->type() == (QEvent::Type)CommandEvents::EventCommandFinished)
+    {
+        qDebug() << " EventCommandFinished event";
+
+        emit signalFinished();
+        return true;
+    }
+
+    return false;
 }

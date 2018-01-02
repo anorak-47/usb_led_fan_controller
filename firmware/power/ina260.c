@@ -16,7 +16,9 @@
 */
 /**************************************************************************/
 
+#if POWER_METER_INA260
 
+_ina260_device ina260_device[MAX_POWERMETER];
 
 /**************************************************************************/
 /*!
@@ -29,8 +31,8 @@ static void ina260_setConfigRegister(_ina260_device *dev)
     // Sets 4 samples average and sampling time for voltage and current to 8.244ms
 
     // Set Config register
-    uint16_t config = INA260_CONFIG_AVGRANGE_4 | INA260_CONFIG_BVOLTAGETIME_8244US | INA260_CONFIG_SCURRENTTIME_8244US |
-                      INA260_CONFIG_MODE_SANDBVOLT_CONTINUOUS;
+    uint16_t config =
+        INA260_CONFIG_AVGRANGE_4 | INA260_CONFIG_BVOLTAGETIME_8244US | INA260_CONFIG_SCURRENTTIME_8244US | INA260_CONFIG_MODE_SANDBVOLT_CONTINUOUS;
     wireWriteRegister(dev->i2caddr, INA260_REG_CONFIG, config);
 }
 
@@ -42,7 +44,6 @@ static void ina260_setConfigRegister(_ina260_device *dev)
 void ina260_init(_ina260_device *dev, uint8_t addr)
 {
     dev->i2caddr = addr;
-    // Set chip to large range config values to start
     ina260_setConfigRegister(dev);
 }
 
@@ -55,18 +56,6 @@ static int16_t ina260_getBusVoltage_raw(_ina260_device *dev)
 {
     uint16_t value;
     wireReadRegister(dev->i2caddr, INA260_REG_BUSVOLTAGE, &value);
-    return (int16_t)value;
-}
-
-/**************************************************************************/
-/*!
-    @brief  Gets the raw shunt voltage (16-bit signed integer, so +-32767)
-*/
-/**************************************************************************/
-static int16_t ina260_getShuntVoltage_raw(_ina260_device *dev)
-{
-    uint16_t value;
-    wireReadRegister(dev->i2caddr, INA260_REG_SHUNTVOLTAGE, &value);
     return (int16_t)value;
 }
 
@@ -96,24 +85,12 @@ static int16_t ina260_getPower_raw(_ina260_device *dev)
 
 /**************************************************************************/
 /*!
-    @brief  Gets the shunt voltage in mV
-*/
-/**************************************************************************/
-uint32_t ina260_getShuntVoltage_mV(_ina260_device *dev)
-{
-    int16_t value;
-    value = ina260_getShuntVoltage_raw(dev);
-    return value * 0.007;
-}
-
-/**************************************************************************/
-/*!
     @brief  Gets the shunt voltage in volts
 */
 /**************************************************************************/
 uint32_t ina260_getBusVoltage_mV(_ina260_device *dev)
 {
-	uint32_t value = ina260_getBusVoltage_raw(dev);
+    uint32_t value = ina260_getBusVoltage_raw(dev);
     return (value * 125) / 100;
 }
 
@@ -124,8 +101,8 @@ uint32_t ina260_getBusVoltage_mV(_ina260_device *dev)
 /**************************************************************************/
 uint32_t ina260_getCurrent_mA(_ina260_device *dev)
 {
-	uint32_t valueDec = ina260_getCurrent_raw(dev);
-    return (valueDec * 125)	 / 100;
+    uint32_t valueDec = ina260_getCurrent_raw(dev);
+    return (valueDec * 125) / 100;
 }
 
 /**************************************************************************/
@@ -135,6 +112,8 @@ uint32_t ina260_getCurrent_mA(_ina260_device *dev)
 /**************************************************************************/
 uint32_t ina260_getPower_mW(_ina260_device *dev)
 {
-	uint32_t valueDec = ina260_getPower_raw(dev);
+    uint32_t valueDec = ina260_getPower_raw(dev);
     return valueDec * 10;
 }
+
+#endif

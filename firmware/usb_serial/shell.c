@@ -8,11 +8,15 @@
 #include "max31790.h"
 #include "sensor_type.h"
 #include "settings.h"
+#include "uart.h"
+#include "animation.h"
 #include "shell_fan.h"
 #include "shell_fan_out.h"
 #include "shell_ina219.h"
+#include "shell_ina260.h"
 #include "shell_powermeter.h"
 #include "shell_max31790.h"
+#include "shell_animation.h"
 #include "shell_sensor.h"
 
 #define VIRTSER_ENABLE_ECHO
@@ -106,12 +110,12 @@ const struct _s_shell_cmd shell_cmd[] PROGMEM = {SHELLCMD("?", shell_command_hel
 
 bool cmd_nfo(uint8_t argc, char **argv)
 {
-    fprintf_P(_sf, PSTR(".info\n"));
-    fprintf_P(_sf, PSTR(".sns %u\n"), MAX_SNS);
-    fprintf_P(_sf, PSTR(".fan %u\n"), MAX_FANS);
-    fprintf_P(_sf, PSTR(".fao %u\n"), MAX_FAN_OUTS);
-    fprintf_P(_sf, PSTR(".pwr %u\n"), MAX_POWERMETER);
-    fprintf_P(_sf, PSTR(".led %u\n"), 4);
+    fprintf_P(_vsf, PSTR(".info\n"));
+    fprintf_P(_vsf, PSTR(".sns %u\n"), MAX_SNS);
+    fprintf_P(_vsf, PSTR(".fan %u\n"), MAX_FANS);
+    fprintf_P(_vsf, PSTR(".fao %u\n"), MAX_FAN_OUTS);
+    fprintf_P(_vsf, PSTR(".pwr %u\n"), MAX_POWERMETER);
+    fprintf_P(_vsf, PSTR(".led %u\n"), 4);
     return true;
 }
 
@@ -126,13 +130,13 @@ int freeRam(void)
 
 bool cmd_dbg(uint8_t argc, char **argv)
 {
-    fprintf_P(_sf, PSTR(".dbg\n"));
-    fprintf_P(_sf, PSTR(".sns %u\n"), sizeof(Sensor) * MAX_SNS);
-    fprintf_P(_sf, PSTR(".fan %u\n"), sizeof(Fan) * MAX_FANS);
-    fprintf_P(_sf, PSTR(".fao %u\n"), sizeof(Fan_out) * MAX_FAN_OUTS);
-    fprintf_P(_sf, PSTR(".tot %u\n"), sizeof(Fan_out) * MAX_FAN_OUTS + sizeof(Fan) * MAX_FANS + sizeof(Sensor) * MAX_SNS);
-    fprintf_P(_sf, PSTR(".mx3 %u\n"), sizeof(struct _s_max31790_device));
-    fprintf_P(_sf, PSTR(".free %d\n"), freeRam());
+    fprintf_P(_vsf, PSTR(".dbg\n"));
+    fprintf_P(_vsf, PSTR(".sns %u\n"), sizeof(Sensor) * MAX_SNS);
+    fprintf_P(_vsf, PSTR(".fan %u\n"), sizeof(Fan) * MAX_FANS);
+    fprintf_P(_vsf, PSTR(".fao %u\n"), sizeof(Fan_out) * MAX_FAN_OUTS);
+    fprintf_P(_vsf, PSTR(".tot %u\n"), sizeof(Fan_out) * MAX_FAN_OUTS + sizeof(Fan) * MAX_FANS + sizeof(Sensor) * MAX_SNS);
+    fprintf_P(_vsf, PSTR(".mx3 %u\n"), sizeof(struct _s_max31790_device));
+    fprintf_P(_vsf, PSTR(".free %d\n"), freeRam());
     return true;
 }
 
@@ -141,7 +145,7 @@ bool cmd_i2c(uint8_t argc, char **argv)
     if (argc == 1)
     {
         uint8_t addr = atoi(argv[0]);
-        fprintf_P(_sf, PSTR("dev at %u 0x%x: %u\n"), addr, addr, i2c_scan_address(addr));
+        fprintf_P(_vsf, PSTR("dev at %u 0x%x: %u\n"), addr, addr, i2c_scan_address(addr));
     }
     else
     {
@@ -149,7 +153,7 @@ bool cmd_i2c(uint8_t argc, char **argv)
         {
         	uint8_t waddr = addr << 1;
         	if (i2c_scan_address(waddr))
-        		fprintf_P(_sf, PSTR("dev at %u 0x%x\n"), waddr, waddr);
+        		fprintf_P(_vsf, PSTR("dev at %u 0x%x\n"), waddr, waddr);
         }
     }
 
@@ -223,8 +227,7 @@ bool cmd_led(uint8_t argc, char **argv)
 #if FASTLED_SUPPORTED
 bool cmd_fastled(uint8_t argc, char **argv)
 {
-    // return sub_shell_command(fastled_shell_cmd, argc, argv);
-    return false;
+    return sub_shell_command(animation_shell_cmd, argc, argv);
 }
 #endif
 
@@ -233,17 +236,23 @@ bool cmd_save_settings(uint8_t argc, char **argv)
 #if FAN_CONTROL_SUPPORTED
     saveSettings();
 #endif
+#if FASTLED_SUPPORTED
+    animation_save();
+#endif
     return true;
 }
 
 bool cmd_load_settings(uint8_t argc, char **argv)
 {
-#if FAN_CONTROL_SUPPORTED
     uint8_t clear = 0;
     if (argc > 0)
         clear = atoi(argv[0]);
 
+#if FAN_CONTROL_SUPPORTED
     loadSettings(clear);
+#endif
+#if FASTLED_SUPPORTED
+    animation_load(clear);
 #endif
     return true;
 }
@@ -258,15 +267,15 @@ bool shell_command_help(uint8_t argc, char **argv)
     while (cmd.name)
     {
 #if defined(SHELL_ARGS_HELP_SUPPORTED) && defined(SHELL_HELP_SUPPORTED)
-        fprintf_P(_sf, PSTR("%s [%s]: %s\n"), cmd.name, cmd.args_help, cmd.cmd_help);
+        fprintf_P(_vsf, PSTR("%s [%s]: %s\n"), cmd.name, cmd.args_help, cmd.cmd_help);
 #else
 #ifdef SHELL_ARGS_HELP_SUPPORTED
-        fprintf_P(_sf, PSTR("%s [%s]\n"), cmd.name, cmd.args_help);
+        fprintf_P(_vsf, PSTR("%s [%s]\n"), cmd.name, cmd.args_help);
 #else
 #ifdef SHELL_HELP_SUPPORTED
-        fprintf_P(_sf, PSTR("%s: %s\n"), cmd.name, cmd.cmd_help);
+        fprintf_P(_vsf, PSTR("%s: %s\n"), cmd.name, cmd.cmd_help);
 #else
-        fprintf_P(_sf, PSTR("%s\n"), cmd.name);
+        fprintf_P(_vsf, PSTR("%s\n"), cmd.name);
 #endif
 #endif
 #endif
@@ -274,7 +283,7 @@ bool shell_command_help(uint8_t argc, char **argv)
         memcpy_P(&cmd, (const void *)&shell_cmd[pos++], sizeof(struct _s_shell_cmd));
     }
 
-    fprintf_P(_sf, PSTR("\n"));
+    fprintf_P(_vsf, PSTR("\n"));
     return true;
 }
 
@@ -374,11 +383,11 @@ void shell_command(uint8_t *buffer, uint8_t length)
 
             if (success)
             {
-                fprintf_P(_sf, PSTR(">OK\n"));
+                fprintf_P(_vsf, PSTR(">OK\n"));
             }
             else
             {
-                fprintf_P(_sf, PSTR(">ERR\n"));
+                fprintf_P(_vsf, PSTR(">ERR\n"));
             }
 
             break;
@@ -391,8 +400,8 @@ void shell_command(uint8_t *buffer, uint8_t length)
 
     if (!user_command.func)
     {
-        fprintf_P(_sf, PSTR(">NC ':?' for help\n"));
-        fprintf_P(_sf, PSTR(">NC\n"));
+        fprintf_P(_vsf, PSTR(">NC ':?' for help\n"));
+        fprintf_P(_vsf, PSTR(">NC\n"));
     }
 }
 
@@ -401,7 +410,7 @@ void virtser_recv(uint8_t ucData)
     static uint8_t buffer_pos = 0;
 
 #ifdef VIRTSER_ENABLE_ECHO
-    fprintf_P(_sf, PSTR("%c"), ucData);
+    fputc(ucData, _vsf);
 #endif
 
     // dprintf("recv: [%02X] <%c> s:%u\n", ucData, (char)ucData, recv_status);
@@ -435,8 +444,8 @@ void virtser_recv(uint8_t ucData)
             buffer_pos = 0;
             recv_status = recvStatusIdle;
             // print("recv: payload too long\n");
-            fprintf_P(_sf, PSTR(">ERR payload\n"));
-            fprintf_P(_sf, PSTR(">ERR\n"));
+            fprintf_P(_vsf, PSTR(">ERR payload\n"));
+            fprintf_P(_vsf, PSTR(">ERR\n"));
         }
 
         else
@@ -446,3 +455,22 @@ void virtser_recv(uint8_t ucData)
         }
     }
 }
+
+#if 0
+#define LOW_BYTE(x)        	(x & 0xff)					// 16Bit 	--> 8Bit
+#define HIGH_BYTE(x)       	((x >> 8) & 0xff)			// 16Bit 	--> 8Bit
+
+void uart_recv_task(void)
+{
+    uint8_t ucData;
+    unsigned int rd = uart_getc();
+
+    // wenn Zeichen empfangen
+    if (HIGH_BYTE(rd) == 0)
+    {
+        ucData = LOW_BYTE(rd);
+
+        virtser_recv(ucData);
+    }
+}
+#endif

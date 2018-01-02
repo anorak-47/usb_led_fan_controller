@@ -4,7 +4,6 @@
 #include "fan.h"
 #include <avr/io.h>
 
-
 #if SNS_ANALOG_SUPPORTED
 // Conversion table for 10K NTC
 const int8_t NTC_Conv_Table[] = {100, 85, 75, 67, 61, 56, 51, 47, 43, 40, 37, 34, 31, 28, 26, 23, 20, 18, 15};
@@ -101,10 +100,11 @@ void updateSns()
         else if (sns[i].type >= SNSTYPE_DUTY_IN0 && sns[i].type <= SNSTYPE_DUTY_IN1)
         {
             // TODO: ADC channel selection
-            uint16_t advalue = adConvert10bits(0); // ADC0 receives the analog representation of the input duty cycle
-            sns[i].value = (advalue * 25) >> 8;    // Convert value (1024 represents 100%, 0 represents 0%) to [0..100]% range.
-                                                   // multiply by 100, then divide by 1024 (won't fit in 16 bits) so first
-                                                   // multiply by 25, then divide by 256.
+            uint16_t advalue =
+                adConvert10bits(i - SNSTYPE_DUTY_IN0); // ADC0/ADC1 receives the analog representation of the input duty cycle
+            sns[i].value = (advalue * 25) >> 8;        // Convert value (1024 represents 100%, 0 represents 0%) to [0..100]% range.
+                                                       // multiply by 100, then divide by 1024 (won't fit in 16 bits) so first
+                                                       // multiply by 25, then divide by 256.
         }
 #endif
         // Sensors SNSTYPE_EXT0..SNSTYPE_EXT3 can be written over USB.

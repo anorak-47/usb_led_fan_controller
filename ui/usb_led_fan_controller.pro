@@ -24,13 +24,10 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 INCLUDEPATH += $$PWD/../common $$PWD/../usb_raw $$PWD/../qt_custom_widgets
 
-include(/home/wenkm/git/Qt-Color-Widgets/color_widgets.pri)
+include(/home/wenk/git/Qt-Color-Widgets/color_widgets.pri)
 include ($$PWD/../qt_custom_widgets/ulf_controller_customwidgets.pri)
 
-#
-# Note: This is libusb 0.1!
-#
-unix|win32: LIBS += -lusb
+unix|win32: LIBS += -lhidapi-libusb -lusb
 
 SOURCES += \
         main.cpp \
@@ -48,7 +45,6 @@ SOURCES += \
     ../usb_raw/timeseries_data.cpp \
     ../usb_raw/usb_connection.cpp \
     ../usb_raw/opendevice.c \
-    ../usb_raw/usbface.c \
     widget_sensor_form.cpp \
     widget_fanout_form.cpp \
     widget_sensor_container_form.cpp \
@@ -64,7 +60,15 @@ SOURCES += \
     widget_powermeter_container_form.cpp \
     chart_settings_form.cpp \
     widget_fan_container_form.cpp \
-    widget_fan_show_form.cpp
+    widget_fan_show_form.cpp \
+    series_data.cpp \
+    series_fan.cpp \
+    series_fanout.cpp \
+    series_powermeter.cpp \
+    series_sensor.cpp \
+    value_updater_test.cpp \
+    ../usb_raw/hid_device.cpp \
+    ../usb_raw/usbface.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -103,7 +107,14 @@ HEADERS += \
     widget_powermeter_container_form.h \
     chart_settings_form.h \
     widget_fan_container_form.h \
-    widget_fan_show_form.h
+    widget_fan_show_form.h \
+    series_fan.h \
+    series_data.h \
+    series_fanout.h \
+    series_powermeter.h \
+    series_sensor.h \
+    value_updater_test.h \
+    ../usb_raw/hid_device.h
 
 FORMS += \
         mainwindow.ui \

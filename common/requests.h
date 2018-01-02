@@ -35,6 +35,8 @@ typedef enum
   CUSTOM_RQ_ECHO                  = 0,    // Test communication. Can e.g. also be used to reset the communication watchdog.
   CUSTOM_RQ_FUNCS_SUPPORTED       = 1,
   CUSTOM_RQ_STATUS_READ           = 2,
+  CUSTOM_RQ_PROTOCOL_VERSION      = 3,
+  CUSTOM_RQ_FIRMWARE_VERSION      = 4,
 
   CUSTOM_RQ_FANTYPE_WRITE         = 10,
   CUSTOM_RQ_FANTYPE_READ          = 11,
@@ -60,6 +62,9 @@ typedef enum
   CUSTOM_RQ_FANGAIN_READ          = 37,   // Read linear controller gain parameter (FANMODE_LINEAR)
   CUSTOM_RQ_FANOFFS_WRITE         = 38,   // Write linear controller offset parameter (FANMODE_LINEAR)
   CUSTOM_RQ_FANOFFS_READ          = 39,   // Read linear controller offset parameter (FANMODE_LINEAR)
+
+  CUSTOM_RQ_FANTRIPPOINT_READ     = 40,   // Read point from trip point controller (FANMODE_TRIP_POINS)
+  CUSTOM_RQ_FANTRIPPOINT_WRITE    = 41,   // Write point to trip point controller (FANMODE_TRIP_POINS)
 
   CUSTOM_RQ_FANDUTYFIXED_WRITE    = 50,   // Write fixed fan duty cycle (FANMODE_FIXED_DUTY)
   CUSTOM_RQ_FANDUTYFIXED_READ     = 51,   // Read fixed fan duty cycle (FANMODE_FIXED_DUTY)
@@ -92,29 +97,41 @@ typedef enum
 #endif
 
 #if FASTLED_SUPPORTED
-  CUSTOM_RQ_FLED_READ_STATUS      = 160,
-  CUSTOM_RQ_FLED_WRITE_STATUS     = 161,
+  CUSTOM_RQ_FASTLEDSTATE_READ     = 160,
+  CUSTOM_RQ_FASTLEDSTATE_WRITE    = 161,
+  CUSTOM_RQ_FASTLEDANIID_READ     = 162,
+  CUSTOM_RQ_FASTLEDANIID_WRITE    = 163,
+  CUSTOM_RQ_FASTLEDCOLOR_READ     = 164,
+  CUSTOM_RQ_FASTLEDCOLOR_WRITE    = 165,
+  CUSTOM_RQ_FASTLEDASTART_READ    = 166,
+  CUSTOM_RQ_FASTLEDASTART_WRITE   = 167,
+  CUSTOM_RQ_FASTLEDSNSID_READ     = 168,
+  CUSTOM_RQ_FASTLEDSNSID_WRITE    = 169,
+  CUSTOM_RQ_FASTLEDFPS_READ       = 170,
+  CUSTOM_RQ_FASTLEDFPS_WRITE      = 171,
+#endif
+
+#ifdef POWER_METER_SUPPORTED
+  CUSTOM_RQ_POWERMTR_POWER_READ   = 180,
+  CUSTOM_RQ_POWERMTR_CURRENT_READ = 181,
+  CUSTOM_RQ_POWERMTR_LOAD_READ    = 182,
 #endif
 
   CUSTOM_RQ_EEPROM_WRITE          = 200,
   CUSTOM_RQ_EEPROM_READ           = 201,
   CUSTOM_RQ_LOAD_DEFAULTS         = 202,
-
 #if EEPROM_UPDOWNLOAD
   CUSTOM_RQ_EEPROM_DOWNLOAD       = 203,  // Download full eeprom contents from eeprom
   CUSTOM_RQ_EEPROM_UPLOAD         = 204,  // Upload full eeprom contents to eeprom, and activate as new settings.
 #endif
-
-  #if CTRL_DEBUG
+#if CTRL_DEBUG
   CUSTOM_RQ_FANE_READ             = 240,
   CUSTOM_RQ_FANP_READ             = 241,
   CUSTOM_RQ_FANI_READ             = 242,
 #endif
-
 #if ENTER_BOOTLOADER_REMOTELY
   CUSTOM_RQ_ENTER_BOOTLOAD        = 250,	// Enter bootloader (when present). Call 3 times in a row to actually reset AVR and enter bootloader.
 #endif
-
   CUSTOM_RQ_UNSUPPORTED           = 255,
   CUSTOM_RQ_MAX
 } CUSTOM_RQ;

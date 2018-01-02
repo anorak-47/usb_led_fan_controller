@@ -9,7 +9,6 @@
 DataFanOut::DataFanOut(int channel) : DataWithAChannel(channel)
 {
     memset(&_fanout, 0, sizeof(Fan_out));
-    _series.setCapacity(TIME_SERIES_CAPACITY);
 }
 
 DataFanOut::~DataFanOut()
@@ -53,11 +52,11 @@ bool DataFanOut::handleEvent(CommandEvent *event)
 {
     if (event->type() == (QEvent::Type)CommandEvents::EventValueUpdated)
     {
-        qDebug() << "EventValueUpdated event, channel: " << event->getChannel();
+        //qDebug() << "EventValueUpdated event, channel: " << event->getChannel();
 
         if (event->getChannel() == _channel)
         {
-            qDebug() << "EventValueUpdated: " << fullName();
+            //qDebug() << "EventValueUpdated: " << fullName();
             emit signalValueChanged();
             return true;
         }

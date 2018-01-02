@@ -4,8 +4,8 @@
 #include "sensor_type.h"
 #include "types.h"
 #include "timeseries_data.h"
-#include <QtCore/QObject>
 #include <QtCore/QContiguousCache>
+#include <QtCore/QObject>
 
 class QMutex;
 
@@ -30,13 +30,12 @@ public:
     void setValue(double value);
 
     Sensor &data();
-    QContiguousCache<TimeSeriesData> series() const;
+    QContiguousCache<TimeSeriesData> const &timeDataSeries() const;
 
 protected:
     virtual bool handleEvent(CommandEvent *event) override;
 
 private:
     Sensor _sensor;
-
-    QContiguousCache<TimeSeriesData> _series;
+    QContiguousCache<TimeSeriesData> _timeDataSeries;
 };

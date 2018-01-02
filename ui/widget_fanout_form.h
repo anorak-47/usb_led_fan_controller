@@ -19,6 +19,7 @@ class QDateTimeAxis;
 
 class QCheckBox;
 class DataFanOut;
+class SeriesFanOut;
 class DataFan;
 class DataSensor;
 class FanStalledWidget;
@@ -51,18 +52,13 @@ private:
 
     Ui::WidgetFanOutForm *ui;
     std::shared_ptr<DataFanOut> _dataFanOut;
+    std::shared_ptr<SeriesFanOut> _seriesFanOut;
     std::vector<std::shared_ptr<DataFan>> _dataFans;
     std::vector<std::shared_ptr<DataSensor>> _dataSensors;
 
     std::map<FANOUTMODE, int> _modeToIndex;
     std::vector<QCheckBox*> _stallDetectionFans;
     std::vector<FanStalledWidget*> _stalledFans;
-
-    QT_CHARTS_NAMESPACE::QChart *_chartFan;
-    QT_CHARTS_NAMESPACE::QDateTimeAxis *_axisXFan;
-
-    QT_CHARTS_NAMESPACE::QLineSeries *_seriesFanRpm;
-    QT_CHARTS_NAMESPACE::QLineSeries *_seriesFanDuty;
 };
 
 #endif // WIDGET_FANOUT_FORM_H

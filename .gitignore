@@ -30,3 +30,4 @@
 *.exe
 *.out
 *.app
+/build-usb_led_fan_controller-Qt_5_9_2_in_PATH_qt5-Debug/

@@ -44,14 +44,11 @@ private slots:
     void on_timeRangeChanged(QTime timerange);
     void on_pause(bool paused);
 
-
-    void on_timeout();
-
 private:
     void restoreSplitter();
     void createSensorChart();
-    void addSensorSeriesToGraph(WidgetSensorForm *sensorFromWidget);
-    QString getNameForSeries(WidgetSensorForm *sensorFromWidget);
+    void addSensorSeriesToGraph(WidgetSensorForm *sensorFormWidget);
+    QString getNameForSeries(WidgetSensorForm *sensorFormWidget);
 
     Ui::WidgetSensorContainerForm *ui;
 

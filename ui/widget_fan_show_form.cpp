@@ -1,7 +1,9 @@
 #include "widget_fan_show_form.h"
 #include "ui_widget_fan_show_form.h"
 #include "data_fan.h"
+#include "series_fan.h"
 #include "data_sensor.h"
+#include "series_sensor.h"
 #include <QtCore/QSettings>
 #include <QtCore/QDebug>
 
@@ -12,6 +14,11 @@ WidgetFanShowForm::WidgetFanShowForm(std::shared_ptr<DataFan> dataFan, QWidget *
 {
     ui->setupUi(this);    
     ui->lName->setText(_dataFan->fullName());
+
+    _seriesFan = std::shared_ptr<SeriesFan>(new SeriesFan(_dataFan));
+
+    connect(dataFan.get(), SIGNAL(signalValueChanged()), this, SLOT(on_valueUpdated()));
+
     readSettings();
 }
 
@@ -21,9 +28,17 @@ WidgetFanShowForm::~WidgetFanShowForm()
     delete ui;
 }
 
+void WidgetFanShowForm::showSensorSeries(int index)
+{
+    std::shared_ptr<DataSensor> dataSensor = _dataSensors[index];
+    _seriesSensor = std::shared_ptr<SeriesSensor>(new SeriesSensor(dataSensor));
+    _seriesSensor->copyFromTimeSeries(dataSensor->timeDataSeries());
+}
+
 void WidgetFanShowForm::setDataSensors(std::vector<std::shared_ptr<DataSensor> > dataSensors)
 {
     _dataSensors = dataSensors;
+    showSensorSeries(_dataFan->data().config.snsIdx);
 }
 
 bool WidgetFanShowForm::showGraphRpm() const
@@ -61,6 +76,11 @@ void WidgetFanShowForm::on_nameChanged(const QString &name)
     ui->lDescription->setText(name);
 }
 
+void WidgetFanShowForm::on_valueUpdated()
+{
+    emit signalValueUpdated();
+}
+
 void WidgetFanShowForm::saveSettings()
 {
     QSettings settings("Anorak", "ULFControl");
@@ -77,9 +97,19 @@ std::shared_ptr<DataSensor> WidgetFanShowForm::dataSensor() const
     return _dataSensors[_dataFan->data().config.snsIdx];
 }
 
+std::shared_ptr<SeriesSensor> WidgetFanShowForm::seriesSensor() const
+{
+    return _seriesSensor;
+}
+
 std::shared_ptr<DataFan> WidgetFanShowForm::dataFan() const
 {
     return _dataFan;
+}
+
+std::shared_ptr<SeriesFan> WidgetFanShowForm::seriesFan() const
+{
+    return _seriesFan;
 }
 
 void WidgetFanShowForm::readSettings()
@@ -118,7 +148,6 @@ void WidgetFanShowForm::on_checkBox_3_clicked()
 
 void WidgetFanShowForm::on_ColorSelector_1_colorChanged(const QColor &arg1)
 {
-    qDebug() << __PRETTY_FUNCTION__;
     emit signalGraphColorChanged();
 }
 

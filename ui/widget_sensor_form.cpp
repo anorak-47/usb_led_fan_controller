@@ -1,6 +1,7 @@
 #include "widget_sensor_form.h"
 #include "ui_widget_sensor_form.h"
 #include "data_sensor.h"
+#include "series_sensor.h"
 #include "usbface.h"
 #include <QtCore/QSettings>
 #include <QtCore/QDebug>
@@ -12,6 +13,7 @@ WidgetSensorForm::WidgetSensorForm(std::shared_ptr<DataSensor> dataSensor, QWidg
 {
     ui->setupUi(this);
     ui->label->setText(QString::number(dataSensor->channel()+1));
+    _seriesSensor = std::shared_ptr<SeriesSensor>(new SeriesSensor(_dataSensor));
 
     on_supportedFunctionsUpdated(SUPPORTED_NONE);
     setValueReadOnlyByType();
@@ -20,6 +22,9 @@ WidgetSensorForm::WidgetSensorForm(std::shared_ptr<DataSensor> dataSensor, QWidg
     connect(_dataSensor.get(), SIGNAL(signalValueChanged()), this, SLOT(on_valueUpdated()));
 
     readSettings();
+
+    _seriesSensor->setVisible(_showInGraph);
+    _seriesSensor->setColor(ui->ColorSelector->color());
 }
 
 WidgetSensorForm::~WidgetSensorForm()
@@ -31,7 +36,10 @@ WidgetSensorForm::~WidgetSensorForm()
 void WidgetSensorForm::on_supportedFunctionsUpdated(int supportedFunctions)
 {
     int index = 0;
+
     QSignalBlocker cb(ui->comboBox);
+    ui->comboBox->clear();
+
     for (int i = SNSTYPE_NONE; i < SNSTYPE_MAX; i++)
     {
         if (usbfaceSnsTypeIsSupportedByFunctions(supportedFunctions, (SNSTYPE)i))
@@ -89,9 +97,16 @@ std::shared_ptr<DataSensor> WidgetSensorForm::dataSensor() const
     return _dataSensor;
 }
 
+std::shared_ptr<SeriesSensor> WidgetSensorForm::seriesSensor() const
+{
+    return _seriesSensor;
+}
+
 void WidgetSensorForm::on_dataUpdated()
 {
-    qDebug() << "on_dataUpdated " << _dataSensor->name();
+    qDebug() << "on_dataUpdated " << _dataSensor->name();    
+    qDebug() << "on_dataUpdated type " << _dataSensor->data().type;
+    qDebug() << "on_dataUpdated index " << _typeToIndex[(SNSTYPE)_dataSensor->data().type];
 
     QSignalBlocker cb(ui->comboBox);
     ui->comboBox->setCurrentIndex(_typeToIndex[(SNSTYPE)_dataSensor->data().type]);
@@ -104,7 +119,6 @@ void WidgetSensorForm::on_dataUpdated()
 
 void WidgetSensorForm::on_valueUpdated()
 {
-    qDebug() << "on_dataUpdated " << _dataSensor->name();
     QSignalBlocker sb(ui->spinBox);
     ui->spinBox->setValue(_dataSensor->data().value);
 }
@@ -138,6 +152,7 @@ void WidgetSensorForm::on_bShowGraph_clicked()
 {
     qDebug() << "on_bShowGraph_clicked " << ui->bShowGraph->isChecked() << " " << _dataSensor->name();
     _showInGraph = ui->bShowGraph->isChecked();
+    _seriesSensor->setVisible(_showInGraph);
     emit signalShowGraph(_showInGraph);
     emit signalShowGraphChanged();
 }
@@ -156,7 +171,7 @@ void WidgetSensorForm::readSettings()
     //qDebug() << "WidgetSensorForm::readSettings";
     QSettings settings("Anorak", "ULFControl");
     _showInGraph = settings.value(QString("Sensor%1/showInGraph").arg(_dataSensor->channel()), false).toBool();
-    QColor color(settings.value(QString("Sensor%1/GraphColor").arg(_dataSensor->channel())).toString());    
+    QColor color(settings.value(QString("Sensor%1/GraphColor").arg(_dataSensor->channel())).toString());
     QString description = settings.value(QString("Sensor%1/Description").arg(_dataSensor->channel()), _dataSensor->fullName()).toString();
 
     QSignalBlocker b(ui->bShowGraph);
@@ -173,10 +188,12 @@ void WidgetSensorForm::on_ColorSelector_colorChanged(const QColor &arg1)
 {
     qDebug() << __PRETTY_FUNCTION__;
     Q_UNUSED(arg1);
+    _seriesSensor->setColor(arg1);
     emit signalGraphColorChanged();
 }
 
 void WidgetSensorForm::on_lineEdit_editingFinished()
 {
+    //_seriesSensor->setName(ui->lineEdit->text());
     emit signalGraphNameChanged();
 }

@@ -20,7 +20,8 @@ public:
 
     virtual void update() = 0;
     virtual void updateValues() = 0;
-    virtual bool event(QEvent *event);
+
+    virtual bool event(QEvent *event) override;
 
     QMutex *mutex() const;
 

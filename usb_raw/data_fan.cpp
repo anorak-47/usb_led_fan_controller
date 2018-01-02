@@ -11,9 +11,7 @@ DataFan::DataFan(int channel) : DataWithAChannel(channel)
 {
     memset(&_fan, 0, sizeof(Fan));
 
-    _seriesRpm.setCapacity(TIME_SERIES_CAPACITY);
-    _seriesDuty.setCapacity(TIME_SERIES_CAPACITY);
-    _seriesSetpoint.setCapacity(TIME_SERIES_CAPACITY);
+    _fan.rpm = 3000;
 }
 
 DataFan::~DataFan()
@@ -47,7 +45,6 @@ void DataFan::updateValues()
 void DataFan::setScaledDuty(double duty)
 {
     QMutexLocker l(_mutex);
-    _seriesSetpoint.append(TimeSeriesData(duty));
     _scaledDuty = duty;
 }
 
@@ -62,7 +59,6 @@ void DataFan::setRPM(unsigned int rpm)
     QMutexLocker l(_mutex);
     _fan.rpm = rpm;
     _fan.rps = round(rpm / 60.0);
-    _seriesRpm.append(TimeSeriesData(rpm));
 }
 
 unsigned int DataFan::getRPM() const
@@ -97,52 +93,61 @@ double DataFan::getMinRpmStalled() const
 
 double DataFan::getSetpointValue() const
 {
+	QMutexLocker l(_mutex);
     return _setpointValue;
 }
 
 void DataFan::setSetpointValue(double setpointValue)
 {
-    _seriesSetpoint.append(TimeSeriesData(setpointValue));
+	QMutexLocker l(_mutex);
     _setpointValue = setpointValue;
 }
 
 double DataFan::getPiSetpointOffset() const
 {
+	QMutexLocker l(_mutex);
     return _piSetpointOffset;
 }
 
 void DataFan::setPiSetpointOffset(double piSetpointOffset)
 {
+	QMutexLocker l(_mutex);
     _piSetpointOffset = piSetpointOffset;
 }
 
 double DataFan::getPiControllerKt() const
 {
+	QMutexLocker l(_mutex);
     return _piControllerKt;
 }
 
 double DataFan::getPiControllerKi() const
 {
+	QMutexLocker l(_mutex);
     return _piControllerKi;
 }
 
 double DataFan::getPiControllerKp() const
 {
+	QMutexLocker l(_mutex);
     return _piControllerKp;
 }
 
 double DataFan::getLinearOffset() const
 {
+	QMutexLocker l(_mutex);
     return _linearOffset;
 }
 
 void DataFan::setLinearOffset(double linearOffset)
 {
+	QMutexLocker l(_mutex);
     _linearOffset = linearOffset;
 }
 
 void DataFan::setPiControllerParameters(double kp, double ki, double kt)
 {
+	QMutexLocker l(_mutex);
     _piControllerKi = ki;
     _piControllerKp = kp;
     _piControllerKt = kt;
@@ -150,24 +155,30 @@ void DataFan::setPiControllerParameters(double kp, double ki, double kt)
 
 double DataFan::getLinearGain() const
 {
+	QMutexLocker l(_mutex);
     return _linearGain;
 }
 
 void DataFan::setLinearGain(double linearGain)
 {
+	QMutexLocker l(_mutex);
     _linearGain = linearGain;
 }
 
 void DataFan::updateType(FANTYPE type)
 {
     QMutexLocker l(_mutex);
-    _fan.config.fanType = type;
+    if (_fan.config.fanType == type)
+        return;
+    _fan.config.fanType = type;    
     CommandQueueInstance().enqueue(std::move(std::unique_ptr<CommandSetFanConfig>(new CommandSetFanConfig(this))));
 }
 
 void DataFan::updateMode(FANMODE mode)
 {
     QMutexLocker l(_mutex);
+    if (_fan.config.fanMode == mode)
+        return;
     _fan.config.fanMode = mode;
     CommandQueueInstance().enqueue(std::move(std::unique_ptr<CommandSetFanConfig>(new CommandSetFanConfig(this))));
 }
@@ -175,6 +186,8 @@ void DataFan::updateMode(FANMODE mode)
 void DataFan::updateSensorIndex(int index)
 {
     QMutexLocker l(_mutex);
+    if (_fan.config.snsIdx == index)
+        return;
     _fan.config.snsIdx = index;
     CommandQueueInstance().enqueue(std::move(std::unique_ptr<CommandSetFanConfig>(new CommandSetFanConfig(this))));
 }
@@ -190,6 +203,8 @@ void DataFan::updateMinRpmStalled(double rpm)
 void DataFan::updateMinDuty(int duty)
 {
     QMutexLocker l(_mutex);
+    if (_fan.dutyMin == duty)
+        return;
     _fan.dutyMin = duty;
     CommandQueueInstance().enqueue(std::move(std::unique_ptr<CommandSetFanConfig>(new CommandSetFanConfig(this))));
 }
@@ -197,6 +212,8 @@ void DataFan::updateMinDuty(int duty)
 void DataFan::updateMaxDuty(int duty)
 {
     QMutexLocker l(_mutex);
+    if (_fan.dutyMax == duty)
+        return;
     _fan.dutyMax = duty;
     CommandQueueInstance().enqueue(std::move(std::unique_ptr<CommandSetFanConfig>(new CommandSetFanConfig(this))));
 }
@@ -278,30 +295,15 @@ Fan &DataFan::data()
     return _fan;
 }
 
-QContiguousCache<TimeSeriesData> DataFan::seriesRpm() const
-{
-    return _seriesRpm;
-}
-
-QContiguousCache<TimeSeriesData> DataFan::seriesDuty() const
-{
-    return _seriesDuty;
-}
-
-QContiguousCache<TimeSeriesData> DataFan::seriesSetpoint() const
-{
-    return _seriesSetpoint;
-}
-
 bool DataFan::handleEvent(CommandEvent *event)
 {
     if (event->type() == (QEvent::Type)CommandEvents::EventValueUpdated)
     {
-        qDebug() << "EventValueUpdated event, channel: " << event->getChannel();
+        //qDebug() << "EventValueUpdated event, channel: " << event->getChannel();
 
         if (event->getChannel() == _channel)
         {
-            qDebug() << "EventValueUpdated: " << fullName();
+            //qDebug() << "signalValueChanged: " << fullName();
             emit signalValueChanged();
             return true;
         }

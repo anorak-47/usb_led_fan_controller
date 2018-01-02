@@ -3,6 +3,7 @@
 #include "usb_connection.h"
 #include <QtCore/QThreadPool>
 #include <QtCore/QRunnable>
+#include <QtCore/QDebug>
 
 CommandConsumer::CommandConsumer(QObject *parent) : QThread(parent)
 {
@@ -22,6 +23,7 @@ void UsbCommandConsumer::run()
         if (isInterruptionRequested())
             return;
 
+        //qDebug() << "exec " << cmd->getName();
         cmd->exec(_connectionObject);
     }
 }

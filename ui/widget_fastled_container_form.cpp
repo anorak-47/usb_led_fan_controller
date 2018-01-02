@@ -1,7 +1,7 @@
 #include "widget_fastled_container_form.h"
 #include "ui_widget_fastled_container_form.h"
 #include "widget_fastled_form.h"
-#include <QtGui/QLayout>
+#include <QLayout>
 
 WidgetFastLedContainerForm::WidgetFastLedContainerForm(QWidget *parent) :
     QWidget(parent),

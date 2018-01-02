@@ -39,8 +39,8 @@ const struct _s_shell_cmd sensor_shell_cmd[] PROGMEM = {SHELLCMD("cfg", sensor_c
 
 static void dump_sensor_config(uint8_t channel)
 {
-    fprintf_P(_sf, PSTR(".sns %u\n"), channel);
-    fprintf_P(_sf, PSTR(".sty %u\n"), sns[channel].type);
+    fprintf_P(_vsf, PSTR(".sns %u\n"), channel);
+    fprintf_P(_vsf, PSTR(".sty %u\n"), sns[channel].type);
 }
 
 bool sensor_cmd_cfg(uint8_t argc, char **argv)
@@ -79,9 +79,9 @@ bool sensor_cmd_cfg(uint8_t argc, char **argv)
 
 static void dump_sensor_status(uint8_t channel)
 {
-    fprintf_P(_sf, PSTR(".sns %u\n"), channel);
-    fprintf_P(_sf, PSTR(".val %d\n"), sns[channel].value);
-    fprintf_P(_sf, PSTR(".vld %u\n"), sns[channel].status.valid);
+    fprintf_P(_vsf, PSTR(".sns %u\n"), channel);
+    fprintf_P(_vsf, PSTR(".val %d\n"), sns[channel].value);
+    fprintf_P(_vsf, PSTR(".vld %u\n"), sns[channel].status.valid);
 }
 
 bool sensor_cmd_sta(uint8_t argc, char **argv)
@@ -111,7 +111,7 @@ bool sensor_cmd_sta(uint8_t argc, char **argv)
     {
         if (strcmp_P(PSTR("val"), argv[1]) == 0)
         {
-            fprintf_P(_sf, PSTR(".val %d\n"), sns[channel].value);
+            fprintf_P(_vsf, PSTR(".val %d\n"), sns[channel].value);
         }
         else
         {

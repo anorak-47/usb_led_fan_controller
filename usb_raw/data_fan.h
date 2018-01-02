@@ -3,9 +3,7 @@
 #include "data.h"
 #include "fan_type.h"
 #include "types.h"
-#include "timeseries_data.h"
 #include <QtCore/QObject>
-#include <QtCore/QContiguousCache>
 
 class QMutex;
 
@@ -76,10 +74,6 @@ public:
 
     Fan &data();
 
-    QContiguousCache<TimeSeriesData> seriesRpm() const;
-    QContiguousCache<TimeSeriesData> seriesDuty() const;
-    QContiguousCache<TimeSeriesData> seriesSetpoint() const;
-
 protected:
     virtual bool handleEvent(CommandEvent *event) override;
 
@@ -99,8 +93,4 @@ private:
     double _piControllerDebugI = 0.0;
     double _piSetpointOffset = 0.0;
     double _setpointValue = 0.0;
-
-    QContiguousCache<TimeSeriesData> _seriesRpm;
-    QContiguousCache<TimeSeriesData> _seriesDuty;
-    QContiguousCache<TimeSeriesData> _seriesSetpoint;
 };

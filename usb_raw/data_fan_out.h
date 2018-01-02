@@ -3,9 +3,7 @@
 #include "data.h"
 #include "fan_out_type.h"
 #include "types.h"
-#include "timeseries_data.h"
 #include <QtCore/QObject>
-#include <QtCore/QContiguousCache>
 
 class QMutex;
 
@@ -32,6 +30,4 @@ protected:
 
 private:
     Fan_out _fanout;
-
-    QContiguousCache<TimeSeriesData> _series;
 };

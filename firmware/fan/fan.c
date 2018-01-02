@@ -1,12 +1,13 @@
 
 #include "fan.h"
-
 #include "ctrl.h"
 #include "fan_out.h"
 #include "sensor.h"
+#include "powermeter.h"
 #include "pwm.h"
 #include "timer.h"
 #include "settings.h"
+#include "debug.h"
 
 Fan fans[MAX_FANS];
 Fan EEMEM fans_eeprom[MAX_FANS]; // first entry in eeprom; start of crc calculation.
@@ -38,6 +39,8 @@ void fanControlInit()
     // Init i2c and analog sensors
     initSns();
 
+    initPowerMeter();
+
     // Load settings from eeprom, or revert to defaults when eeprom is invalid.
     loadSettings(0);
 
@@ -54,12 +57,14 @@ void fanControlUpdate()
     if (timer1_ovf_counter >= FREQ_PWM)
     {
         // A second has passed
+    	LS_("fup");
 
         // Reset timer1 overflow counter, to allow accurate timing within each second.
         timer1_ovf_counter -= FREQ_PWM;
 
         updatePwm();
         updateSns();
+        updatePowerMeter();
 
         // Update fan control loops and calculate new PWM duty cycles.
         for (uint8_t i = 0; i < MAX_FANS; i++)

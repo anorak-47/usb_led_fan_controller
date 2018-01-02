@@ -1,7 +1,8 @@
-#include "widget_fanout_form.h"
+	#include "widget_fanout_form.h"
 #include "ui_widget_fanout_form.h"
 #include "data_fan_out.h"
 #include "data_fan.h"
+#include "series_fanout.h"
 #include "usbface.h"
 #include <QtCharts/QChartView>
 #include <QtCharts/QLineSeries>
@@ -9,6 +10,7 @@
 #include <QtCharts/QDateTimeAxis>
 #include <QtCore/QDateTime>
 #include <QtCore/QDebug>
+#include <math.h>
 
 QT_CHARTS_USE_NAMESPACE
 
@@ -18,6 +20,7 @@ WidgetFanOutForm::WidgetFanOutForm(std::shared_ptr<DataFanOut> dataFanOut, QWidg
     _dataFanOut(dataFanOut)
 {
     ui->setupUi(this);
+    _seriesFanOut = std::shared_ptr<SeriesFanOut>(new SeriesFanOut(_dataFanOut));
 
     _stallDetectionFans.resize(MAX_FANS);
     _stallDetectionFans[0] = ui->cbDetectFan0;
@@ -105,7 +108,6 @@ void WidgetFanOutForm::showStalledFans()
 
 void WidgetFanOutForm::on_dataUpdated()
 {
-    qDebug() << "on_dataUpdated " << _dataFanOut->name();
     QSignalBlocker cb(ui->comboBox);
     ui->comboBox->setCurrentIndex(_dataFanOut->data().mode);
     QSignalBlocker sp(ui->spRpmOut);
@@ -177,7 +179,7 @@ void WidgetFanOutForm::showDutyCycle()
 
 void WidgetFanOutForm::on_valueUpdated()
 {
-    qDebug() << "on_dataUpdated " << _dataFanOut->name();
+    //qDebug() << "on_dataUpdated " << _dataFanOut->name();
     QSignalBlocker sp(ui->spRpmOut);
     ui->spRpmOut->setValue(_dataFanOut->data().rpm);
 
@@ -187,6 +189,14 @@ void WidgetFanOutForm::on_valueUpdated()
 
 void WidgetFanOutForm::createChart()
 {
+    QChartView *chartView = _seriesFanOut->createChartView();
+
+    QGridLayout *cLayout = new QGridLayout();
+    cLayout->setContentsMargins(0, 0, 0, 0);
+    ui->wChart->setLayout(cLayout);
+    cLayout->addWidget(chartView);
+
+    /*
     QValueAxis *axisY_duty = new QValueAxis();
     axisY_duty->setLabelFormat("%d");
     axisY_duty->setTitleText("Duty Cycle [%]");
@@ -235,4 +245,5 @@ void WidgetFanOutForm::createChart()
 
     axisY_duty->setRange(0.0, 100.0);
     axisY_rpm->setRange(0.0, 5000.0);
+    */
 }

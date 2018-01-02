@@ -43,7 +43,7 @@
  *  the device will send, and what it may be sent back from the host. Refer to the HID specification for
  *  more details on HID report descriptors.
  */
-#ifdef USB_GENERIC_HID_RAW_SUPPORTED
+
 const USB_Descriptor_HIDReport_Datatype_t PROGMEM GenericReport[] =
 {
 	HID_RI_USAGE_PAGE(16, 0xFF77), /* Vendor Page 0xFF77 */
@@ -63,19 +63,6 @@ const USB_Descriptor_HIDReport_Datatype_t PROGMEM GenericReport[] =
 	    HID_RI_OUTPUT(8, HID_IOF_DATA | HID_IOF_VARIABLE | HID_IOF_ABSOLUTE | HID_IOF_NON_VOLATILE),
 	HID_RI_END_COLLECTION(0),
 };
-#else
-const USB_Descriptor_HIDReport_Datatype_t PROGMEM GenericReport[] =
-{
-	/* Use the HID class driver's standard Vendor HID report.
-	 *  Vendor Usage Page: 0
-	 *  Vendor Collection Usage: 1
-	 *  Vendor Report IN Usage: 2
-	 *  Vendor Report OUT Usage: 3
-	 *  Vendor Report Size: GENERIC_REPORT_SIZE
-	 */
-	HID_DESCRIPTOR_VENDOR(0x00, 0x01, 0x02, 0x03, GENERIC_REPORT_SIZE)
-};
-#endif
 
 /** Device descriptor structure. This descriptor, located in FLASH memory, describes the overall
  *  device characteristics, including the supported USB version, control endpoint size and the
@@ -136,7 +123,6 @@ const USB_Descriptor_Configuration_t PROGMEM ConfigurationDescriptor =
 		.MaxPowerConsumption    = USB_CONFIG_POWER_MA(100)
 	},
 
-#ifdef USB_GENERIC_HID_RAW_SUPPORTED
 	.HID_Interface =
 		{
 			.Header                 = {.Size = sizeof(USB_Descriptor_Interface_t), .Type = DTYPE_Interface},
@@ -183,44 +169,6 @@ const USB_Descriptor_Configuration_t PROGMEM ConfigurationDescriptor =
 			.EndpointSize           = GENERIC_EPSIZE,
 			.PollingIntervalMS      = 0x05
 		},
-#else
-	.HID_Interface =
-		{
-			.Header                 = {.Size = sizeof(USB_Descriptor_Interface_t), .Type = DTYPE_Interface},
-
-			.InterfaceNumber        = INTERFACE_ID_GenericHID,
-			.AlternateSetting       = 0x00,
-
-			.TotalEndpoints         = 1,
-
-			.Class                  = HID_CSCP_HIDClass,
-			.SubClass               = HID_CSCP_NonBootSubclass,
-			.Protocol               = HID_CSCP_NonBootProtocol,
-
-			.InterfaceStrIndex      = NO_DESCRIPTOR
-		},
-
-	.HID_GenericHID =
-		{
-			.Header                 = {.Size = sizeof(USB_HID_Descriptor_HID_t), .Type = HID_DTYPE_HID},
-
-			.HIDSpec                = VERSION_BCD(1,1,1),
-			.CountryCode            = 0x00,
-			.TotalReportDescriptors = 1,
-			.HIDReportType          = HID_DTYPE_Report,
-			.HIDReportLength        = sizeof(GenericReport)
-		},
-
-	.HID_ReportINEndpoint =
-		{
-			.Header                 = {.Size = sizeof(USB_Descriptor_Endpoint_t), .Type = DTYPE_Endpoint},
-
-			.EndpointAddress        = GENERIC_IN_EPADDR,
-			.Attributes             = (EP_TYPE_INTERRUPT | ENDPOINT_ATTR_NO_SYNC | ENDPOINT_USAGE_DATA),
-			.EndpointSize           = GENERIC_EPSIZE,
-			.PollingIntervalMS      = 0x05
-		},
-#endif
 #ifdef USB_VIRTUAL_SERIAL_SUPPORTED
 	.CDC_IAD =
 		{
@@ -341,7 +289,7 @@ const USB_Descriptor_String_t PROGMEM ManufacturerString = USB_STRING_DESCRIPTOR
  *  and is read out upon request by the host when the appropriate string ID is requested, listed in the Device
  *  Descriptor.
  */
-const USB_Descriptor_String_t PROGMEM ProductString = USB_STRING_DESCRIPTOR(L"FanController");
+const USB_Descriptor_String_t PROGMEM ProductString = USB_STRING_DESCRIPTOR(L"ULFController");
 
 /** This function is called by the library when in device mode, and must be overridden (see library "USB Descriptors"
  *  documentation) by the application code so that the address and size of a requested descriptor can be given

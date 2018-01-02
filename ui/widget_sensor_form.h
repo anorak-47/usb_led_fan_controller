@@ -10,6 +10,7 @@ class WidgetSensorForm;
 }
 
 class DataSensor;
+class SeriesSensor;
 
 class WidgetSensorForm : public QWidget
 {
@@ -20,6 +21,7 @@ public:
     ~WidgetSensorForm();
 
     std::shared_ptr<DataSensor> dataSensor() const;
+    std::shared_ptr<SeriesSensor> seriesSensor() const;
 
     bool showInGraph() const;
     void setShowInGraph(bool showInGraph);
@@ -39,7 +41,7 @@ signals:
 
 public slots:
     void on_supportedFunctionsUpdated(int supportedFunctions);
-    
+
 private slots:
     void on_dataUpdated();
     void on_valueUpdated();
@@ -59,6 +61,7 @@ private:
 
     Ui::WidgetSensorForm *ui;
     std::shared_ptr<DataSensor> _dataSensor;
+    std::shared_ptr<SeriesSensor> _seriesSensor;
 
     std::map<SNSTYPE, int> _typeToIndex;
 };

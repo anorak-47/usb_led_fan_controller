@@ -10,21 +10,8 @@
 DataSensor::DataSensor(int channel) : DataWithAChannel(channel)
 {
     memset(&_sensor, 0, sizeof(Sensor));
-    _series.setCapacity(TIME_SERIES_CAPACITY);
-
-    double value = 0;
-    QDateTime dt = QDateTime::currentDateTime();
-    dt = dt.addSecs(-1000);
-
-    for (int i = 0; i < 1000; i++)
-    {
-        value += random() % 2 ? +random() % 2 : -random() % 2;
-        TimeSeriesData tsd;
-        tsd.dt = dt;
-        tsd.value = value;
-        _series.append(tsd);
-        dt = dt.addSecs(1);
-    }
+    _timeDataSeries.setCapacity(TIME_SERIES_CAPACITY);
+    _sensor.value = 63;
 }
 
 DataSensor::~DataSensor()
@@ -73,30 +60,32 @@ Sensor &DataSensor::data()
     return _sensor;
 }
 
+const QContiguousCache<TimeSeriesData> &DataSensor::timeDataSeries() const
+{
+	return _timeDataSeries;
+}
+
 void DataSensor::setValue(double value)
 {
 	_sensor.value = round(value);
-    _series.append(TimeSeriesData(value));
+    _timeDataSeries.append(TimeSeriesData(_sensor.value));
+
+    qDebug() << "timeDataSeries " << _timeDataSeries.size();
 }
 
 bool DataSensor::handleEvent(CommandEvent *event)
 {
     if (event->type() == (QEvent::Type)CommandEvents::EventValueUpdated)
     {
-        qDebug() << "EventValueUpdated event, channel: " << event->getChannel();
+        //qDebug() << "EventValueUpdated event, channel: " << event->getChannel();
 
         if (event->getChannel() == _channel)
         {
-            qDebug() << "EventValueUpdated: " << fullName();
+            //qDebug() << "EventValueUpdated: " << fullName();
             emit signalValueChanged();
             return true;
         }
     }
 
     return false;
-}
-
-QContiguousCache<TimeSeriesData> DataSensor::series() const
-{
-    return _series;
 }

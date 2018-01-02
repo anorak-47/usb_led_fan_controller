@@ -1,6 +1,7 @@
 #pragma once
 
 #include "usbface.h"
+#include "hid_device.h"
 #include <QtCore/QObject>
 
 class QTimer;
@@ -32,17 +33,22 @@ public:
     void connectToDevice() override;
     void disconnectFromDevice() override;
 
-    usb_dev_handle *getDevHandle();
+    hid_device *getDevHandle();
 
 signals:
     void signalConnectionChanged(bool connected);
     void signalConnected();
 
+protected:
+    bool openHidDeviceByPath(std::string devicePath);
+    bool checkProtocolVersion(hid_device *device);
+
 private slots:
     void onTimeout();
 
 private:
-    usb_dev_handle *m_device = 0;
+    hid_device *_hid_device = 0;
+
     QTimer *_timer = 0;
     QMutex *_mutex = 0;
 };

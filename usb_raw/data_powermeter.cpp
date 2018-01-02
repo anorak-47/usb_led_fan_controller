@@ -7,9 +7,6 @@
 
 DataPowerMeter::DataPowerMeter(int channel) : DataWithAChannel(channel), _power_mW(0), _current_mA(0), _load_mV(0)
 {
-    _seriesCurrent.setCapacity(TIME_SERIES_CAPACITY);
-    _seriesLoad.setCapacity(TIME_SERIES_CAPACITY);
-    _seriesPower.setCapacity(TIME_SERIES_CAPACITY);
 }
 
 DataPowerMeter::~DataPowerMeter()
@@ -41,36 +38,18 @@ void DataPowerMeter::setCurrent_mA(unsigned int current)
 {
     QMutexLocker l(_mutex);
     _current_mA = current;
-    _seriesCurrent.append(TimeSeriesData(current));
 }
 
 void DataPowerMeter::setLoad_mV(unsigned int load)
 {
     QMutexLocker l(_mutex);
     _load_mV = load;
-    _seriesLoad.append(TimeSeriesData(load));
 }
 
 void DataPowerMeter::setPower_mW(unsigned int power)
 {
     QMutexLocker l(_mutex);
     _power_mW = power;
-    _seriesPower.append(TimeSeriesData(power));
-}
-
-QContiguousCache<TimeSeriesData> DataPowerMeter::seriesPower()
-{
-    return _seriesPower;
-}
-
-QContiguousCache<TimeSeriesData> DataPowerMeter::seriesCurrent()
-{
-    return _seriesCurrent;
-}
-
-QContiguousCache<TimeSeriesData> DataPowerMeter::seriesLoad()
-{
-    return _seriesLoad;
 }
 
 unsigned int DataPowerMeter::getCurrent_mA() const
@@ -95,10 +74,14 @@ bool DataPowerMeter::handleEvent(CommandEvent *event)
 {
     if (event->type() == (QEvent::Type)CommandEvents::EventValueUpdated)
     {
-        qDebug() << " EventValueUpdated event";
+        qDebug() << "EventValueUpdated event, channel: " << event->getChannel();
 
-        emit signalValueChanged();
-        return true;
+        if (event->getChannel() == _channel)
+        {
+            qDebug() << "EventValueUpdated: " << fullName();
+            emit signalValueChanged();
+            return true;
+        }
     }
 
     return false;

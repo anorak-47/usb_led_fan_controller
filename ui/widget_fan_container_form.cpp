@@ -3,8 +3,10 @@
 #include "widget_fan_show_form.h"
 #include "config.h"
 #include "data_fan.h"
+#include "series_fan.h"
 #include "data_sensor.h"
-#include <QtGui/QLayout>
+#include "series_sensor.h"
+#include <QLayout>
 #include <QtCharts/QChartView>
 #include <QtCharts/QLineSeries>
 #include <QtCharts/QValueAxis>
@@ -40,10 +42,6 @@ WidgetFanContainerForm::WidgetFanContainerForm(QWidget *parent) :
     _signalMapperColorGraph = new QSignalMapper(this);
     connect(_signalMapperColorGraph, SIGNAL(mapped(QWidget*)), this, SLOT(on_colorGraphUpdated(QWidget*)));
 
-    _seriesFanRpm.resize(MAX_FANS, 0);
-    _seriesFanDuty.resize(MAX_FANS, 0);
-    _seriesFanSensor.resize(MAX_FANS, 0);
-
     createFanChart();
     readSettings();
 }
@@ -69,7 +67,6 @@ void WidgetFanContainerForm::saveSettings()
 void WidgetFanContainerForm::readSettings()
 {
     QSettings settings("Anorak", "ULFControl");
-    //ui->splitter->restoreGeometry(settings.value("FanContainer/splitter").toByteArray());
     restoreSplitter();
 }
 
@@ -90,7 +87,6 @@ void WidgetFanContainerForm::restoreSplitter()
 void WidgetFanContainerForm::addWidgetFan(WidgetFanShowForm *fanForm, bool hasSuccessor)
 {
     _widgetFanShowForms.push_back(fanForm);
-
     _layout->addWidget(fanForm);
 
     if (hasSuccessor)
@@ -111,194 +107,77 @@ void WidgetFanContainerForm::addWidgetFan(WidgetFanShowForm *fanForm, bool hasSu
     connect(fanForm, SIGNAL(signalGraphColorChanged()), _signalMapperColorGraph, SLOT(map()));
     _signalMapperColorGraph->setMapping(fanForm, fanForm);
 
+    fanForm->seriesFan()->setXAxis(_axisXFan);
+    fanForm->seriesFan()->setYAxis(_axisY, _axisY_duty, _axisY_rpm);
+    fanForm->seriesFan()->addSeries(_chartFan);
+
+    fanForm->seriesSensor()->setXAxis(_axisXFan);
+    fanForm->seriesSensor()->setYAxis(_axisY);
+    fanForm->seriesSensor()->addSeries(_chartFan);
+
+    fanForm->seriesFan()->setVisible(SeriesFan::SeriesType::setpoint, false);
+
+    fanForm->seriesFan()->setName(SeriesFan::SeriesType::rpm, QString("%1 - RPM").arg(fanForm->dataFan()->channel()));
+    fanForm->seriesFan()->setName(SeriesFan::SeriesType::dutycycle, QString("%1 - Duty").arg(fanForm->dataFan()->channel()));
+    fanForm->seriesSensor()->setName(QString("%1 - Sensor").arg(fanForm->dataFan()->channel()));
+
     on_showGraphUpdated(fanForm);
+
+    /*
+    _axisY->setRange(0.0, 50.0);
+    _axisY_duty->setRange(0.0, 100.0);
+    _axisY_rpm->setRange(0.0, 5000.0);
+    */
 }
 
 void WidgetFanContainerForm::on_sensorValueUpdated(QWidget *fanWidget)
 {
-    WidgetFanShowForm *fanShowForm = static_cast<WidgetFanShowForm *>(fanWidget);
-    qDebug() << "on_sensorValueUpdated " << fanShowForm->dataFan()->fullName();
+    //WidgetFanShowForm *fanShowForm = static_cast<WidgetFanShowForm *>(fanWidget);
+    //qDebug() << "WidgetFanContainerForm::on_sensorValueUpdated " << fanShowForm->dataFan()->fullName();
 
-    int channel = fanShowForm->dataFan()->channel();
-    qDebug() << "on_sensorValueUpdated " << channel;
+    //int channel = fanShowForm->dataFan()->channel();
+    //qDebug() << "WidgetFanContainerForm::on_sensorValueUpdated " << channel;
 
+    //QDateTime now = QDateTime::currentDateTime();
+    //_axisXFan->setRange(now.addSecs(-60*60), now);
 
-    if (fanShowForm->showGraphRpm())
+    /*
+    QDateTime now = QDateTime::currentDateTime();
+    QDateTime then = now.addSecs(-_xaxis_display_range);
+
+    if (oldestTimestamp > then)
     {
-        QLineSeries *lineSeries = _seriesFanRpm[channel];
-        if (lineSeries)
-        {
-            QContiguousCache<TimeSeriesData> series = fanShowForm->dataFan()->seriesRpm();
-            lineSeries->append(series.last().dt.toMSecsSinceEpoch(), series.last().value);
-        }
+        then = oldestTimestamp;
+        now = then.addSecs(_xaxis_display_range);
     }
 
-    if (fanShowForm->showGraphDuty())
-    {
-        QLineSeries *lineSeries = _seriesFanDuty[channel];
-        if (lineSeries)
-        {
-            QContiguousCache<TimeSeriesData> series = fanShowForm->dataFan()->seriesDuty();
-            lineSeries->append(series.last().dt.toMSecsSinceEpoch(), series.last().value);
-        }
-    }
-
-    if (fanShowForm->showGraphSensor())
-    {
-        QLineSeries *lineSeries = _seriesFanSensor[channel];
-        if (lineSeries)
-        {
-            QContiguousCache<TimeSeriesData> series = fanShowForm->dataSensor()->series();
-            lineSeries->append(series.last().dt.toMSecsSinceEpoch(), series.last().value);
-        }
-    }
+    _axisXFan->setRange(then, now);
+    */
 }
 
 void WidgetFanContainerForm::on_showGraphUpdated(QWidget *fanWidget)
 {
     WidgetFanShowForm *fanShowForm = static_cast<WidgetFanShowForm *>(fanWidget);
-    qDebug() << "on_showGraphUpdated " << fanShowForm->dataFan()->fullName();
+    //qDebug() << "WidgetFanContainerForm::on_showGraphUpdated " << fanShowForm->dataFan()->fullName();
 
-    int channel = fanShowForm->dataFan()->channel();
-    qDebug() << "on_showGraphUpdated " << channel;
+    //int channel = fanShowForm->dataFan()->channel();
+    //qDebug() << "WidgetFanContainerForm::on_showGraphUpdated " << channel;
 
-    if (fanShowForm->showGraphRpm())
-    {
-        QLineSeries *newLineSeries;
-
-        if (!_seriesFanRpm[channel])
-        {
-            newLineSeries = new QLineSeries();
-            newLineSeries->setName(QString("%1 - RPM").arg(channel+1));
-            newLineSeries->setColor(fanShowForm->colorRpm());
-            _seriesFanRpm[channel] = newLineSeries;
-
-            _chartFan->addSeries(newLineSeries);
-            newLineSeries->attachAxis(_axisXFan);
-            newLineSeries->attachAxis(_axisY_rpm);
-        }
-        else
-        {
-            newLineSeries = _seriesFanRpm[channel];
-        }
-
-        newLineSeries->clear();
-
-        QDateTime xmin = _axisXFan->min();
-        QContiguousCache<TimeSeriesData> series = fanShowForm->dataFan()->seriesRpm();
-
-        for (int i = 0; i < series.count(); i++)
-            if (series[i].dt > xmin)
-                newLineSeries->append(series[i].dt.toMSecsSinceEpoch(), series[i].value);
-
-        newLineSeries->show();
-    }
-    else
-    {
-        if (_seriesFanRpm[channel])
-            _seriesFanRpm[channel]->hide();
-    }
-
-    if (fanShowForm->showGraphDuty())
-    {
-        QLineSeries *newLineSeries;
-
-        if (!_seriesFanDuty[channel])
-        {
-            newLineSeries = new QLineSeries();
-            newLineSeries->setName(QString("%1 - Duty").arg(channel+1));
-            newLineSeries->setColor(fanShowForm->colorDuty());
-            _seriesFanDuty[channel] = newLineSeries;
-
-            _chartFan->addSeries(newLineSeries);
-            newLineSeries->attachAxis(_axisXFan);
-            newLineSeries->attachAxis(_axisY_duty);
-        }
-        else
-        {
-            newLineSeries = _seriesFanDuty[channel];
-        }
-
-        newLineSeries->clear();
-
-        QDateTime xmin = _axisXFan->min();
-        QContiguousCache<TimeSeriesData> series = fanShowForm->dataFan()->seriesDuty();
-
-        for (int i = 0; i < series.count(); i++)
-            if (series[i].dt > xmin)
-                newLineSeries->append(series[i].dt.toMSecsSinceEpoch(), series[i].value);
-
-        newLineSeries->show();
-    }
-    else
-    {
-        if (_seriesFanDuty[channel])
-            _seriesFanDuty[channel]->hide();
-    }
-
-    if (fanShowForm->showGraphSensor())
-    {
-        QLineSeries *newLineSeries;
-
-        if (!_seriesFanSensor[channel])
-        {
-            newLineSeries = new QLineSeries();
-            newLineSeries->setName(QString("%1 - Sensor").arg(channel+1));
-            newLineSeries->setColor(fanShowForm->colorSensor());
-            _seriesFanSensor[channel] = newLineSeries;
-
-            _chartFan->addSeries(newLineSeries);
-            newLineSeries->attachAxis(_axisXFan);
-            newLineSeries->attachAxis(_axisY);
-        }
-        else
-        {
-            newLineSeries = _seriesFanSensor[channel];
-        }
-
-        newLineSeries->clear();
-
-        QDateTime xmin = _axisXFan->min();
-        QContiguousCache<TimeSeriesData> series = fanShowForm->dataSensor()->series();
-
-        for (int i = 0; i < series.count(); i++)
-            if (series[i].dt > xmin)
-                newLineSeries->append(series[i].dt.toMSecsSinceEpoch(), series[i].value);
-
-        newLineSeries->show();
-    }
-    else
-    {
-        if (_seriesFanSensor[channel])
-            _seriesFanSensor[channel]->hide();
-    }
-
-    _axisY->setRange(0.0, 50.0);
-    _axisY_duty->setRange(0.0, 100.0);
-    _axisY_rpm->setRange(0.0, 5000.0);
+    fanShowForm->seriesFan()->setVisible(SeriesFan::SeriesType::rpm, fanShowForm->showGraphRpm());
+    fanShowForm->seriesFan()->setVisible(SeriesFan::SeriesType::dutycycle, fanShowForm->showGraphDuty());
+    fanShowForm->seriesSensor()->setVisible(fanShowForm->showGraphSensor());
 }
 
 void WidgetFanContainerForm::on_colorGraphUpdated(QWidget *fanWidget)
 {
-    qDebug() << __PRETTY_FUNCTION__;
-
     WidgetFanShowForm *fanShowForm = static_cast<WidgetFanShowForm *>(fanWidget);
     qDebug() << "on_colorGraphUpdated " << fanShowForm->dataFan()->fullName();
 
     int channel = fanShowForm->dataFan()->channel();
     qDebug() << "on_colorGraphUpdated " << channel;
 
-    if (_seriesFanRpm[channel])
-        if (_seriesFanRpm[channel]->color() != fanShowForm->colorRpm())
-            _seriesFanRpm[channel]->setColor(fanShowForm->colorRpm());
-
-    if (_seriesFanDuty[channel])
-        if (_seriesFanDuty[channel]->color() != fanShowForm->colorDuty())
-            _seriesFanDuty[channel]->setColor(fanShowForm->colorDuty());
-
-    if (_seriesFanSensor[channel])
-        if (_seriesFanSensor[channel]->color() != fanShowForm->colorSensor())
-            _seriesFanSensor[channel]->setColor(fanShowForm->colorSensor());
+    fanShowForm->seriesFan()->setColor(SeriesFan::SeriesType::rpm, fanShowForm->colorRpm());
+    fanShowForm->seriesFan()->setColor(SeriesFan::SeriesType::dutycycle, fanShowForm->colorDuty());
 }
 
 void WidgetFanContainerForm::createFanChart()
@@ -319,21 +198,17 @@ void WidgetFanContainerForm::createFanChart()
     _axisY_rpm->setTickCount(6);
 
     _axisXFan = new QDateTimeAxis;
-    //axisX->setFormat("dd-MM-yyyy h:mm");
     _axisXFan->setFormat("h:mm");
-    //axisX_fan->setTitleText("Time");
 
     QDateTime now = QDateTime::currentDateTime();
     _axisXFan->setRange(now.addSecs(-60*60), now);
 
     _chartFan = new QChart();
-    //fanChart->legend()->hide();
-    //_chartFan->setTitle(tr("Fans"));
     _chartFan->setTheme(QChart::ChartTheme::ChartThemeBlueNcs);
 
-    _chartFan->addAxis(_axisY, Qt::AlignLeft);
+    _chartFan->addAxis(_axisY, Qt::AlignRight);
     _chartFan->addAxis(_axisY_duty, Qt::AlignLeft);
-    _chartFan->addAxis(_axisY_rpm, Qt::AlignRight);
+    _chartFan->addAxis(_axisY_rpm, Qt::AlignLeft);
 
     _chartFan->setAxisX(_axisXFan);
 
