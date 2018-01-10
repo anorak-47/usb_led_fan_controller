@@ -29,7 +29,7 @@
 
 hid_device *hid_open(unsigned short vendor_id, unsigned short product_id, unsigned short interface_number)
 {
-    qDebug("hid_open: %x:%x:%x\n", vendor_id, product_id, interface_number);
+    qDebug("hid_open: %x:%x:%x", vendor_id, product_id, interface_number);
 
     hid_device *device = NULL;
     struct hid_device_info *deviceInfos;
@@ -59,7 +59,7 @@ hid_device *hid_open(unsigned short vendor_id, unsigned short product_id, unsign
         device = hid_open_path(foundDeviceInfo->path);
     }
 
-    qDebug("hid_open: device is open now: %d\n", (device != 0));
+    qDebug("hid_open: device is open now: %d", (device != 0));
 
     hid_free_enumeration(deviceInfos);
 
@@ -68,7 +68,7 @@ hid_device *hid_open(unsigned short vendor_id, unsigned short product_id, unsign
 
 std::vector<std::string> hid_get_device_paths(unsigned short vendor_id, unsigned short product_id, unsigned short interface_number)
 {
-    qDebug("hid_get_device_paths: filter: %x:%x:%x\n", vendor_id, product_id, interface_number);
+    qDebug("hid_get_device_paths: filter: %x:%x:%x", vendor_id, product_id, interface_number);
 
     std::vector<std::string> devicePaths;
     struct hid_device_info *deviceInfos;
@@ -80,10 +80,10 @@ std::vector<std::string> hid_get_device_paths(unsigned short vendor_id, unsigned
     {
         if (currentDeviceInfo->interface_number == interface_number)
         {
-            qDebug("hid_get_device_paths: found a device at path: %s\n", currentDeviceInfo->path);
+            qDebug("hid_get_device_paths: found a device at path: %s", currentDeviceInfo->path);
             qDebug() << "hid_get_device_paths: product: " << QString::fromWCharArray(currentDeviceInfo->product_string);
             qDebug() << "hid_get_device_paths: serial: " << QString::fromWCharArray(currentDeviceInfo->serial_number);
-            qDebug("hid_get_device_paths: release: %X\n", currentDeviceInfo->release_number);
+            qDebug("hid_get_device_paths: release: %X", currentDeviceInfo->release_number);
             devicePaths.push_back(currentDeviceInfo->path);
         }
         currentDeviceInfo = currentDeviceInfo->next;
@@ -91,7 +91,7 @@ std::vector<std::string> hid_get_device_paths(unsigned short vendor_id, unsigned
 
     hid_free_enumeration(deviceInfos);
 
-    qDebug("hid_get_device_paths: devices found: %lu\n", devicePaths.size());
+    qDebug("hid_get_device_paths: devices found: %lu", devicePaths.size());
 
     return devicePaths;
 }
@@ -101,13 +101,13 @@ bool hid_send_message(hid_device *device, uint8_t id, void *outMsg, uint8_t outM
     // assert( outMsgLength <= RAW_HID_BUFFER_SIZE );
     if (outMsgLength > RAW_HID_BUFFER_SIZE)
     {
-        qDebug("Message size %d is bigger than maximum %d\n", outMsgLength, RAW_HID_BUFFER_SIZE);
+        qDebug("Message size %d is bigger than maximum %d", outMsgLength, RAW_HID_BUFFER_SIZE);
         return false;
     }
 
     if (retMsgLength > RAW_HID_BUFFER_SIZE - 1)
     {
-        qDebug("Requested Message size %d is bigger than maximum %d\n", retMsgLength, RAW_HID_BUFFER_SIZE - 1);
+        qDebug("Requested Message size %d is bigger than maximum %d", retMsgLength, RAW_HID_BUFFER_SIZE - 1);
         return false;
     }
 
@@ -122,14 +122,14 @@ bool hid_send_message(hid_device *device, uint8_t id, void *outMsg, uint8_t outM
         memcpy(&data[2], outMsg, outMsgLength);
     }
 
-    //qDebug("hid_send_message: request: %u: %x %x %x %x %x %x %x %x %x\n", id, data[0], data[1], data[2], data[3], data[4], data[5], data[6], data[7], data[7]);
+    //qDebug("hid_send_message: request: %u: %x %x %x %x %x %x %x %x %x", id, data[0], data[1], data[2], data[3], data[4], data[5], data[6], data[7], data[7]);
 
     res = 0;
     res = hid_write(device, data, RAW_HID_BUFFER_SIZE + 1);
     if (res < 0)
     {
         qDebug("hid_send_message: Unable to hid_write()\n");
-        qDebug("hid_send_message: Error: %ls\n", hid_error(device));
+        qDebug("hid_send_message: Error: %ls", hid_error(device));
         return false;
     }
 
@@ -152,23 +152,23 @@ bool hid_send_message(hid_device *device, uint8_t id, void *outMsg, uint8_t outM
 #endif
     }
 
-    //qDebug("hid_send_message: hid_read returned: %d\n", res);
+    //qDebug("hid_send_message: hid_read returned: %d", res);
 
     if (res < 0)
     {
         qDebug("hid_send_message: Unable to hid_read()\n");
-        qDebug("hid_send_message: Error: %ls\n", hid_error(device));
+        qDebug("hid_send_message: Error: %ls", hid_error(device));
         return false;
     }
 
     if (res > 0)
     {
-        //qDebug("hid_send_message: response: %x %x %x %x %x %x %x %x\n", data[0], data[1], data[2], data[3], data[4], data[5], data[6], data[7]);
+        //qDebug("hid_send_message: response: %u %x %x %x %x %x %x %x", data[0], data[1], data[2], data[3], data[4], data[5], data[6], data[7]);
 
         if (retMsg && retMsgLength > 0)
         {
             // data[0] contains the request id
-            //qDebug("hid_send_message: copy response, %d\n", retMsgLength);
+            //qDebug("hid_send_message: copy response, %d", retMsgLength);
             memcpy(retMsg, data, retMsgLength);
         }
     }
@@ -180,7 +180,7 @@ hid_device *hid_open_device_by_path(std::string path)
 {
     if (path.empty())
         return 0;
-    qDebug("hid_open_device_by_path: opening path: %s\n", path.c_str());
+    qDebug("hid_open_device_by_path: opening path: %s", path.c_str());
     hid_device *device = hid_open_path(path.c_str());
     if (device)
         hid_set_nonblocking(device, 1);
@@ -193,7 +193,7 @@ hid_device *hid_open_first_found(unsigned short vendor_id, unsigned short produc
 
     if (devicePaths.size() >= 1)
     {
-        qDebug("hid_open_first_found: opening: %s\n", devicePaths[0].c_str());
+        qDebug("hid_open_first_found: opening: %s", devicePaths[0].c_str());
         hid_device *device = hid_open_path(devicePaths[0].c_str());
         if (device)
             hid_set_nonblocking(device, 1);
@@ -225,10 +225,10 @@ bool send_led_pattern(hid_device *device, uint8_t led1, uint8_t led2, uint8_t le
     msg[1] = led3;
     msg[2] = led4;
 
-    qDebug("send led pattern: %u %u %u %u\n", led1, led2, led3, led4);
+    qDebug("send led pattern: %u %u %u %u", led1, led2, led3, led4);
     if (hid_send_message(device, msg[0], msg, 7, msg, 7))
     {
-        qDebug("got led pattern: %u %u %u %u\n", msg[0], msg[1], msg[2], msg[3]);
+        qDebug("got led pattern: %u %u %u %u", msg[0], msg[1], msg[2], msg[3]);
         return true;
     }
 
@@ -245,11 +245,11 @@ bool request_echo(hid_device *device, uint8_t led1, uint8_t led2, uint8_t led3, 
     msg[3] = led3;
     msg[4] = led3;
 
-    qDebug("request_echo %x %x %x %x\n", msg[1], msg[2], msg[3], msg[4]);
+    qDebug("request_echo %x %x %x %x", msg[1], msg[2], msg[3], msg[4]);
 
 	if (hid_send_message(device, 0, msg, 3, msg, 7))
 	    {
-            qDebug("got echo: %x %x %x %x %x\n", msg[0], msg[1], msg[2], msg[3], msg[4]);
+            qDebug("got echo: %x %x %x %x %x", msg[0], msg[1], msg[2], msg[3], msg[4]);
 	        return true;
 	    }
 

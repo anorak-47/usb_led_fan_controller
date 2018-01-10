@@ -22,7 +22,7 @@ void animation_load_stripe(uint8_t stripe);
 void animation_save_stripe(uint8_t stripe);
 
 void animation_set_running(uint8_t stripe, bool running);
-bool animation_get_current_running(uint8_t stripe);
+bool animation_get_running(uint8_t stripe);
 
 animation_names animation_get_current(uint8_t stripe);
 void animation_set_current(uint8_t stripe, animation_names animation);
@@ -53,6 +53,9 @@ uint8_t animation_get_current_option(uint8_t stripe);
 
 void animation_set_option(uint8_t stripe, animation_names animation, uint8_t option);
 uint8_t animation_get_option(uint8_t stripe, animation_names animation);
+
+void animation_set_global_brightness(uint8_t brightness);
+uint8_t animation_get_global_brightness(void);
 
 #else
 #define animation_init() do {} while(0)

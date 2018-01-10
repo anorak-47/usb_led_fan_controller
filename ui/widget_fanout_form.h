@@ -50,6 +50,9 @@ private:
     void showFanOutModes();
     void createChart();
 
+    void saveSettings();
+    void readSettings();
+
     Ui::WidgetFanOutForm *ui;
     std::shared_ptr<DataFanOut> _dataFanOut;
     std::shared_ptr<SeriesFanOut> _seriesFanOut;

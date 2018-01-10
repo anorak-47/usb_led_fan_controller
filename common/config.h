@@ -26,10 +26,11 @@
 
 #define USB_PROTOCOL_VERSION (1)
 
-#define DEBUG_FUNCTIONS_SUPPORTED           1
+
 #define DEBUG_OUTPUT_SUPPORTED              1
 #define DEBUG_OUTPUT_USE_UART               1
 #define DEBUG_OUTPUT_USE_USB                0
+#define DEBUG_FUNCTIONS_SUPPORTED           1
 
 #define FAN_CONTROL_SUPPORTED               1
 

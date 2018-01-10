@@ -24,7 +24,8 @@ LUFA_PATH       = ../../lufa/LUFA
 FASTLED_PATH    = extra/FastLED
 ARDUINO_PATH    = extra/arduino-1.0.1
 FASTLED_INCL    = -I$(FASTLED_PATH) -I$(ARDUINO_PATH)/cores/arduino -I$(ARDUINO_PATH)/variants/$(ARDUINO_VARIANT) -include Arduino.h
-CC_FLAGS        = -DUSE_LUFA_CONFIG_HEADER -I../common/ -IConfig/ -Ii2c/ -Ipower/ -Iled/ -Iledstripe/ -Ifan/ -Iusb_serial/ -Iusb_raw/ -Iuart/ $(FASTLED_INCL)
+SUBDIR_INCLUDES = -I../common/ -IConfig/ -Ii2c/ -Ipower/ -Iled/ -Iledstripe/ -Ifan/ -Iusb_serial/ -Iusb_raw/ -Iuart/ $(FASTLED_INCL)
+CC_FLAGS        = -DUSE_LUFA_CONFIG_HEADER -DFASTLED_HAS_MILLIS $(SUBDIR_INCLUDES)
 CPP_FLAGS       = -std=c++11 
 LUFA_SRC        = $(LUFA_SRC_USB) $(LUFA_SRC_USBCLASS)
 
@@ -51,6 +52,7 @@ SRC          = \
 	ledstripe/led_stripe_animation.cpp \
 	ledstripe/animation_rotating_palette.cpp \
 	ledstripe/animation_fire2012.cpp \
+	ledstripe/animation_gradient.cpp \
 	usb_serial/shell.c \
 	usb_serial/shell_fan.c \
 	usb_serial/shell_fan_out.c \

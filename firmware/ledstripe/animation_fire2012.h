@@ -12,8 +12,8 @@ public:
     AnimationFire2012(CRGB *leds, uint8_t led_count, animation *animation_info);
     virtual ~AnimationFire2012();
 
-    virtual void initialize() override;
     virtual void loop() override;
+    virtual void setOption(uint8_t option) override;
 
 protected:
     void Fire2012WithPalette();

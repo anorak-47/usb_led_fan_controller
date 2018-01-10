@@ -1,6 +1,7 @@
-#include <ledstripe/animation_fire2012.h>
-#include <ledstripe/animation_names.h>
-#include <ledstripe/animation_rotating_palette.h>
+#include "animation_names.h"
+#include "animation_fire2012.h"
+#include "animation_gradient.h"
+#include "animation_rotating_palette.h"
 #include "debug.h"
 
 #if FASTLED_SUPPORTED
@@ -24,14 +25,19 @@ void animation_set_for_stripe(uint8_t stripe, animation_names animation)
 
     switch (animation)
     {
+    case animation_names::AnimationGradient:
+        led_stripe[stripe].animation = new fastled::AnimationGradient(led_stripe[stripe].leds, led_stripe[stripe].led_count,
+                                                                      &led_stripe_status[stripe].animations[animation_index]);
+        break;
     case animation_names::AnimationRotatingPalette:
-        led_stripe[stripe].animation = new fastled::AnimationRotatingPalette(led_stripe[stripe].leds, led_stripe[stripe].led_count, &led_stripe_status[stripe].animations[animation_index]);
+        led_stripe[stripe].animation = new fastled::AnimationRotatingPalette(led_stripe[stripe].leds, led_stripe[stripe].led_count,
+                                                                             &led_stripe_status[stripe].animations[animation_index]);
         break;
     case animation_names::AnimationFire2012:
-    	led_stripe[stripe].animation = new fastled::AnimationFire2012(led_stripe[stripe].leds, led_stripe[stripe].led_count, &led_stripe_status[stripe].animations[animation_index]);
-		break;
+        led_stripe[stripe].animation = new fastled::AnimationFire2012(led_stripe[stripe].leds, led_stripe[stripe].led_count,
+                                                                      &led_stripe_status[stripe].animations[animation_index]);
+        break;
     }
 }
-
 }
 #endif

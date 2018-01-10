@@ -42,21 +42,36 @@ AnimationFire2012::~AnimationFire2012()
     free(heat);
 }
 
-void AnimationFire2012::initialize()
+void AnimationFire2012::setOption(uint8_t option)
 {
-    // This first palette is the basic 'black body radiation' colors,
-    // which run from black to red to bright yellow to white.
-    gPal = HeatColors_p;
+    switch (option)
+    {
+    case 1:
+        // These are other ways to set up the color palette for the 'fire'.
+        // First, a gradient from black to red to yellow to white -- similar to HeatColors_p
+        gPal = CRGBPalette16(CRGB::Black, CRGB::Red, CRGB::Yellow, CRGB::White);
+        break;
 
-    // These are other ways to set up the color palette for the 'fire'.
-    // First, a gradient from black to red to yellow to white -- similar to HeatColors_p
-    //   gPal = CRGBPalette16( CRGB::Black, CRGB::Red, CRGB::Yellow, CRGB::White);
+    case 2:
+    	// Second, this palette is like the heat colors, but blue/aqua instead of red/yellow
+        gPal = CRGBPalette16(CRGB::Black, CRGB::Blue, CRGB::Aqua, CRGB::White);
+        break;
 
-    // Second, this palette is like the heat colors, but blue/aqua instead of red/yellow
-    //   gPal = CRGBPalette16( CRGB::Black, CRGB::Blue, CRGB::Aqua,  CRGB::White);
+    case 3:
+        // Third, here's a simpler, three-step gradient, from black to red to white
+        gPal = CRGBPalette16(CRGB::Black, CRGB::Red, CRGB::White);
+        break;
 
-    // Third, here's a simpler, three-step gradient, from black to red to white
-    //   gPal = CRGBPalette16( CRGB::Black, CRGB::Red, CRGB::White);
+    case 4:
+    	break;
+
+    case 0:
+    default:
+        // This first palette is the basic 'black body radiation' colors,
+        // which run from black to red to bright yellow to white.
+        gPal = HeatColors_p;
+        break;
+    }
 }
 
 void AnimationFire2012::loop()
@@ -68,12 +83,14 @@ void AnimationFire2012::loop()
     // time through the loop, based on a hue that changes every time.
     // The palette is a gradient from black, to a dark color based on the hue,
     // to a light color based on the hue, to white.
-    //
-    //   static uint8_t hue = 0;
-    //   hue++;
-    //   CRGB darkcolor  = CHSV(hue,255,192); // pure hue, three-quarters brightness
-    //   CRGB lightcolor = CHSV(hue,128,255); // half 'whitened', full brightness
-    //   gPal = CRGBPalette16( CRGB::Black, darkcolor, lightcolor, CRGB::White);
+    if (_animation_info->option >= 4)
+    {
+        static uint8_t hue = 0;
+        hue++;
+        CRGB darkcolor = CHSV(hue, 255, 192);  // pure hue, three-quarters brightness
+        CRGB lightcolor = CHSV(hue, 128, 255); // half 'whitened', full brightness
+        gPal = CRGBPalette16(CRGB::Black, darkcolor, lightcolor, CRGB::White);
+    }
 
     Fire2012WithPalette(); // run simulation frame, using palette colors
 }

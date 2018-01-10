@@ -280,6 +280,30 @@ protected:
     void _exec() override;
 };
 
+class CommandSetFastLedAnimationOption : public CommandUpdateFastLed
+{
+public:
+    CommandSetFastLedAnimationOption(DataFastLed* fan);
+protected:
+    void _exec() override;
+};
+
+class CommandSetFastLedAnimationFPS : public CommandUpdateFastLed
+{
+public:
+    CommandSetFastLedAnimationFPS(DataFastLed* fan);
+protected:
+    void _exec() override;
+};
+
+class CommandSetFastLedAnimationColor : public CommandUpdateFastLed
+{
+public:
+    CommandSetFastLedAnimationColor(DataFastLed* fan);
+protected:
+    void _exec() override;
+};
+
 class CommandSetFastLedState : public CommandUpdateFastLed
 {
 public:

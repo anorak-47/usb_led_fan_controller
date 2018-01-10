@@ -15,13 +15,12 @@ LedStripeAnimation::~LedStripeAnimation()
 
 void LedStripeAnimation::initialize()
 {
-	// do nothing
+	setOption(0);
 }
 
 void LedStripeAnimation::deinitialize()
 {
-    for (int i = 0; i < _led_count; i++)
-        _leds[i] = CRGB::Black;
+	fill_solid(_leds, _led_count, CRGB::Black);
 }
 
 void LedStripeAnimation::setOption(uint8_t)

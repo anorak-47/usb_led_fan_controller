@@ -22,6 +22,7 @@ public:
     virtual void updateValues() override;
 
     void updateAnimationId(unsigned char animationId);
+    void updateAnimationOption(unsigned char option);
     void updateAutoStart(bool autoStart);
     void updateFps(unsigned char fps);
     void updateRunning(bool running);
@@ -30,6 +31,8 @@ public:
 
     unsigned char getAnimationId() const;
     void setAnimationId(unsigned char animationId);
+
+
 
     bool isAutoStart() const;
     void setAutoStart(bool autoStart);
@@ -49,6 +52,9 @@ public:
     const QColor &getColor2() const;
     void setColor2(const QColor &color2);
 
+    unsigned char getOption() const;
+    void setOption(unsigned char option);
+
 protected:
     virtual bool handleEvent(CommandEvent *event) override;
 
@@ -58,6 +64,7 @@ private:
     unsigned char _fps = 1;
     unsigned char _sensorIndex = 0;
     bool _autoStart = false;
+    unsigned char _option = 0;
     QColor _color1;
     QColor _color2;
 };

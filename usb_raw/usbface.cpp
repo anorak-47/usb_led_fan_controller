@@ -30,7 +30,7 @@
 
 #define DATASIZE (sizeof(unsigned char) + sizeof(int))
 
-int usbRequest(hid_device *device, const CUSTOM_RQ req, const int value, const int index, const int len, int *val)
+int usbRequest(hid_device *device, const CUSTOM_RQ req, const int value, const int channel, const int len, int *val)
 {
     int respMsgLen = len + 1;
     uint8_t *buff = (uint8_t *)malloc(respMsgLen);
@@ -41,7 +41,7 @@ int usbRequest(hid_device *device, const CUSTOM_RQ req, const int value, const i
     uint8_t data[DATASIZE];
     memset(data, 0xFE, sizeof(data));
 
-    data[0] = index;
+    data[0] = channel;
     int *vp = (int*)&data[1];
     *vp = value;
 
@@ -55,19 +55,20 @@ int usbRequest(hid_device *device, const CUSTOM_RQ req, const int value, const i
     if (!read)
     {
         ret = USBFACE_ERR_IO;
-        qDebug() << "usbRequest: req: " << req << ", channel: " << index << ", value: " << value << ", len: " << len;
+        qDebug() << "usbRequest: req: " << req << ", channel: " << channel << ", value: " << value << ", len: " << len;
         qDebug() << "usbRequest: USBFACE_ERR_IO";
     }
     else if (respMsgLen > 0 && buff[0] == CUSTOM_RQ_UNSUPPORTED)
     {
         ret = USBFACE_ERR_UNSUPP;
-        qDebug() << "usbRequest: req: " << req << ", channel: " << index << ", value: " << value << ", len: " << len;
+        qDebug() << "usbRequest: req: " << req << ", channel: " << channel << ", value: " << value << ", len: " << len;
         qDebug() << "usbRequest: USBFACE_ERR_UNSUPP";
     }
     else if (respMsgLen > 0 && buff[0] != req)
     {
         ret = USBFACE_ERR_READ;
-        qDebug() << "usbRequest: req: " << req << ", channel: " << index << ", value: " << value << ", len: " << len;
+        qDebug() << "usbRequest: req: " << req << ", channel: " << channel << ", value: " << value << ", len: " << len;
+        qDebug() << "usbRequest: res: " << buff[0] << ", respMsgLen: " << respMsgLen;
         qDebug() << "usbRequest: USBFACE_ERR_READ";
     }
     else
@@ -98,10 +99,50 @@ int usbRequest(hid_device *device, const CUSTOM_RQ req, const int value, const i
     return ret;
 }
 
-int usbRequestData(hid_device *device, const CUSTOM_RQ req, const int index, const int input_len, unsigned char *input_data, const int output_len, unsigned char *output_data)
+int usbRequestData(hid_device *device, const CUSTOM_RQ req, const int channel, const int input_len, const unsigned char *input_data, const int output_len, unsigned char *output_data)
 {
-    int ret = USBFACE_SUCCESS;
     assert(device != NULL);
+    //assert(input_len <= DATASIZE);
+    //qDebug() << "usbRequestData: req: " << req << ", channel: " << channel << ", input_len: " << input_len << ", output_len: " << output_len;
+
+    int respMsgLen = output_len + 1;
+    uint8_t *buff = (uint8_t *)malloc(respMsgLen);
+    int ret = USBFACE_SUCCESS;
+    bool read;
+
+    uint8_t data[DATASIZE];
+    memset(data, 0xFE, sizeof(data));
+
+    data[0] = channel;
+
+    if (input_len)
+        memcpy(&data[1], input_data, input_len);
+
+    read = hid_send_message(device, req, data, DATASIZE, buff, respMsgLen);
+
+    if (!read)
+    {
+        ret = USBFACE_ERR_IO;
+        qDebug() << "usbRequestData: req: " << req << ", channel: " << channel << ", input_len: " << input_len << ", output_len: " << output_len;
+        qDebug() << "usbRequestData: USBFACE_ERR_IO";
+    }
+    else if (respMsgLen > 0 && buff[0] == CUSTOM_RQ_UNSUPPORTED)
+    {
+        ret = USBFACE_ERR_UNSUPP;
+        qDebug() << "usbRequestData: req: " << req << ", channel: " << channel << ", input_len: " << input_len << ", output_len: " << output_len;
+        qDebug() << "usbRequestData: USBFACE_ERR_UNSUPP";
+    }
+    else if (respMsgLen > 0 && buff[0] != req)
+    {
+        ret = USBFACE_ERR_READ;
+        qDebug() << "usbRequestData: req: " << req << ", channel: " << channel << ", input_len: " << input_len << ", output_len: " << output_len;
+        qDebug() << "usbRequestData: res: " << buff[0] << ", respMsgLen: " << respMsgLen;
+        qDebug() << "usbRequestData: USBFACE_ERR_READ";
+    }
+    else
+    {
+        memcpy(output_data, &buff[1], output_len);
+    }
 
     return ret;
 }
@@ -540,66 +581,102 @@ int usbfaceFastledAnimationIdWrite(hid_device *device, const unsigned char chann
 	return usbRequest(device, CUSTOM_RQ_FASTLEDANIID_WRITE, (int)id, (int)channel, 0, NULL);
 }
 
+int usbfaceFastledAnimationOptionRead(hid_device *device, const unsigned char channel, const unsigned char animation, unsigned char *option)
+{
+    int read;
+    int res = usbRequest(device, CUSTOM_RQ_FASTLEDOPTION_READ, animation, (int)channel, 1, &read);
+    *option = read;
+    return res;
+}
+
+int usbfaceFastledAnimationOptionWrite(hid_device *device, const unsigned char channel, const unsigned char animation, unsigned char option)
+{
+    //qDebug() << __PRETTY_FUNCTION__ << " channel: " << channel << ", animation: " << animation << ", option: " << option;
+    uint8_t request[2];
+    request[0] = animation;
+    request[1] = option;
+    return usbRequestData(device, CUSTOM_RQ_FASTLEDOPTION_WRITE, channel, 2, &request[0], 0, 0);
+}
+
 int usbfaceFastledStateRead(hid_device *device, const unsigned char channel, unsigned char *running)
 {
     int read;
-    int res = usbRequest(device, CUSTOM_RQ_FASTLEDSTATE_READ, 0, (int)channel, 1, &read);
+    int res = usbRequest(device, CUSTOM_RQ_FASTLEDRUNNING_READ, 0, (int)channel, 1, &read);
     *running = read;
     return res;
 }
 
 int usbfaceFastledStateWrite(hid_device *device, const unsigned char channel, unsigned char running)
 {
-	return usbRequest(device, CUSTOM_RQ_FASTLEDSTATE_WRITE, (int)running, (int)channel, 0, NULL);
+    return usbRequest(device, CUSTOM_RQ_FASTLEDRUNNING_WRITE, (int)running, (int)channel, 0, NULL);
 }
 
-int usbfaceFastledColorRead(hid_device *device, const unsigned char channel, unsigned char colors[6])
-{
-	return usbRequestData(device, CUSTOM_RQ_FASTLEDCOLOR_READ, channel, 6, colors, 0, 0);
+int usbfaceFastledColorRead(hid_device *device, const unsigned char channel, const unsigned char animation, const unsigned char colorid, unsigned char *colors)
+{    
+    uint8_t request[2];
+    request[0] = animation;
+    request[1] = colorid;
+    return usbRequestData(device, CUSTOM_RQ_FASTLEDCOLOR_READ, channel, 2, &request[0], 3, colors);
 }
 
-int usbfaceFastledColorWrite(hid_device *device, const unsigned char channel, unsigned char colors[6])
+int usbfaceFastledColorWrite(hid_device *device, const unsigned char channel, const unsigned char animation, const unsigned char colorid, unsigned char *colors)
 {
-	return usbRequestData(device, CUSTOM_RQ_FASTLEDCOLOR_WRITE, channel, 0, 0, 6, colors);
+    //qDebug() << __PRETTY_FUNCTION__ << " channel: " << channel << ", animation: " << animation << ", colorid: " << colorid;
+    //qDebug() << __PRETTY_FUNCTION__ << " " << colors[0] << " " << colors[1] << " " << colors[2];
+
+    uint8_t request[5];
+    request[0] = animation;
+    request[1] = colorid;
+    request[2] = colors[0];
+    request[3] = colors[1];
+    request[4] = colors[2];
+    return usbRequestData(device, CUSTOM_RQ_FASTLEDCOLOR_WRITE, channel, 5, &request[0], 0, 0);
 }
 
 int usbfaceFastledAutostartRead(hid_device *device, const unsigned char channel, unsigned char *start)
 {
     int read;
-    int res = usbRequest(device, CUSTOM_RQ_FASTLEDASTART_READ, 0, (int)channel, 1, &read);
+    int res = usbRequest(device, CUSTOM_RQ_FASTLEDACTIVE_READ, 0, (int)channel, 1, &read);
     *start = read;
     return res;
 }
 
 int usbfaceFastledAutostartWrite(hid_device *device, const unsigned char channel, unsigned char start)
 {
-	return usbRequest(device, CUSTOM_RQ_FASTLEDASTART_WRITE, (int)start, (int)channel, 0, NULL);
+    return usbRequest(device, CUSTOM_RQ_FASTLEDACTIVE_WRITE, (int)start, (int)channel, 0, NULL);
 }
 
-int usbfaceFastledSnsIdRead(hid_device *device, const unsigned char channel, unsigned char *id)
+int usbfaceFastledSnsIdRead(hid_device *device, const unsigned char channel, const unsigned char animation, unsigned char *snsId)
 {
     int read;
-    int res = usbRequest(device, CUSTOM_RQ_FASTLEDSNSID_READ, 0, (int)channel, 1, &read);
-    *id = read;
+    int res = usbRequest(device, CUSTOM_RQ_FASTLEDSNSID_READ, (int)animation, (int)channel, 1, &read);
+    *snsId = read;
     return res;
 }
 
-int usbfaceFastledSnsIdWrite(hid_device *device, const unsigned char channel, unsigned char id)
+int usbfaceFastledSnsIdWrite(hid_device *device, const unsigned char channel, const unsigned char animation, unsigned char snsId)
 {
-	return usbRequest(device, CUSTOM_RQ_FASTLEDSNSID_WRITE, (int)id, (int)channel, 0, NULL);
+    uint8_t request[2];
+    request[0] = animation;
+    request[1] = snsId;
+    return usbRequestData(device, CUSTOM_RQ_FASTLEDSNSID_WRITE, channel, 2, &request[0], 0, 0);
 }
 
-int usbfaceFastledFPSRead(hid_device *device, const unsigned char channel, unsigned char *fps)
+int usbfaceFastledFPSRead(hid_device *device, const unsigned char channel, const unsigned char animation, unsigned char *fps)
 {
     int read;
-    int res = usbRequest(device, CUSTOM_RQ_FASTLEDFPS_READ, 0, (int)channel, 1, &read);
+    int res = usbRequest(device, CUSTOM_RQ_FASTLEDFPS_READ, (int)animation, (int)channel, 1, &read);
     *fps = read;
     return res;
 }
 
-int usbfaceFastledFPSWrite(hid_device *device, const unsigned char channel, unsigned char fps)
+int usbfaceFastledFPSWrite(hid_device *device, const unsigned char channel, const unsigned char animation, unsigned char fps)
 {
-    return usbRequest(device, CUSTOM_RQ_FASTLEDFPS_WRITE, (int)fps, (int)channel, 0, NULL);
+    //qDebug() << __PRETTY_FUNCTION__ << " channel: " << channel << ", animation: " << animation << ", fps: " << fps;
+    uint8_t request[2];
+    request[0] = animation;
+    request[1] = fps;
+    return usbRequestData(device, CUSTOM_RQ_FASTLEDFPS_WRITE, channel, 2, &request[0], 0, 0);
 }
 
 int usbfacePowerMeterPowerRead(hid_device *device, const unsigned char channel, unsigned int *milliwatt)

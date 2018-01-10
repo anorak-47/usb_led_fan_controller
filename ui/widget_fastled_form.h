@@ -26,26 +26,38 @@ public slots:
     void on_currentTabChanged(int index);
     void on_supportedFunctionsUpdated(int supportedFunctions);
 
+
 private slots:
 	void on_dataUpdated();
 	void on_valueUpdated();
 
-    void on_ColorSelector_colorChanged(const QColor &arg1);
+    void on_ColorSelector_1_colorChanged(const QColor &arg1);
     void on_ColorSelector_2_colorChanged(const QColor &arg1);
 
     void on_cbSensor_currentIndexChanged(int index);
     void on_checkBox_clicked(bool checked);
     void on_spinBox_valueChanged(int arg1);
     void on_cbAnimation_currentIndexChanged(int index);
+    void on_cbOption_currentIndexChanged(int index);
+
+    void on_pbPlay_clicked();
+    void on_pbStop_clicked();
 
 private:
     void updateSensorSelectors();
+    void updateOptionComboBox();
+    void updateAnimationComboBox();
+    void updateRunningStateLineEdit();
+
+    void saveSettings();
+    void readSettings();
 
     Ui::WidgetFastLEDForm *ui;
 
     std::shared_ptr<DataFastLed> _dataFastLed;
     std::shared_ptr<DataSensor> _dataSensor;
     std::vector<std::shared_ptr<DataSensor>> _dataSensors;
+
 };
 
 #endif // WIDGET_FASTLED_FORM_H

@@ -6,6 +6,7 @@
 // Count number of timer1 overflow interrupts to allow accurate timing without
 // using a timer. Increments by FREQ_PWM each second.
 uint16_t timer1_ovf_counter = 0;
+volatile uint8_t timer1_ledstripe_delay_counter = 0;
 
 // Timer1 overflow interrupt.
 // Used to keep the 8bit PWM's in sync with this timer.
@@ -14,6 +15,9 @@ ISR(TIMER1_OVF_vect, ISR_NOBLOCK)
     //TCNT0 = 0xff;
     //TCNT2 = 0xff;
     timer1_ovf_counter++;
+
+    if (timer1_ledstripe_delay_counter)
+    	timer1_ledstripe_delay_counter--;
 }
 
 void initTimer()

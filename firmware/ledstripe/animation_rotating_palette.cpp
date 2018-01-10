@@ -106,11 +106,6 @@ void AnimationRotatingPalette::setOption(uint8_t option)
     }
 }
 
-void AnimationRotatingPalette::initialize()
-{
-    setOption(0);
-}
-
 void AnimationRotatingPalette::loop()
 {
     _startIndex = _startIndex + 1; /* motion speed */

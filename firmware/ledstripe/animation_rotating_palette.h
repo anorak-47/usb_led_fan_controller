@@ -12,9 +12,7 @@ public:
     AnimationRotatingPalette(CRGB *leds, uint8_t led_count, animation *animation_info);
     virtual ~AnimationRotatingPalette();
 
-    virtual void initialize() override;
     virtual void loop() override;
-
     virtual void setOption(uint8_t option) override;
 
 protected:

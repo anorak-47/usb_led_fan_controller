@@ -976,6 +976,18 @@ void CommandUpdateFastLed::_exec()
         updated = false;
     }
 
+    unsigned char option;
+    rc = usbfaceFastledAnimationOptionRead(dev, _channel, _fastled->getAnimationId(), &option);
+    if (USBFACE_SUCCESS == rc)
+    {
+        _fastled->setOption(option);
+    }
+    else
+    {
+        postUsbCommunicationErrorEvent(rc, "usbfaceFastledAnimationIdRead");
+        updated = false;
+    }
+
     unsigned char running;
     rc = usbfaceFastledStateRead(dev, _channel, &running);
     if (USBFACE_SUCCESS == rc)
@@ -989,7 +1001,7 @@ void CommandUpdateFastLed::_exec()
     }
 
     unsigned char fps;
-    rc = usbfaceFastledFPSRead(dev, _channel, &fps);
+    rc = usbfaceFastledFPSRead(dev, _channel, _fastled->getAnimationId(), &fps);
     if (USBFACE_SUCCESS == rc)
     {
     	_fastled->setFps(fps);
@@ -1013,7 +1025,7 @@ void CommandUpdateFastLed::_exec()
     }
 
     unsigned char snsIdx;
-    rc = usbfaceFastledSnsIdRead(dev, _channel, &snsIdx);
+    rc = usbfaceFastledSnsIdRead(dev, _channel, _fastled->getAnimationId(), &snsIdx);
     if (USBFACE_SUCCESS == rc)
     {
         _fastled->setSensorIndex(snsIdx);
@@ -1024,16 +1036,25 @@ void CommandUpdateFastLed::_exec()
         updated = false;
     }
 
-    unsigned char colors[6];
-    rc = usbfaceFastledColorRead(dev, _channel, colors);
+    unsigned char colors[3];
+    rc = usbfaceFastledColorRead(dev, _channel, _fastled->getAnimationId(), 0, colors);
     if (USBFACE_SUCCESS == rc)
     {
         QColor color;
-
-        color.setRgb(colors[0], colors[1], colors[2]);
+        color.setHsv(round((360.0/256.0) * colors[0]), colors[1], colors[2]);
         _fastled->setColor1(color);
+    }
+    else
+    {
+        postUsbCommunicationErrorEvent(rc, "usbfaceFastledColorRead");
+        updated = false;
+    }
 
-        color.setRgb(colors[3], colors[4], colors[5]);
+    rc = usbfaceFastledColorRead(dev, _channel, _fastled->getAnimationId(), 1, colors);
+    if (USBFACE_SUCCESS == rc)
+    {
+        QColor color;
+        color.setHsv(round((360.0/256.0) * colors[0]), colors[1], colors[2]);
         _fastled->setColor2(color);
     }
     else
@@ -1075,6 +1096,18 @@ void CommandUpdateFastLedState::_exec()
     {
         bool updated = true;
 
+        unsigned char option;
+        int rc = usbfaceFastledAnimationOptionRead(dev, _channel, _fastled->getAnimationId(), &option);
+        if (USBFACE_SUCCESS == rc)
+        {
+            _fastled->setOption(option);
+        }
+        else
+        {
+            postUsbCommunicationErrorEvent(rc, "usbfaceFastledAnimationIdRead");
+            updated = false;
+        }
+
         unsigned char running;
         rc = usbfaceFastledStateRead(dev, _channel, &running);
         if (USBFACE_SUCCESS == rc)
@@ -1088,7 +1121,7 @@ void CommandUpdateFastLedState::_exec()
         }
 
         unsigned char fps;
-        rc = usbfaceFastledFPSRead(dev, _channel, &fps);
+        rc = usbfaceFastledFPSRead(dev, _channel, _fastled->getAnimationId(), &fps);
         if (USBFACE_SUCCESS == rc)
         {
             _fastled->setFps(fps);
@@ -1112,7 +1145,7 @@ void CommandUpdateFastLedState::_exec()
         }
 
         unsigned char snsIdx;
-        rc = usbfaceFastledSnsIdRead(dev, _channel, &snsIdx);
+        rc = usbfaceFastledSnsIdRead(dev, _channel, _fastled->getAnimationId(), &snsIdx);
         if (USBFACE_SUCCESS == rc)
         {
             _fastled->setSensorIndex(snsIdx);
@@ -1123,17 +1156,32 @@ void CommandUpdateFastLedState::_exec()
             updated = false;
         }
 
-        unsigned char colors[6];
-        rc = usbfaceFastledColorRead(dev, _channel, colors);
+        unsigned char colors[3];
+        rc = usbfaceFastledColorRead(dev, _channel, _fastled->getAnimationId(), 0, colors);
         if (USBFACE_SUCCESS == rc)
         {
             QColor color;
-
-            color.setRgb(colors[0], colors[1], colors[2]);
+            color.setHsv(round((360.0/256.0) * colors[0]), colors[1], colors[2]);
+            //qDebug() << __PRETTY_FUNCTION__ << " " << colors[0] << " " << colors[1] << " " << colors[2];
+            //qDebug() << __PRETTY_FUNCTION__ << " " << color.hue() << " " << color.saturation() << " " << color.value();
             _fastled->setColor1(color);
+            //qDebug() << __PRETTY_FUNCTION__ << " " << _fastled->getColor1();
+        }
+        else
+        {
+            postUsbCommunicationErrorEvent(rc, "usbfaceFastledColorRead");
+            updated = false;
+        }
 
-            color.setRgb(colors[3], colors[4], colors[5]);
+        rc = usbfaceFastledColorRead(dev, _channel, _fastled->getAnimationId(), 1, colors);
+        if (USBFACE_SUCCESS == rc)
+        {
+            QColor color;
+            color.setHsv(round((360.0/256.0) * colors[0]), colors[1], colors[2]);
+            //qDebug() << __PRETTY_FUNCTION__ << " " << colors[0] << " " << colors[1] << " " << colors[2];
+            //qDebug() << __PRETTY_FUNCTION__ << " " << color.hue() << " " << color.saturation() << " " << color.value();
             _fastled->setColor2(color);
+            //qDebug() << __PRETTY_FUNCTION__ << " " << _fastled->getColor2();
         }
         else
         {
@@ -1190,6 +1238,94 @@ void CommandSetFastLedAnimationId::_exec()
     }
 }
 
+CommandSetFastLedAnimationOption::CommandSetFastLedAnimationOption(DataFastLed *fastled) : CommandUpdateFastLed(fastled)
+{
+    setName(__func__);
+}
+
+void CommandSetFastLedAnimationOption::_exec()
+{
+    hid_device *dev = _co->getDevHandle();
+    unsigned char option;
+
+    _fastled->mutex()->lock();
+    option = _fastled->getOption();
+    _fastled->mutex()->unlock();
+
+    int rc = usbfaceFastledAnimationOptionWrite(dev, _channel, _fastled->getAnimationId(), option);
+    if (USBFACE_SUCCESS != rc)
+    {
+        postUsbCommunicationErrorEvent(rc, "usbfaceFastledAnimationOptionWrite");
+    }
+}
+
+CommandSetFastLedAnimationFPS::CommandSetFastLedAnimationFPS(DataFastLed *fastled) : CommandUpdateFastLed(fastled)
+{
+    setName(__func__);
+}
+
+void CommandSetFastLedAnimationFPS::_exec()
+{
+    hid_device *dev = _co->getDevHandle();
+    unsigned char fps;
+
+    _fastled->mutex()->lock();
+    fps = _fastled->getFps();
+    _fastled->mutex()->unlock();
+
+    int rc = usbfaceFastledFPSWrite(dev, _channel, _fastled->getAnimationId(), fps);
+    if (USBFACE_SUCCESS != rc)
+    {
+        postUsbCommunicationErrorEvent(rc, "usbfaceFastledFPSWrite");
+    }
+}
+
+CommandSetFastLedAnimationColor::CommandSetFastLedAnimationColor(DataFastLed *fastled) : CommandUpdateFastLed(fastled)
+{
+    setName(__func__);
+}
+
+void CommandSetFastLedAnimationColor::_exec()
+{
+    hid_device *dev = _co->getDevHandle();
+
+    QColor color1;
+    unsigned char colors[3];
+
+    _fastled->mutex()->lock();
+    color1 = _fastled->getColor1();
+    _fastled->mutex()->unlock();
+
+    colors[0] = round((256.0/360.0) * color1.hue());
+    colors[1] = color1.saturation();
+    colors[2] = color1.value();
+
+    qDebug() << __PRETTY_FUNCTION__ << " " << colors[0] << " " << colors[1] << " " << colors[2];
+
+    int rc = usbfaceFastledColorWrite(dev, _channel, _fastled->getAnimationId(), 0, colors);
+    if (USBFACE_SUCCESS != rc)
+    {
+        postUsbCommunicationErrorEvent(rc, "usbfaceFastledColorWrite");
+    }
+
+    _fastled->mutex()->lock();
+    color1 = _fastled->getColor2();
+    _fastled->mutex()->unlock();
+
+    colors[0] = round((256.0/360.0) * color1.hue());
+    colors[1] = color1.saturation();
+    colors[2] = color1.value();
+
+
+    qDebug() << __PRETTY_FUNCTION__ << " " << colors[0] << " " << colors[1] << " " << colors[2];
+
+    rc = usbfaceFastledColorWrite(dev, _channel, _fastled->getAnimationId(), 1, colors);
+    if (USBFACE_SUCCESS != rc)
+    {
+        postUsbCommunicationErrorEvent(rc, "usbfaceFastledColorWrite");
+    }
+}
+
 CommandSetFastLedState::CommandSetFastLedState(DataFastLed *fastled) : CommandUpdateFastLed(fastled)
 {
     setName(__func__);
@@ -1220,58 +1356,25 @@ void CommandSetFastLedConfiguration::_exec()
 {
     hid_device *dev = _co->getDevHandle();
 
-    unsigned char id;
-    unsigned char fps;
     unsigned char autoStart;
     unsigned char snsIdx;
-    unsigned char colors[6];
 
     _fastled->mutex()->lock();
-    id = _fastled->getAnimationId();
-    fps = _fastled->getFps();
     autoStart = _fastled->isAutoStart();
     snsIdx = _fastled->getSensorIndex();
 
-    QColor color1 = _fastled->getColor1();
-    QColor color2 = _fastled->getColor2();
-
-    colors[0] = color1.red();
-    colors[1] = color1.green();
-    colors[2] = color1.blue();
-    colors[3] = color2.red();
-    colors[4] = color2.green();
-    colors[5] = color2.blue();
-
     _fastled->mutex()->unlock();
 
-    int rc = usbfaceFastledAnimationIdWrite(dev, _channel, id);
-    if (USBFACE_SUCCESS != rc)
-    {
-        postUsbCommunicationErrorEvent(rc, "usbfaceFastledAnimationIdWrite");
-    }
-
-    rc = usbfaceFastledFPSWrite(dev, _channel, fps);
-    if (USBFACE_SUCCESS != rc)
-    {
-        postUsbCommunicationErrorEvent(rc, "usbfaceFastledFPSWrite");
-    }
-
-    rc = usbfaceFastledAutostartWrite(dev, _channel, autoStart);
+    int rc = usbfaceFastledAutostartWrite(dev, _channel, autoStart);
     if (USBFACE_SUCCESS != rc)
     {
         postUsbCommunicationErrorEvent(rc, "usbfaceFastledAutostartWrite");
     }
 
-    rc = usbfaceFastledSnsIdWrite(dev, _channel, snsIdx);
+    rc = usbfaceFastledSnsIdWrite(dev, _channel, _fastled->getAnimationId(), snsIdx);
     if (USBFACE_SUCCESS != rc)
     {
         postUsbCommunicationErrorEvent(rc, "usbfaceFastledSnsIdWrite");
-    }
-
-    rc = usbfaceFastledColorWrite(dev, _channel, colors);
-    if (USBFACE_SUCCESS != rc)
-    {
-        postUsbCommunicationErrorEvent(rc, "usbfaceFastledColorWrite");
     }
 }
 

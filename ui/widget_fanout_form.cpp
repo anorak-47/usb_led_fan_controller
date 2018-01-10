@@ -9,6 +9,7 @@
 #include <QtCharts/QValueAxis>
 #include <QtCharts/QDateTimeAxis>
 #include <QtCore/QDateTime>
+#include <QtCore/QSettings>
 #include <QtCore/QDebug>
 #include <math.h>
 
@@ -51,11 +52,25 @@ WidgetFanOutForm::WidgetFanOutForm(std::shared_ptr<DataFanOut> dataFanOut, QWidg
     connect(_dataFanOut.get(), SIGNAL(signalValueChanged()), this, SLOT(on_valueUpdated()));
 
     createChart();
+    readSettings();
 }
 
 WidgetFanOutForm::~WidgetFanOutForm()
 {
+    saveSettings();
     delete ui;
+}
+
+void WidgetFanOutForm::saveSettings()
+{
+    //QSettings settings("Anorak", "ULFControl");
+    //settings.setValue(QString("FanOut%1/description").arg(_dataFanOut->channel()), ui->leName->text());
+}
+
+void WidgetFanOutForm::readSettings()
+{
+    //QSettings settings("Anorak", "ULFControl");
+    //ui->leName->setText(settings.value(QString("FanOut%1/description").arg(_dataFanOut->channel()), _dataFanOut->fullName()).toString());
 }
 
 void WidgetFanOutForm::showFanOutModes()

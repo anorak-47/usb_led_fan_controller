@@ -60,8 +60,14 @@ void fanControlUpdate()
 
     if (timer1_ovf_counter >= FREQ_PWM)
     {
-        // A second has passed
-    	LV_("fup %lu", millis());
+    	// A second has passed
+
+
+    	static unsigned long old_millis = 0;
+    	LV_("fan loop %lu", millis() - old_millis);
+    	LV_("t1_ovf %u", timer1_ovf_counter);
+    	old_millis = millis();
+
 
         // Reset timer1 overflow counter, to allow accurate timing within each second.
         timer1_ovf_counter -= FREQ_PWM;

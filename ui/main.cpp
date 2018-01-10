@@ -62,24 +62,6 @@ int main(int argc, char *argv[])
     WidgetDeviceInformationForm *devinfo = new WidgetDeviceInformationForm(properties);
     w.addWidget(MainWindow::Feature::Device, devinfo, "Device");
 
-    //WidgetFastLedContainerForm *fastled = new WidgetFastLedContainerForm();
-    //w.addWidget(fastled, "LED stripes");
-
-    std::shared_ptr<DataFastLed> dataFastLed0 = std::make_shared<DataFastLed>(0);
-    WidgetFastLEDForm *fled0 = new WidgetFastLEDForm(dataFastLed0);
-    QObject::connect(&w, SIGNAL(currentChanged(int)), fled0, SLOT(on_currentTabChanged(int)));
-    QObject::connect(properties.get(), SIGNAL(signalSupportedFunctionsUpdated(int)), fled0, SLOT(on_supportedFunctionsUpdated(int)));
-    //fastled->addWidgetFastLed(fled0);
-    w.addWidget(MainWindow::Feature::LEDStripe, fled0, dataFastLed0->name());
-
-    std::shared_ptr<DataFastLed> dataFastLed1 = std::make_shared<DataFastLed>(1);
-    WidgetFastLEDForm *fled1 = new WidgetFastLEDForm(dataFastLed1);
-    QObject::connect(&w, SIGNAL(currentChanged(int)), fled1, SLOT(on_currentTabChanged(int)));
-    QObject::connect(properties.get(), SIGNAL(signalSupportedFunctionsUpdated(int)), fled1, SLOT(on_supportedFunctionsUpdated(int)));
-    //fastled->addWidgetFastLed(fled1);
-    w.addWidget(MainWindow::Feature::LEDStripe, fled1, dataFastLed1->name());
-
-
 
     WidgetSensorContainerForm *sensorListWidget = new WidgetSensorContainerForm();
 
@@ -106,9 +88,6 @@ int main(int argc, char *argv[])
     w.addWidget(MainWindow::Feature::Sensor, sensorListWidget, "Sensors");
 
 
-
-    fled0->setDataSensors(dataSensors);
-    fled1->setDataSensors(dataSensors);
 
 
     WidgetFanContainerForm *fanContainer = new WidgetFanContainerForm();
@@ -163,6 +142,28 @@ int main(int argc, char *argv[])
 
     //fanoutLayout->addStretch(2);
     //w.addWidget(fanoutListWidget, "Fan Out");
+
+
+
+
+    //WidgetFastLedContainerForm *fastled = new WidgetFastLedContainerForm();
+    //w.addWidget(fastled, "LED stripes");
+
+
+    for (int i = 0; i < MAX_LED_STRIPES; i++)
+    {
+        std::shared_ptr<DataFastLed> dataFastLed = std::make_shared<DataFastLed>(i);
+
+        watcher.registerDataObject(dataFastLed);
+
+        WidgetFastLEDForm *fled = new WidgetFastLEDForm(dataFastLed);
+        fled->setDataSensors(dataSensors);
+        QObject::connect(&w, SIGNAL(currentChanged(int)), fled, SLOT(on_currentTabChanged(int)));
+        QObject::connect(properties.get(), SIGNAL(signalSupportedFunctionsUpdated(int)), fled, SLOT(on_supportedFunctionsUpdated(int)));
+        //fastled->addWidgetFastLed(fled);
+        w.addWidget(MainWindow::Feature::LEDStripe, fled, dataFastLed->name());
+    }
+
 
 
     //WidgetPowerMeterContainerForm *powermeterListWidget = new WidgetPowerMeterContainerForm();

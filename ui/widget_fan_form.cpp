@@ -81,7 +81,7 @@ void WidgetFanForm::saveSettings()
 void WidgetFanForm::readSettings()
 {
     QSettings settings("Anorak", "ULFControl");
-    ui->leDescription->setText(settings.value(QString("Fan%1/description").arg(_dataFan->channel())).toString());
+    ui->leDescription->setText(settings.value(QString("Fan%1/description").arg(_dataFan->channel()), _dataFan->fullName()).toString());
 }
 
 void WidgetFanForm::createFanChart()

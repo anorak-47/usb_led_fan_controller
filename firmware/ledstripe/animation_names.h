@@ -11,6 +11,7 @@ extern "C" {
 
 enum _e_animation_names
 {
+	AnimationGradient,
 	AnimationRotatingPalette,
 	AnimationFire2012
 };

@@ -105,16 +105,18 @@ int usbfaceFanOutRpmRead(hid_device *device, const unsigned char channel, double
 
 int usbfaceFastledAnimationIdRead(hid_device *device, const unsigned char channel, unsigned char *id);
 int usbfaceFastledAnimationIdWrite(hid_device *device, const unsigned char channel, unsigned char id);
+int usbfaceFastledAnimationOptionRead(hid_device *device, const unsigned char channel, const unsigned char animation, unsigned char *id);
+int usbfaceFastledAnimationOptionWrite(hid_device *device, const unsigned char channel, const unsigned char animation, unsigned char option);
 int usbfaceFastledStateRead(hid_device *device, const unsigned char channel, unsigned char *running);
 int usbfaceFastledStateWrite(hid_device *device, const unsigned char channel, unsigned char running);
-int usbfaceFastledColorRead(hid_device *device, const unsigned char channel, unsigned char colors[6]);
-int usbfaceFastledColorWrite(hid_device *device, const unsigned char channel, unsigned char colors[6]);
+int usbfaceFastledColorRead(hid_device *device, const unsigned char channel, const unsigned char animation, const unsigned char colorid, unsigned char *colors);
+int usbfaceFastledColorWrite(hid_device *device, const unsigned char channel, const unsigned char animation, const unsigned char colorid, unsigned char *colors);
 int usbfaceFastledAutostartRead(hid_device *device, const unsigned char channel, unsigned char *start);
 int usbfaceFastledAutostartWrite(hid_device *device, const unsigned char channel, unsigned char start);
-int usbfaceFastledSnsIdRead(hid_device *device, const unsigned char channel, unsigned char *id);
-int usbfaceFastledSnsIdWrite(hid_device *device, const unsigned char channel, unsigned char id);
-int usbfaceFastledFPSRead(hid_device *device, const unsigned char channel, unsigned char *fps);
-int usbfaceFastledFPSWrite(hid_device *device, const unsigned char channel, unsigned char fps);
+int usbfaceFastledSnsIdRead(hid_device *device, const unsigned char channel, const unsigned char animation, unsigned char *snsId);
+int usbfaceFastledSnsIdWrite(hid_device *device, const unsigned char channel, const unsigned char animation, unsigned char snsId);
+int usbfaceFastledFPSRead(hid_device *device, const unsigned char channel, const unsigned char animation, unsigned char *fps);
+int usbfaceFastledFPSWrite(hid_device *device, const unsigned char channel, const unsigned char animation, unsigned char fps);
 
 int usbfacePowerMeterPowerRead(hid_device *device, const unsigned char channel, unsigned int *milliwatt);
 int usbfacePowerMeterCurrentRead(hid_device *device, const unsigned char channel, unsigned int *milliampere);
