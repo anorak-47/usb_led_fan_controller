@@ -65,6 +65,7 @@ void WidgetFastLEDForm::on_currentTabChanged(int index)
 void WidgetFastLEDForm::on_supportedFunctionsUpdated(int supportedFunctions)
 {
     ui->gbFastLed->setEnabled((supportedFunctions & SUPPORTED_LED_FASTLED));
+    _dataFastLed->setEnabled((supportedFunctions & SUPPORTED_LED_FASTLED));
 }
 
 void WidgetFastLEDForm::updateSensorSelectors()

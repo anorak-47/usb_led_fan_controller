@@ -25,13 +25,15 @@ QString DataPowerMeter::description() const
 
 void DataPowerMeter::update()
 {
-    CommandQueueInstance().enqueue(std::move(std::unique_ptr<CommandUpdatePowerMeter>(new CommandUpdatePowerMeter(this))));
+    if (_enabled)
+        CommandQueueInstance().enqueue(std::move(std::unique_ptr<CommandUpdatePowerMeter>(new CommandUpdatePowerMeter(this))));
 }
 
 void DataPowerMeter::updateValues()
 {
-    CommandQueueInstance().enqueue(
-        std::move(std::unique_ptr<CommandUpdatePowerMeter>(new CommandUpdatePowerMeter(this))));
+    if (_enabled)
+        CommandQueueInstance().enqueue(
+                    std::move(std::unique_ptr<CommandUpdatePowerMeter>(new CommandUpdatePowerMeter(this))));
 }
 
 void DataPowerMeter::setCurrent_mA(unsigned int current)

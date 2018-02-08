@@ -24,7 +24,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 INCLUDEPATH += $$PWD/../common $$PWD/../usb_raw $$PWD/../qt_custom_widgets
 
-include(/home/wenk/git/Qt-Color-Widgets/color_widgets.pri)
+include($$PWD/../../Qt-Color-Widgets/color_widgets.pri)
 include ($$PWD/../qt_custom_widgets/ulf_controller_customwidgets.pri)
 
 unix|win32: LIBS += -lhidapi-libusb -lusb
@@ -131,5 +131,8 @@ FORMS += \
     chart_settings_form.ui \
     widget_fan_container_form.ui \
     widget_fan_show_form.ui
+
+RESOURCES += \
+    resources.qrc
 
 

@@ -36,6 +36,7 @@ WidgetPowerMeterForm::~WidgetPowerMeterForm()
 void WidgetPowerMeterForm::on_supportedFunctionsUpdated(int supportedFunctions)
 {
     ui->gbPowerMeter->setEnabled((supportedFunctions & SUPPORTED_SNS_POWER));
+    _dataPowerMeter->setEnabled((supportedFunctions & SUPPORTED_SNS_POWER));
 }
 
 void WidgetPowerMeterForm::appendLastValueToSeries(QLineSeries *series, QContiguousCache<TimeSeriesData> const &timeSeriesData)

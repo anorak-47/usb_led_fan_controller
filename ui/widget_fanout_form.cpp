@@ -102,6 +102,7 @@ void WidgetFanOutForm::setDataSensors(std::vector<std::shared_ptr<DataSensor> > 
 void WidgetFanOutForm::on_supportedFunctionsUpdated(int supportedFunctions)
 {
     this->setEnabled((supportedFunctions & SUPPORTED_FAN_OUT));
+    _dataFanOut->setEnabled((supportedFunctions & SUPPORTED_FAN_OUT));
 }
 
 void WidgetFanOutForm::on_comboBox_currentIndexChanged(int index)

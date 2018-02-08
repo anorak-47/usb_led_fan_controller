@@ -4,5 +4,10 @@
         <file>gHookGreen.svg</file>
         <file>gFanStalled.svg</file>
         <file>gFanNotStalled.svg</file>
+        <file>001-refresh-1.svg</file>
+        <file>002-refresh.svg</file>
+        <file>003-exclamation-mark.svg</file>
+        <file>004-cancel-1.svg</file>
+        <file>005-checked.svg</file>
     </qresource>
 </RCC>

@@ -27,11 +27,13 @@ QString DataFanOut::description() const
 
 void DataFanOut::update()
 {
+    if (_enabled)
     CommandQueueInstance().enqueue(std::move(std::unique_ptr<CommandUpdateFanOut>(new CommandUpdateFanOut(this))));
 }
 
 void DataFanOut::updateValues()
 {
+    if (_enabled)
     CommandQueueInstance().enqueue(
         std::move(std::unique_ptr<CommandUpdateFanOutValue>(new CommandUpdateFanOutValue(this))));
 }
