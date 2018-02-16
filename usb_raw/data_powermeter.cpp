@@ -76,11 +76,11 @@ bool DataPowerMeter::handleEvent(CommandEvent *event)
 {
     if (event->type() == (QEvent::Type)CommandEvents::EventValueUpdated)
     {
-        qDebug() << "EventValueUpdated event, channel: " << event->getChannel();
+        //qDebug() << "EventValueUpdated event, channel: " << event->getChannel();
 
         if (event->getChannel() == _channel)
         {
-            qDebug() << "EventValueUpdated: " << fullName();
+            //qDebug() << "EventValueUpdated: " << fullName();
             emit signalValueChanged();
             return true;
         }

@@ -68,7 +68,7 @@ hid_device *hid_open(unsigned short vendor_id, unsigned short product_id, unsign
 
 std::vector<std::string> hid_get_device_paths(unsigned short vendor_id, unsigned short product_id, unsigned short interface_number)
 {
-    qDebug("hid_get_device_paths: filter: %x:%x:%x", vendor_id, product_id, interface_number);
+    //qDebug("hid_get_device_paths: filter: %x:%x:%x", vendor_id, product_id, interface_number);
 
     std::vector<std::string> devicePaths;
     struct hid_device_info *deviceInfos;
@@ -91,7 +91,7 @@ std::vector<std::string> hid_get_device_paths(unsigned short vendor_id, unsigned
 
     hid_free_enumeration(deviceInfos);
 
-    qDebug("hid_get_device_paths: devices found: %lu", devicePaths.size());
+    //qDebug("hid_get_device_paths: devices found: %lu", devicePaths.size());
 
     return devicePaths;
 }

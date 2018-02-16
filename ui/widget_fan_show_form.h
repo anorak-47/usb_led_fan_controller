@@ -43,6 +43,7 @@ signals:
 
 public slots:
     void on_nameChanged(QString const& name);
+    void on_currentTabChanged(int index);
 
 private slots:
     void on_valueUpdated();

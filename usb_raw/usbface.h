@@ -46,6 +46,9 @@ int usbfaceProtocolVersion(hid_device *device, unsigned char *version);
 int usbfaceFirmwareVersion(hid_device *device, unsigned char *major, unsigned char *minor);
 int usbfaceFuncsSupportedRead(hid_device *device, SUPPORTED *funcs);
 
+int usbfaceDeviceNameRead(hid_device *device, char*name);
+int usbfaceDeviceNameWrite(hid_device *device, const char *name);
+
 int usbfaceGetNrOfFans();
 int usbfaceGetNrOfFanOuts();
 int usbfaceGetNrOfSensors();

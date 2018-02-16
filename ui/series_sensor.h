@@ -28,6 +28,8 @@ public:
     virtual void rescaleYAxis() override;
 
     void setVisible(bool visible) override;
+    void setSeriesVisible(bool visible);
+
     void setName(QString const &name);
     void setColor(QColor color);
 

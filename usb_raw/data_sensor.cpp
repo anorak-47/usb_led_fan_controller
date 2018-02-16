@@ -70,7 +70,7 @@ void DataSensor::setValue(double value)
 	_sensor.value = round(value);
     _timeDataSeries.append(TimeSeriesData(_sensor.value));
 
-    qDebug() << "timeDataSeries " << _timeDataSeries.size();
+    //qDebug() << "timeDataSeries " << _timeDataSeries.size();
 }
 
 bool DataSensor::handleEvent(CommandEvent *event)

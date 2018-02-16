@@ -84,7 +84,6 @@ void WidgetSensorContainerForm::restoreSplitter()
     ui->splitter->setSizes(sizes);
 }
 
-
 void WidgetSensorContainerForm::createSensorChart()
 {
     _axisY = new QValueAxis();
@@ -124,6 +123,14 @@ void WidgetSensorContainerForm::createSensorChart()
 
     connect(csf, SIGNAL(signalPause(bool)), this, SLOT(on_pause(bool)));
     connect(csf, SIGNAL(signalTimeRangeChanged(QTime)), this, SLOT(on_timeRangeChanged(QTime)));
+}
+
+void WidgetSensorContainerForm::on_currentTabChanged(int index)
+{
+    Q_UNUSED(index);
+
+    qDebug() << "WidgetSensorContainerForm: visible: " << isVisible();
+
 }
 
 void WidgetSensorContainerForm::addWidgetSensor(WidgetSensorForm *sensor, bool hasSuccessor)

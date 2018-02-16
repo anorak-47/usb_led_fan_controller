@@ -81,6 +81,16 @@ protected:
     bool _clearSettings;
 };
 
+class CommandPropertiesDeviceName : public CommandNotifyACallerUsbDevice
+{
+public:
+    CommandPropertiesDeviceName(DataDeviceProperties *caller);
+    virtual void _exec() override;
+
+protected:
+    DataDeviceProperties *_properties;
+};
+
 class CommandManipulateAChannel : public Command
 {
 public:

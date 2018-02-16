@@ -34,6 +34,8 @@ private slots:
     void on_pbSettingsLoad_clicked();
     void on_pbSettingsClear_clicked();
 
+    void on_leName_editingFinished();
+
 private:
     void enableSettingsButtons(bool enabled);
     void showSupportedFunctions(int supportedFunctions);

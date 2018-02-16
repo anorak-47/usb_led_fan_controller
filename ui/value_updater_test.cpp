@@ -2,6 +2,8 @@
 #include "data.h"
 #include "data_sensor.h"
 #include "data_fan.h"
+#include "data_fan_out.h"
+#include "data_powermeter.h"
 #include <QtCore/QTimer>
 #include <QtCore/QCoreApplication>
 #include <QtCore/QDebug>
@@ -70,6 +72,39 @@ void ValueUpdaterTest::on_timeout()
             dataFan->setScaledDuty(value / 5000.0 * 100.0 - 10.0);
 
             postEvent(dataFan.get(), CommandEvents::EventValueUpdated);
+            continue;
+        }
+
+        std::shared_ptr<DataFanOut> dataFanOut = std::dynamic_pointer_cast<DataFanOut>(dataObject);
+
+        if (dataFanOut)
+        {
+            double rps = dataFanOut->data().rps;
+            rps += (random() % 3) - 1;
+            dataFanOut->data().rps = rps;
+            dataFanOut->data().rpm = rps * 60;
+
+            postEvent(dataFanOut.get(), CommandEvents::EventValueUpdated);
+            continue;
+        }
+
+        std::shared_ptr<DataPowerMeter> dataPowerMeter = std::dynamic_pointer_cast<DataPowerMeter>(dataObject);
+
+        if (dataPowerMeter)
+        {
+            unsigned int value = dataPowerMeter->getCurrent_mA();
+            value += (random() % 6) - 3;
+            dataPowerMeter->setCurrent_mA(value);
+
+            value = dataPowerMeter->getLoad_mV();
+            value += (random() % 6) - 3;
+            dataPowerMeter->setLoad_mV(value);
+
+            value = dataPowerMeter->getPower_mW();
+            value += (random() % 6) - 3;
+            dataPowerMeter->setPower_mW(value);
+
+            postEvent(dataPowerMeter.get(), CommandEvents::EventValueUpdated);
             continue;
         }
     }

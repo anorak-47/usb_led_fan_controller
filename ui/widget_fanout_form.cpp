@@ -73,6 +73,12 @@ void WidgetFanOutForm::readSettings()
     //ui->leName->setText(settings.value(QString("FanOut%1/description").arg(_dataFanOut->channel()), _dataFanOut->fullName()).toString());
 }
 
+void WidgetFanOutForm::on_currentTabChanged(int index)
+{
+    Q_UNUSED(index);
+    _seriesFanOut->setVisible(isVisible());
+}
+
 void WidgetFanOutForm::showFanOutModes()
 {
     int index = 0;
@@ -211,55 +217,4 @@ void WidgetFanOutForm::createChart()
     cLayout->setContentsMargins(0, 0, 0, 0);
     ui->wChart->setLayout(cLayout);
     cLayout->addWidget(chartView);
-
-    /*
-    QValueAxis *axisY_duty = new QValueAxis();
-    axisY_duty->setLabelFormat("%d");
-    axisY_duty->setTitleText("Duty Cycle [%]");
-
-    QValueAxis *axisY_rpm = new QValueAxis();
-    axisY_rpm->setLabelFormat("%d");
-    axisY_rpm->setTitleText("RPM [1/s]");
-
-    _axisXFan = new QDateTimeAxis;
-    //axisX->setFormat("dd-MM-yyyy h:mm");
-    _axisXFan->setFormat("h:mm");
-    //axisX_fan->setTitleText("Time");
-
-    QDateTime now = QDateTime::currentDateTime();
-    _axisXFan->setRange(now.addSecs(-60*60), now);
-
-    _chartFan = new QChart();
-    //fanChart->legend()->hide();
-    //_chartFan->setTitle(tr("Fan Output"));
-    _chartFan->setTheme(QChart::ChartTheme::ChartThemeBlueNcs);
-
-    _chartFan->addAxis(axisY_duty, Qt::AlignLeft);
-    _chartFan->addAxis(axisY_rpm, Qt::AlignRight);
-
-    _chartFan->setAxisX(_axisXFan);
-
-    QChartView *chartView = new QChartView(_chartFan);
-    chartView->setRenderHint(QPainter::Antialiasing);
-
-    QGridLayout *cLayout = new QGridLayout();
-    cLayout->setContentsMargins(0, 0, 0, 0);
-    ui->wChart->setLayout(cLayout);
-    cLayout->addWidget(chartView);
-
-    _seriesFanRpm = new QLineSeries();
-    _seriesFanRpm->setName("Fan RPM");
-    _chartFan->addSeries(_seriesFanRpm);
-    _seriesFanRpm->attachAxis(_axisXFan);
-    _seriesFanRpm->attachAxis(axisY_rpm);
-
-    _seriesFanDuty = new QLineSeries();
-    _seriesFanDuty->setName("Fan Duty Cycle");
-    _chartFan->addSeries(_seriesFanDuty);
-    _seriesFanDuty->attachAxis(_axisXFan);
-    _seriesFanDuty->attachAxis(axisY_duty);
-
-    axisY_duty->setRange(0.0, 100.0);
-    axisY_rpm->setRange(0.0, 5000.0);
-    */
 }

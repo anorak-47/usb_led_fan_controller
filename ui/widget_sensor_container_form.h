@@ -35,6 +35,9 @@ public:
     void saveSettings();
     void readSettings();
 
+public slots:
+    void on_currentTabChanged(int index);
+
 private slots:
     void on_sensorValueUpdated(QWidget *sensorWidget);
     void on_showGraphUpdated(QWidget *sensorWidget);

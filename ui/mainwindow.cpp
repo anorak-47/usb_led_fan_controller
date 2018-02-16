@@ -21,7 +21,7 @@ MainWindow::MainWindow(QWidget *parent) :
     createTrayActions();
     createTrayIcon();
 
-    setIcon(QIcon(":/pixmaps/gFanStalled.svg"));
+    setIcon(QIcon(":/ulf/icons/icons/svg/026-fan.svg"));
     trayIcon->show();
 }
 

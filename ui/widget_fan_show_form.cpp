@@ -41,6 +41,16 @@ void WidgetFanShowForm::setDataSensors(std::vector<std::shared_ptr<DataSensor> >
     showSensorSeries(_dataFan->data().config.snsIdx);
 }
 
+void WidgetFanShowForm::on_currentTabChanged(int index)
+{
+    Q_UNUSED(index);
+
+    bool visible = isVisible();
+
+    _seriesFan->setVisible(visible);
+    _seriesSensor->setVisible(visible);
+}
+
 bool WidgetFanShowForm::showGraphRpm() const
 {
     return ui->checkBox->isChecked();

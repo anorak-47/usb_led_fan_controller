@@ -52,7 +52,7 @@
       <item row="2" column="3">
        <widget class="QLabel" name="label_2">
         <property name="text">
-         <string>Protocol Version:</string>
+         <string>Protocol &amp;Version:</string>
         </property>
         <property name="buddy">
          <cstring>leProtocolVersion</cstring>
@@ -69,16 +69,6 @@
         </property>
        </widget>
       </item>
-      <item row="0" column="0">
-       <widget class="QLabel" name="label">
-        <property name="text">
-         <string>De&amp;vice:</string>
-        </property>
-        <property name="buddy">
-         <cstring>leDevice</cstring>
-        </property>
-       </widget>
-      </item>
       <item row="2" column="4">
        <widget class="QLineEdit" name="leProtocolVersion">
         <property name="readOnly">
@@ -86,16 +76,6 @@
         </property>
         <property name="placeholderText">
          <string>not connected</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="0" colspan="2">
-       <widget class="QLabel" name="label_4">
-        <property name="text">
-         <string>Serial &amp;Number:</string>
-        </property>
-        <property name="buddy">
-         <cstring>leSerialNumber</cstring>
         </property>
        </widget>
       </item>
@@ -109,7 +89,7 @@
         </property>
        </widget>
       </item>
-      <item row="1" column="2">
+      <item row="1" column="4">
        <widget class="QLineEdit" name="leSerialNumber">
         <property name="readOnly">
          <bool>true</bool>
@@ -119,7 +99,17 @@
         </property>
        </widget>
       </item>
-      <item row="0" column="2">
+      <item row="1" column="3">
+       <widget class="QLabel" name="label_4">
+        <property name="text">
+         <string>Serial &amp;Number:</string>
+        </property>
+        <property name="buddy">
+         <cstring>leSerialNumber</cstring>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="2">
        <widget class="QLineEdit" name="leDevice">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
@@ -132,6 +122,30 @@
         </property>
         <property name="placeholderText">
          <string>not connected</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="label">
+        <property name="text">
+         <string>De&amp;vice:</string>
+        </property>
+        <property name="buddy">
+         <cstring>leDevice</cstring>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0">
+       <widget class="QLabel" name="label_5">
+        <property name="text">
+         <string>Name:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="2" colspan="3">
+       <widget class="QLineEdit" name="leName">
+        <property name="maxLength">
+         <number>20</number>
         </property>
        </widget>
       </item>
@@ -417,7 +431,6 @@
   </customwidget>
  </customwidgets>
  <tabstops>
-  <tabstop>leDevice</tabstop>
   <tabstop>leFirmwareVersion</tabstop>
   <tabstop>leProtocolVersion</tabstop>
   <tabstop>pbSettingsSave</tabstop>

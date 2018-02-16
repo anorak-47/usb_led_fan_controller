@@ -67,11 +67,11 @@ private slots:
     void on_tbDuty_4_editingFinished();
     void on_tbDuty_5_editingFinished();
 
-    void on_tbDuty_1_valueChanged(int value);
-    void on_tbDuty_2_valueChanged(int value);
-    void on_tbDuty_3_valueChanged(int value);
-    void on_tbDuty_4_valueChanged(int value);
-    void on_tbDuty_5_valueChanged(int value);
+    void set_tbDuty_1_valueChanged(int value);
+    void set_tbDuty_2_valueChanged(int value);
+    void set_tbDuty_3_valueChanged(int value);
+    void set_tbDuty_4_valueChanged(int value);
+    void set_tbDuty_5_valueChanged(int value);
 
     void on_spPiSetpointOffset_valueChanged(double arg1);
     void on_spPiKp_valueChanged(double arg1);
@@ -135,8 +135,12 @@ private:
 
     QT_CHARTS_NAMESPACE::QChart *_chart;
     QT_CHARTS_NAMESPACE::QLineSeries *_seriesLinearController;
+    QT_CHARTS_NAMESPACE::QLineSeries *_seriesLinear20;
+    QT_CHARTS_NAMESPACE::QLineSeries *_seriesLinear60;
+    QT_CHARTS_NAMESPACE::QLineSeries *_seriesLinearSensor;
     QT_CHARTS_NAMESPACE::QLineSeries *_seriesTripPointController;
     void showSensorSeries();
+    int getSensorValueByIndex(int sensorIndex);
 };
 
 #endif // WIDGET_FAN_H

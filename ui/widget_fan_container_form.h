@@ -34,6 +34,7 @@ public slots:
     void on_sensorValueUpdated(QWidget *fanWidget);
     void on_showGraphUpdated(QWidget *fanWidget);
     void on_colorGraphUpdated(QWidget *fanWidget);
+    void on_currentTabChanged(int index);
 
 private:
     void saveSettings();

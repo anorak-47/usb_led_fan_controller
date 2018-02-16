@@ -123,6 +123,18 @@ void CommandUpdateDeviceProperties::_exec()
         success = false;
     }
 
+    char deviceName[21];
+    rc = usbfaceDeviceNameRead(dev, deviceName);
+    if (USBFACE_SUCCESS == rc)
+    {
+        _properties->setDeviceDevice(deviceName);
+    }
+    else
+    {
+        postUsbCommunicationErrorEvent(rc, "usbfaceDeviceNameRead");
+        success = false;
+    }
+
     if (success)
     {
         postEvent(CommandEvents::EventPropertiesUpdated);
@@ -177,6 +189,31 @@ void CommandSettingsLoad::_exec()
         postUsbCommunicationErrorEvent(rc, "usbfaceReadSettings");
     }
 }
+
+CommandPropertiesDeviceName::CommandPropertiesDeviceName(DataDeviceProperties *caller)
+    : CommandNotifyACallerUsbDevice(caller), _properties(caller)
+{
+    setName(__func__);
+}
+
+void CommandPropertiesDeviceName::_exec()
+{
+    qDebug() << "CommandPropertiesDeviceName " << _properties->fullName();
+    hid_device *dev = _co->getDevHandle();
+    int rc;
+
+    rc = usbfaceDeviceNameWrite(dev, qPrintable(_properties->getDeviceName()));
+
+    if (USBFACE_SUCCESS == rc)
+    {
+        postEvent(CommandEvents::EventCommandFinished);
+    }
+    else
+    {
+        postUsbCommunicationErrorEvent(rc, "usbfaceDeviceNameWirte");
+    }
+}
+
 
 CommandManipulateAChannel::CommandManipulateAChannel(unsigned int channel) : _channel(channel)
 {

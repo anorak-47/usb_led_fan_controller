@@ -36,6 +36,7 @@ public:
     virtual void rescaleYAxis() override;
 
     virtual void setVisible(bool visible) override;
+
     void setVisible(SeriesType type, bool visible);
     void setColor(SeriesType type, QColor color);
     void setName(SeriesType type, QString const &name);

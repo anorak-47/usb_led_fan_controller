@@ -65,7 +65,7 @@ void WidgetDeviceInformationForm::on_dataUpdated()
     ui->leDevice->setText(_properties->getDeviceVendorString());
     ui->leFirmwareVersion->setText(_properties->getFirmwareVersionString());
     ui->leProtocolVersion->setText(_properties->getVersionProtocolString());
-
+    ui->leName->setText(_properties->getDeviceName());
     showSupportedFunctions(_properties->getSupportedFunctions());
 }
 
@@ -77,6 +77,8 @@ void WidgetDeviceInformationForm::on_commandFinished()
 
 void WidgetDeviceInformationForm::on_usbCommunicationFailed(int errorCode, const QString &errorMsg)
 {
+    Q_UNUSED(errorMsg);
+    Q_UNUSED(errorCode);
     qDebug() << __PRETTY_FUNCTION__;
     enableSettingsButtons(true);
 }
@@ -105,4 +107,9 @@ void WidgetDeviceInformationForm::on_pbSettingsClear_clicked()
 {
     enableSettingsButtons(false);
     _properties->settingsClear();
+}
+
+void WidgetDeviceInformationForm::on_leName_editingFinished()
+{
+    _properties->updateDeviceName(ui->leName->text());
 }

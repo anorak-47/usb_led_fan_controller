@@ -52,6 +52,16 @@ WidgetFanContainerForm::~WidgetFanContainerForm()
     delete ui;
 }
 
+void WidgetFanContainerForm::on_currentTabChanged(int index)
+{
+    Q_UNUSED(index);
+
+    if (isVisible())
+    {
+
+    }
+}
+
 void WidgetFanContainerForm::saveSettings()
 {
     QSettings settings("Anorak", "ULFControl");
@@ -165,7 +175,7 @@ void WidgetFanContainerForm::on_showGraphUpdated(QWidget *fanWidget)
 
     fanShowForm->seriesFan()->setVisible(SeriesFan::SeriesType::rpm, fanShowForm->showGraphRpm());
     fanShowForm->seriesFan()->setVisible(SeriesFan::SeriesType::dutycycle, fanShowForm->showGraphDuty());
-    fanShowForm->seriesSensor()->setVisible(fanShowForm->showGraphSensor());
+    fanShowForm->seriesSensor()->setSeriesVisible(fanShowForm->showGraphSensor());
 }
 
 void WidgetFanContainerForm::on_colorGraphUpdated(QWidget *fanWidget)
@@ -178,6 +188,8 @@ void WidgetFanContainerForm::on_colorGraphUpdated(QWidget *fanWidget)
 
     fanShowForm->seriesFan()->setColor(SeriesFan::SeriesType::rpm, fanShowForm->colorRpm());
     fanShowForm->seriesFan()->setColor(SeriesFan::SeriesType::dutycycle, fanShowForm->colorDuty());
+
+    fanShowForm->seriesSensor()->setColor(fanShowForm->colorSensor());
 }
 
 void WidgetFanContainerForm::createFanChart()

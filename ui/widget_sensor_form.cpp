@@ -23,7 +23,7 @@ WidgetSensorForm::WidgetSensorForm(std::shared_ptr<DataSensor> dataSensor, QWidg
 
     readSettings();
 
-    _seriesSensor->setVisible(_showInGraph);
+    _seriesSensor->setSeriesVisible(_showInGraph);
     _seriesSensor->setColor(ui->ColorSelector->color());
 }
 
@@ -31,6 +31,16 @@ WidgetSensorForm::~WidgetSensorForm()
 {
     saveSettings();
     delete ui;
+}
+
+void WidgetSensorForm::on_currentTabChanged(int index)
+{
+    Q_UNUSED(index);
+
+    qDebug() << "WidgetSensorForm: " << _dataSensor->fullName() << ": visible: " << isVisible();
+    qDebug() << "WidgetSensorForm: " << _dataSensor->fullName() << ": showInGraph: " << showInGraph();
+
+    _seriesSensor->setVisible(isVisible() && showInGraph());
 }
 
 void WidgetSensorForm::on_supportedFunctionsUpdated(int supportedFunctions)
@@ -80,6 +90,7 @@ bool WidgetSensorForm::showInGraph() const
 void WidgetSensorForm::setShowInGraph(bool showInGraph)
 {
     _showInGraph = showInGraph;
+    _seriesSensor->setSeriesVisible(isVisible() && showInGraph);
 }
 
 QColor WidgetSensorForm::getGraphColor() const
@@ -123,6 +134,33 @@ void WidgetSensorForm::on_valueUpdated()
     ui->spinBox->setValue(_dataSensor->data().value);
 }
 
+void WidgetSensorForm::saveSettings()
+{
+    //qDebug() << "WidgetSensorForm::saveSettings";
+    QSettings settings("Anorak", "ULFControl");
+    settings.setValue(QString("Sensor%1/showInGraph").arg(_dataSensor->channel()), _showInGraph);
+    settings.setValue(QString("Sensor%1/GraphColor").arg(_dataSensor->channel()), ui->ColorSelector->color().name());
+    settings.setValue(QString("Sensor%1/Description").arg(_dataSensor->channel()), ui->lineEdit->text());
+}
+
+void WidgetSensorForm::readSettings()
+{
+    //qDebug() << "WidgetSensorForm::readSettings";
+    QSettings settings("Anorak", "ULFControl");
+    _showInGraph = settings.value(QString("Sensor%1/showInGraph").arg(_dataSensor->channel()), false).toBool();
+    QColor color(settings.value(QString("Sensor%1/GraphColor").arg(_dataSensor->channel())).toString());
+    QString description = settings.value(QString("Sensor%1/Description").arg(_dataSensor->channel()), _dataSensor->fullName()).toString();
+
+    QSignalBlocker b(ui->bShowGraph);
+    ui->bShowGraph->setChecked(_showInGraph);
+
+    QSignalBlocker bl(ui->lineEdit);
+    ui->lineEdit->setText(description);
+
+    QSignalBlocker bc(ui->ColorSelector);
+    ui->ColorSelector->setColor(color);
+}
+
 void WidgetSensorForm::on_comboBox_currentIndexChanged(int index)
 {
     QString oldFullName = _dataSensor->fullName();
@@ -152,42 +190,17 @@ void WidgetSensorForm::on_bShowGraph_clicked()
 {
     qDebug() << "on_bShowGraph_clicked " << ui->bShowGraph->isChecked() << " " << _dataSensor->name();
     _showInGraph = ui->bShowGraph->isChecked();
-    _seriesSensor->setVisible(_showInGraph);
+    _seriesSensor->setSeriesVisible(_showInGraph);
+
+    qDebug() << "WidgetSensorForm: clicked " << _dataSensor->fullName() << ": visible: " << isVisible();
+    qDebug() << "WidgetSensorForm: clicked " << _dataSensor->fullName() << ": showInGraph: " << showInGraph();
+
     emit signalShowGraph(_showInGraph);
     emit signalShowGraphChanged();
 }
 
-void WidgetSensorForm::saveSettings()
-{
-    //qDebug() << "WidgetSensorForm::saveSettings";
-    QSettings settings("Anorak", "ULFControl");
-    settings.setValue(QString("Sensor%1/showInGraph").arg(_dataSensor->channel()), _showInGraph);
-    settings.setValue(QString("Sensor%1/GraphColor").arg(_dataSensor->channel()), ui->ColorSelector->color().name());
-    settings.setValue(QString("Sensor%1/Description").arg(_dataSensor->channel()), ui->lineEdit->text());
-}
-
-void WidgetSensorForm::readSettings()
-{
-    //qDebug() << "WidgetSensorForm::readSettings";
-    QSettings settings("Anorak", "ULFControl");
-    _showInGraph = settings.value(QString("Sensor%1/showInGraph").arg(_dataSensor->channel()), false).toBool();
-    QColor color(settings.value(QString("Sensor%1/GraphColor").arg(_dataSensor->channel())).toString());
-    QString description = settings.value(QString("Sensor%1/Description").arg(_dataSensor->channel()), _dataSensor->fullName()).toString();
-
-    QSignalBlocker b(ui->bShowGraph);
-    ui->bShowGraph->setChecked(_showInGraph);
-
-    QSignalBlocker bl(ui->lineEdit);
-    ui->lineEdit->setText(description);
-
-    QSignalBlocker bc(ui->ColorSelector);
-    ui->ColorSelector->setColor(color);
-}
-
 void WidgetSensorForm::on_ColorSelector_colorChanged(const QColor &arg1)
 {
-    qDebug() << __PRETTY_FUNCTION__;
-    Q_UNUSED(arg1);
     _seriesSensor->setColor(arg1);
     emit signalGraphColorChanged();
 }

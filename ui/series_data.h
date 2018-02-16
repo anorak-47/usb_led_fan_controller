@@ -39,18 +39,24 @@ public:
     virtual void rescaleXAxis(const QDateTime &oldestTimestamp = QDateTime::currentDateTime());
     virtual void rescaleYAxis();
 
-    virtual void setVisible(bool visible) = 0;
+    virtual void setVisible(bool visible);
+    bool isVisible() const;
 
     int getXaxisDisplayRange() const;
     void setXaxisDisplayRange(int xaxisDisplayRange);
+
+    void copyFromTimeSeries(QT_CHARTS_NAMESPACE::QLineSeries *lineseries, QContiguousCache<TimeSeriesData> const &timeSeries);
 
 public slots:
     void on_valueUpdated();
 
 protected:
     void appendLastValueToSeries(QT_CHARTS_NAMESPACE::QLineSeries *series, QContiguousCache<TimeSeriesData> const &timeSeriesData);
+    void scaleXAxis();
 
     QT_CHARTS_NAMESPACE::QDateTimeAxis *_axisX = 0;
     QT_CHARTS_NAMESPACE::QValueAxis *_axisY = 0;
     int _xaxis_display_range = 60*60;
+    //int _xaxis_display_range = 60*15;
+    bool _is_visible = false;
 };

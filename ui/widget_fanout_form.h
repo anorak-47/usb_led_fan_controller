@@ -36,7 +36,8 @@ public:
     void setDataSensors(std::vector<std::shared_ptr<DataSensor>> dataSensors);
 
 public slots:
-    void on_supportedFunctionsUpdated(int supportedFunctions);
+    void on_supportedFunctionsUpdated(int supportedFunctions);    
+    void on_currentTabChanged(int index);
 
 private slots:
     void on_comboBox_currentIndexChanged(int index);
