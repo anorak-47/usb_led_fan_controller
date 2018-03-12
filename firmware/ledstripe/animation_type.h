@@ -2,7 +2,7 @@
 
 #define FASTLED_INTERNAL
 #include "config.h"
-#include <ledstripe/animation_names.h>
+#include "animation_names.h"
 #include <FastLED.h>
 #include <inttypes.h>
 #include <avr/eeprom.h>

@@ -1,5 +1,5 @@
 
-#include <ledstripe/led_stripe_animation.h>
+#include "led_stripe_animation.h"
 
 namespace fastled
 {

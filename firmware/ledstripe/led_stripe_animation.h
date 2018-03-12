@@ -1,7 +1,7 @@
 #ifndef FIRMWARE_LEDSTRIPE_LED_STRIPE_ANIMATION_H_
 #define FIRMWARE_LEDSTRIPE_LED_STRIPE_ANIMATION_H_
 
-#include <ledstripe/animation_type.h>
+#include "animation_type.h"
 #include "config.h"
 
 namespace fastled

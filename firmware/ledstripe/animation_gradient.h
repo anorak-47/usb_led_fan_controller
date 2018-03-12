@@ -1,7 +1,6 @@
-#ifndef FIRMWARE_LEDSTRIPE_ANIMATION_GRADIENT_H_
-#define FIRMWARE_LEDSTRIPE_ANIMATION_GRADIENT_H_
+#pragma once
 
-#include <ledstripe/led_stripe_animation.h>
+#include "led_stripe_animation.h"
 
 namespace fastled
 {
@@ -21,5 +20,3 @@ protected:
 };
 
 } /* namespace fastled */
-
-#endif /* FIRMWARE_LEDSTRIPE_ANIMATION_GRADIENT_H_ */

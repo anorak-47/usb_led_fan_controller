@@ -1,6 +1,6 @@
 
-#include <FastLED.h>
-#include <ledstripe/animation_fire2012.h>
+#include "FastLED.h"
+#include "animation_fire2012.h"
 
 // Fire2012 with programmable Color Palette
 //

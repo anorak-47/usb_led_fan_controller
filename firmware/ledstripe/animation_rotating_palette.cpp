@@ -1,5 +1,5 @@
 
-#include <ledstripe/animation_rotating_palette.h>
+#include "animation_rotating_palette.h"
 
 // Additionl notes on FastLED compact palettes:
 //

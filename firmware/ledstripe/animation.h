@@ -1,9 +1,9 @@
 #pragma once
 
 #include "config.h"
+#include "animation_names.h"
 #include <inttypes.h>
 #include <stdbool.h>
-#include <ledstripe/animation_names.h>
 
 #ifdef __cplusplus
 extern "C" {

@@ -1,6 +1,6 @@
-#include <ledstripe/animation.h>
-#include <ledstripe/animation_setup.h>
-#include <ledstripe/animation_type.h>
+#include "animation.h"
+#include "animation_setup.h"
+#include "animation_type.h"
 #include "config.h"
 #include "Arduino.h"
 #include "debug.h"

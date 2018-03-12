@@ -107,7 +107,7 @@
 #define MAX_FANS        (6)        // Total number of fans supported.
 #define MAX_FAN_OUTS    (2)        // Total number of fan outputs supported.
 #define MAX_POWERMETER  (3)        // Total number of power meters supported.
-#define MAX_LED_STRIPES (3)        // Total number of power meters supported.
+#define MAX_LED_STRIPES (3)        // Total number of led stripes supported.
 
 #define PWM_DUTY_0           (0)     // Value representing 0% duty cycle
 #define PWM_DUTY_100         (255)   // Value representing 100% duty cycle

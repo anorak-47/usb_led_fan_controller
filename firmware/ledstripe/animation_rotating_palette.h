@@ -1,7 +1,7 @@
 #ifndef FIRMWARE_LEDSTRIPE_ANIMATION_ROTATING_PALETTE_H_
 #define FIRMWARE_LEDSTRIPE_ANIMATION_ROTATING_PALETTE_H_
 
-#include <ledstripe/led_stripe_animation.h>
+#include "led_stripe_animation.h"
 
 namespace fastled
 {

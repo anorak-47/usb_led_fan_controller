@@ -1,6 +1,5 @@
 #include "Arduino.h"
 #include "debug.h"
-#include "timer.h"
 #include "animation.h"
 #include "animation_rotating_palette.h"
 #include "animation_setup.h"
@@ -8,7 +7,13 @@
 
 #if FASTLED_SUPPORTED
 
+#define ANIMATION_LIMIT_FPS_BY_TIMER1
 #define ANIMATION_SHOW_FPS
+
+
+#ifdef ANIMATION_LIMIT_FPS_BY_TIMER1
+#include "timer.h"
+#endif
 
 using namespace fastled;
 
@@ -333,14 +338,17 @@ void animation_loop()
     }
     */
 
-#ifdef ANIMATION_LIMIT_FPS
+#ifdef ANIMATION_LIMIT_FPS_BY_TIMER1
     if (timer1_ledstripe_delay_counter == 0)
     {
     	timer1_ledstripe_delay_counter = LEDSTRIPE_DELAY_COUNT;
     	FastLED.show();
     }
 #else
-    FastLED.show();
+    EVERY_N_MILLISECONDS(9)
+    {
+    	FastLED.show();
+    }
 #endif
 
 #if DEBUG_OUTPUT_SUPPORTED && defined(ANIMATION_SHOW_FPS)

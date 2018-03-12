@@ -1,5 +1,5 @@
 
-#include <ledstripe/animation_gradient.h>
+#include "animation_gradient.h"
 
 namespace fastled
 {
