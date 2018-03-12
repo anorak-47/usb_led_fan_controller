@@ -75,7 +75,7 @@ void WidgetSensorContainerForm::restoreSplitter()
 
     int c = 0;
     QList <int> sizes;
-    for(int size : ui->splitter->sizes())
+    for(int i = 0; i < ui->splitter->sizes().size(); i++)
     {
         int restoredSize = settings.value(QString("SensorContainer/splitter-size-%1").arg(c++), 350).toInt();
         sizes.append(restoredSize);
@@ -97,7 +97,7 @@ void WidgetSensorContainerForm::createSensorChart()
 
     QDateTime now = QDateTime::currentDateTime();
     _axisX->setRange(now.addSecs(-_time_range_secs), now);
-    _axisY->setRange(0.0, 100.0);
+    _axisY->setRange(0.0, 75.0);
 
     _chart = new QChart();
     //_chart->legend()->hide();
@@ -165,7 +165,8 @@ void WidgetSensorContainerForm::addWidgetSensor(WidgetSensorForm *sensor, bool h
 
 void WidgetSensorContainerForm::on_sensorValueUpdated(QWidget *sensorWidget)
 {	
-    WidgetSensorForm *sensorFromWidget = static_cast<WidgetSensorForm *>(sensorWidget);
+    Q_UNUSED(sensorWidget);
+    //WidgetSensorForm *sensorFromWidget = static_cast<WidgetSensorForm *>(sensorWidget);
 
     //qDebug() << "on_sensorValueUpdated " << sensorFromWidget->dataSensor()->fullName();
 
@@ -240,7 +241,8 @@ void WidgetSensorContainerForm::on_showGraphUpdated(QWidget *sensorWidget)
 
 void WidgetSensorContainerForm::on_nameGraphUpdated(QWidget *sensorWidget)
 {
-    WidgetSensorForm *sensorFromWidget = static_cast<WidgetSensorForm *>(sensorWidget);
+    Q_UNUSED(sensorWidget);
+    //WidgetSensorForm *sensorFromWidget = static_cast<WidgetSensorForm *>(sensorWidget);
 
     /*
     auto it = _lineSeries.find(sensorWidget);
@@ -254,7 +256,8 @@ void WidgetSensorContainerForm::on_nameGraphUpdated(QWidget *sensorWidget)
 
 void WidgetSensorContainerForm::on_colorGraphUpdated(QWidget *sensorWidget)
 {
-    WidgetSensorForm *sensorFromWidget = static_cast<WidgetSensorForm *>(sensorWidget);
+    Q_UNUSED(sensorWidget);
+    //WidgetSensorForm *sensorFromWidget = static_cast<WidgetSensorForm *>(sensorWidget);
 
     /*
     auto it = _lineSeries.find(sensorWidget);

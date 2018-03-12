@@ -37,10 +37,11 @@ void WidgetSensorForm::on_currentTabChanged(int index)
 {
     Q_UNUSED(index);
 
-    qDebug() << "WidgetSensorForm: " << _dataSensor->fullName() << ": visible: " << isVisible();
-    qDebug() << "WidgetSensorForm: " << _dataSensor->fullName() << ": showInGraph: " << showInGraph();
+    //qDebug() << "WidgetSensorForm: " << _dataSensor->fullName() << ": visible: " << isVisible();
+    //qDebug() << "WidgetSensorForm: " << _dataSensor->fullName() << ": showInGraph: " << showInGraph();
 
     _seriesSensor->setVisible(isVisible() && showInGraph());
+    _seriesSensor->setSeriesVisible(isVisible() && showInGraph());
 }
 
 void WidgetSensorForm::on_supportedFunctionsUpdated(int supportedFunctions)
@@ -188,12 +189,13 @@ void WidgetSensorForm::on_spinBox_valueChanged(int value)
 
 void WidgetSensorForm::on_bShowGraph_clicked()
 {
-    qDebug() << "on_bShowGraph_clicked " << ui->bShowGraph->isChecked() << " " << _dataSensor->name();
     _showInGraph = ui->bShowGraph->isChecked();
-    _seriesSensor->setSeriesVisible(_showInGraph);
 
-    qDebug() << "WidgetSensorForm: clicked " << _dataSensor->fullName() << ": visible: " << isVisible();
-    qDebug() << "WidgetSensorForm: clicked " << _dataSensor->fullName() << ": showInGraph: " << showInGraph();
+    qDebug() << "WidgetSensorForm::on_bShowGraph_clicked " << _dataSensor->fullName() << ": visible: " << isVisible();
+    qDebug() << "WidgetSensorForm::on_bShowGraph_clicked " << _dataSensor->fullName() << ": showInGraph: " << showInGraph();
+
+    _seriesSensor->setSeriesVisible(_showInGraph);
+    _seriesSensor->setVisible(isVisible() && showInGraph());
 
     emit signalShowGraph(_showInGraph);
     emit signalShowGraphChanged();

@@ -95,7 +95,7 @@ void SeriesPowerMeter::rescaleYAxis()
 
 void SeriesPowerMeter::setVisible(bool visible)
 {
-    qDebug() << "SeriesPowerMeter:" << _dataPowerMeter->fullName() << " visible: " << visible;
+    //qDebug() << "SeriesPowerMeter:" << _dataPowerMeter->fullName() << " visible: " << visible;
 
     SeriesWithData::setVisible(visible);
 

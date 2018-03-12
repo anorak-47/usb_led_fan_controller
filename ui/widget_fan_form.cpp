@@ -291,6 +291,9 @@ void WidgetFanForm::showSensorSeries()
     _seriesSensor->setXAxis(_seriesFan->getXAxis());
     _seriesSensor->setYAxis(_seriesFan->getYAxis());
     _seriesSensor->addSeries(_chart);
+
+    _seriesSensor->setName(_dataSensor->fullName());
+    _seriesSensor->setVisible(true);
 }
 
 void WidgetFanForm::showSeriesByMode()
@@ -326,9 +329,6 @@ void WidgetFanForm::showSeriesByMode()
         _dataSensor = _dataSensors.front();
         break;
     }
-
-    if (_seriesSensor && _dataSensor)
-        _seriesSensor->setName(_dataSensor->fullName());
 }
 
 void WidgetFanForm::on_dataUpdated()
@@ -734,14 +734,16 @@ void WidgetFanForm::on_currentTabChanged(int index)
 
     if (isVisible())
     {
-        qDebug() << _dataFan->fullName() << " visible";
         updateSensorSelectors();
         _seriesFan->setVisible(true);
+        if (_seriesSensor)
+            _seriesSensor->setVisible(true);
     }
     else
-    {
-        qDebug() << _dataFan->fullName() << " invisible";
+    {        
         _seriesFan->setVisible(false);
+        if (_seriesSensor)
+            _seriesSensor->setVisible(false);
     }
 }
 

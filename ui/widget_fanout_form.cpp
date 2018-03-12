@@ -121,7 +121,7 @@ void WidgetFanOutForm::showStalledFans()
 {
     for (auto &fan : _dataFans)
     {
-        if (fan->channel() < _stalledFans.size())
+        if ((std::size_t)fan->channel() < _stalledFans.size())
         {
             _stalledFans[fan->channel()]->setFanIsStalled(fan->data().status.stalled);
         }
@@ -135,7 +135,7 @@ void WidgetFanOutForm::on_dataUpdated()
     QSignalBlocker sp(ui->spRpmOut);
     ui->spRpmOut->setValue(_dataFanOut->data().rpm);
 
-    for (int i = 0; i < _stallDetectionFans.size(); i++)
+    for (std::size_t i = 0; i < _stallDetectionFans.size(); i++)
     {
         QSignalBlocker b(_stallDetectionFans[i]);
         _stallDetectionFans[i]->setChecked(_dataFanOut->data().fanStallDetect & (1 << i));
@@ -165,7 +165,7 @@ void WidgetFanOutForm::showDutyCycle()
     }
     else if (fanid == FANOUTMODE_RPS_MINFAN)
     {
-        int min = 100000;
+        unsigned int min = 100000;
         double duty = 0.0;
         for (auto &fan : _dataFans)
         {
@@ -180,7 +180,7 @@ void WidgetFanOutForm::showDutyCycle()
     }
     else if (fanid == FANOUTMODE_RPS_MAXFAN)
     {
-        int max = 0;
+        unsigned int max = 0;
         double duty = 0.0;
         for (auto &fan : _dataFans)
         {

@@ -21,6 +21,8 @@ public:
     explicit WidgetFanShowForm(std::shared_ptr<DataFan> dataFan, QWidget *parent = 0);
     ~WidgetFanShowForm();
 
+    void updateHeaderText();
+
     void setDataSensors(std::vector<std::shared_ptr<DataSensor>> dataSensors);
 
     bool showGraphRpm() const;
@@ -44,6 +46,7 @@ signals:
 public slots:
     void on_nameChanged(QString const& name);
     void on_currentTabChanged(int index);
+    void on_SensorIndexChanged();
 
 private slots:
     void on_valueUpdated();

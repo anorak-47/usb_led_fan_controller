@@ -55,12 +55,12 @@ void SeriesSensor::addSeries(QChart *chart)
 
 void SeriesSensor::rescaleYAxis()
 {
-    _axisY->setRange(0.0, 50.0);
+    _axisY->setRange(0.0, 75.0);
 }
 
 void SeriesSensor::setVisible(bool visible)
 {
-    qDebug() << "SeriesSensor:" << _dataSensor->fullName() << " visible: " << visible;
+    //qDebug() << "SeriesSensor:" << _dataSensor->fullName() << " visible: " << visible;
 
     SeriesWithData::setVisible(visible);
 

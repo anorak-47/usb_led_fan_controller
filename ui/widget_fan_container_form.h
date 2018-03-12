@@ -55,7 +55,7 @@ private:
 
     QT_CHARTS_NAMESPACE::QChart *_chartFan;
     QT_CHARTS_NAMESPACE::QDateTimeAxis *_axisXFan;
-    QT_CHARTS_NAMESPACE::QValueAxis *_axisY;
+    QT_CHARTS_NAMESPACE::QValueAxis *_axisY_sns;
     QT_CHARTS_NAMESPACE::QValueAxis *_axisY_duty;
     QT_CHARTS_NAMESPACE::QValueAxis *_axisY_rpm;
 

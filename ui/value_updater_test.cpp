@@ -92,16 +92,19 @@ void ValueUpdaterTest::on_timeout()
 
         if (dataPowerMeter)
         {
-            unsigned int value = dataPowerMeter->getCurrent_mA();
-            value += (random() % 6) - 3;
+            int value = dataPowerMeter->getCurrent_mA();
+            value += (random() % 6) - 2;
+            if (value < 0) value = 0;
             dataPowerMeter->setCurrent_mA(value);
 
             value = dataPowerMeter->getLoad_mV();
-            value += (random() % 6) - 3;
+            value += (random() % 6) - 2;
+            if (value < 0) value = 0;
             dataPowerMeter->setLoad_mV(value);
 
             value = dataPowerMeter->getPower_mW();
-            value += (random() % 6) - 3;
+            value += (random() % 6) - 2;
+            if (value < 0) value = 0;
             dataPowerMeter->setPower_mW(value);
 
             postEvent(dataPowerMeter.get(), CommandEvents::EventValueUpdated);

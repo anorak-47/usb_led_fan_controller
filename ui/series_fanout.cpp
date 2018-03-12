@@ -79,7 +79,7 @@ void SeriesFanOut::rescaleYAxis()
 
 void SeriesFanOut::setVisible(bool visible)
 {
-    qDebug() << "SeriesFanOut:" << _dataFanOut->fullName() << " visible: " << visible;
+    //qDebug() << "SeriesFanOut:" << _dataFanOut->fullName() << " visible: " << visible;
 
     SeriesWithData::setVisible(visible);
 

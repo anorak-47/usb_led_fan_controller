@@ -13,7 +13,7 @@ WidgetFanShowForm::WidgetFanShowForm(std::shared_ptr<DataFan> dataFan, QWidget *
     _dataFan(dataFan)
 {
     ui->setupUi(this);    
-    ui->lName->setText(_dataFan->fullName());
+    updateHeaderText();
 
     _seriesFan = std::shared_ptr<SeriesFan>(new SeriesFan(_dataFan));
 
@@ -28,11 +28,20 @@ WidgetFanShowForm::~WidgetFanShowForm()
     delete ui;
 }
 
+void WidgetFanShowForm::updateHeaderText()
+{
+    ui->lName->setText(_dataFan->fullName());
+}
+
 void WidgetFanShowForm::showSensorSeries(int index)
 {
+    qDebug() << __PRETTY_FUNCTION__ << " sensor " << index;
+
     std::shared_ptr<DataSensor> dataSensor = _dataSensors[index];
     _seriesSensor = std::shared_ptr<SeriesSensor>(new SeriesSensor(dataSensor));
     _seriesSensor->copyFromTimeSeries(dataSensor->timeDataSeries());
+    _seriesSensor->setSeriesVisible(true);
+    _seriesSensor->setVisible(true);
 }
 
 void WidgetFanShowForm::setDataSensors(std::vector<std::shared_ptr<DataSensor> > dataSensors)
@@ -41,14 +50,17 @@ void WidgetFanShowForm::setDataSensors(std::vector<std::shared_ptr<DataSensor> >
     showSensorSeries(_dataFan->data().config.snsIdx);
 }
 
+void WidgetFanShowForm::on_SensorIndexChanged()
+{
+    showSensorSeries(_dataFan->data().config.snsIdx);
+}
+
 void WidgetFanShowForm::on_currentTabChanged(int index)
 {
     Q_UNUSED(index);
 
-    bool visible = isVisible();
-
-    _seriesFan->setVisible(visible);
-    _seriesSensor->setVisible(visible);
+    if (showGraphSensor() && isVisible())
+        showSensorSeries(_dataFan->data().config.snsIdx);
 }
 
 bool WidgetFanShowForm::showGraphRpm() const
@@ -83,6 +95,7 @@ QColor WidgetFanShowForm::colorSensor() const
 
 void WidgetFanShowForm::on_nameChanged(const QString &name)
 {
+    updateHeaderText();
     ui->lDescription->setText(name);
 }
 
@@ -158,15 +171,18 @@ void WidgetFanShowForm::on_checkBox_3_clicked()
 
 void WidgetFanShowForm::on_ColorSelector_1_colorChanged(const QColor &arg1)
 {
+    Q_UNUSED(arg1);
     emit signalGraphColorChanged();
 }
 
 void WidgetFanShowForm::on_ColorSelector_2_colorChanged(const QColor &arg1)
 {
+    Q_UNUSED(arg1);
     emit signalGraphColorChanged();
 }
 
 void WidgetFanShowForm::on_ColorSelector_3_colorChanged(const QColor &arg1)
 {
+    Q_UNUSED(arg1);
     emit signalGraphColorChanged();
 }

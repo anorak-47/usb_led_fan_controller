@@ -45,7 +45,7 @@ void SeriesFan::updateValues()
 
     if (SeriesWithData::isVisible())
     {
-        qDebug() << "SeriesFan:" << _dataFan->fullName() << " update graph";
+        //qDebug() << "SeriesFan:" << _dataFan->fullName() << " update graph";
 
         appendLastValueToSeries(_series[SeriesType::rpm], _timeDataSeriesRpm);
         appendLastValueToSeries(_series[SeriesType::dutycycle], _timeDataSeriesDuty);
@@ -99,7 +99,7 @@ void SeriesFan::rescaleYAxis()
 
 void SeriesFan::setVisible(bool visible)
 {
-    qDebug() << "SeriesFan:" << _dataFan->fullName() << " visible: " << visible;
+    //qDebug() << "SeriesFan:" << _dataFan->fullName() << " visible: " << visible;
 
     SeriesWithData::setVisible(visible);
 
