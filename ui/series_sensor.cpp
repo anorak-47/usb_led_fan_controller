@@ -24,22 +24,17 @@ SeriesSensor::~SeriesSensor()
 
 void SeriesSensor::updateValues()
 {
-    qDebug() << __PRETTY_FUNCTION__ << " timeSeries size " << _dataSensor->timeDataSeries().size();
-    if (_dataSensor->timeDataSeries().isEmpty())
+    //qDebug() << __PRETTY_FUNCTION__ << " timeSeries size " << _dataSensor->timeDataSeries().size();
+    if (_dataSensor->timeDataSeries().isEmpty() || !isVisible())
         return;
+
     appendLastValueToSeries(_seriesSensor, _dataSensor->timeDataSeries());
     rescaleXAxis(_dataSensor->timeDataSeries().first().dt);
 }
 
 void SeriesSensor::copyFromTimeSeries(QContiguousCache<TimeSeriesData> const &timeSeries)
 {
-    _seriesSensor->clear();
-    qDebug() << "copyFromTimeSeries: timeSeries size " << timeSeries.size();
-    for (int i = 0; i < timeSeries.size(); i++)
-    {
-        TimeSeriesData const &point = timeSeries.at(i);
-        _seriesSensor->append(point.dt.toMSecsSinceEpoch(), point.value);
-    }
+    SeriesWithData::copyFromTimeSeries(_seriesSensor, timeSeries);
 }
 
 void SeriesSensor::addYAxis(QChart *chart)
@@ -60,13 +55,30 @@ void SeriesSensor::addSeries(QChart *chart)
 
 void SeriesSensor::rescaleYAxis()
 {
-    _axisY->setRange(0.0, 50.0);
+    _axisY->setRange(0.0, 75.0);
 }
 
 void SeriesSensor::setVisible(bool visible)
 {
+    //qDebug() << "SeriesSensor:" << _dataSensor->fullName() << " visible: " << visible;
+
+    SeriesWithData::setVisible(visible);
+
+    if (visible)
+    {
+        {
+            QSignalBlocker b(_seriesSensor);
+            copyFromTimeSeries(_dataSensor->timeDataSeries());
+        }
+        if (!_dataSensor->timeDataSeries().isEmpty())
+            rescaleXAxis(_dataSensor->timeDataSeries().first().dt);
+    }
+}
+
+void SeriesSensor::setSeriesVisible(bool visible)
+{
     if (_seriesSensor->isVisible() != visible)
-        _seriesSensor->setVisible(visible);
+        _seriesSensor->setVisible(visible);    
 }
 
 void SeriesSensor::setName(const QString &name)

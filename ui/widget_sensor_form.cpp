@@ -23,7 +23,7 @@ WidgetSensorForm::WidgetSensorForm(std::shared_ptr<DataSensor> dataSensor, QWidg
 
     readSettings();
 
-    _seriesSensor->setVisible(_showInGraph);
+    _seriesSensor->setSeriesVisible(_showInGraph);
     _seriesSensor->setColor(ui->ColorSelector->color());
 }
 
@@ -31,6 +31,17 @@ WidgetSensorForm::~WidgetSensorForm()
 {
     saveSettings();
     delete ui;
+}
+
+void WidgetSensorForm::on_currentTabChanged(int index)
+{
+    Q_UNUSED(index);
+
+    //qDebug() << "WidgetSensorForm: " << _dataSensor->fullName() << ": visible: " << isVisible();
+    //qDebug() << "WidgetSensorForm: " << _dataSensor->fullName() << ": showInGraph: " << showInGraph();
+
+    _seriesSensor->setVisible(isVisible() && showInGraph());
+    _seriesSensor->setSeriesVisible(isVisible() && showInGraph());
 }
 
 void WidgetSensorForm::on_supportedFunctionsUpdated(int supportedFunctions)
@@ -80,6 +91,7 @@ bool WidgetSensorForm::showInGraph() const
 void WidgetSensorForm::setShowInGraph(bool showInGraph)
 {
     _showInGraph = showInGraph;
+    _seriesSensor->setSeriesVisible(isVisible() && showInGraph);
 }
 
 QColor WidgetSensorForm::getGraphColor() const
@@ -123,40 +135,6 @@ void WidgetSensorForm::on_valueUpdated()
     ui->spinBox->setValue(_dataSensor->data().value);
 }
 
-void WidgetSensorForm::on_comboBox_currentIndexChanged(int index)
-{
-    QString oldFullName = _dataSensor->fullName();
-
-    qDebug() << "on_comboBox_currentIndexChanged " << index << " " << _dataSensor->fullName();
-    qDebug() << "on_comboBox_currentIndexChanged " << ui->comboBox->itemData(index).toInt() << " " << _dataSensor->fullName();
-    _dataSensor->updateType((SNSTYPE)ui->comboBox->itemData(index).toInt());
-    setValueReadOnlyByType();
-    qDebug() << "on_comboBox_currentIndexChanged " << index << " " << _dataSensor->data().type;
-    qDebug() << "on_comboBox_currentIndexChanged " << index << " " << _dataSensor->fullName();
-
-    if (oldFullName == ui->lineEdit->text())
-        ui->lineEdit->setText(_dataSensor->fullName());
-
-    emit signalGraphNameChanged();
-}
-
-void WidgetSensorForm::on_spinBox_valueChanged(int value)
-{
-    if (_dataSensor->data().type >= SNSTYPE_EXT0 && _dataSensor->data().type <= SNSTYPE_EXT3)
-    {
-        _dataSensor->updateValue(value);
-    }
-}
-
-void WidgetSensorForm::on_bShowGraph_clicked()
-{
-    qDebug() << "on_bShowGraph_clicked " << ui->bShowGraph->isChecked() << " " << _dataSensor->name();
-    _showInGraph = ui->bShowGraph->isChecked();
-    _seriesSensor->setVisible(_showInGraph);
-    emit signalShowGraph(_showInGraph);
-    emit signalShowGraphChanged();
-}
-
 void WidgetSensorForm::saveSettings()
 {
     //qDebug() << "WidgetSensorForm::saveSettings";
@@ -184,10 +162,47 @@ void WidgetSensorForm::readSettings()
     ui->ColorSelector->setColor(color);
 }
 
+void WidgetSensorForm::on_comboBox_currentIndexChanged(int index)
+{
+    QString oldFullName = _dataSensor->fullName();
+
+    qDebug() << "on_comboBox_currentIndexChanged " << index << " " << _dataSensor->fullName();
+    qDebug() << "on_comboBox_currentIndexChanged " << ui->comboBox->itemData(index).toInt() << " " << _dataSensor->fullName();
+    _dataSensor->updateType((SNSTYPE)ui->comboBox->itemData(index).toInt());
+    setValueReadOnlyByType();
+    qDebug() << "on_comboBox_currentIndexChanged " << index << " " << _dataSensor->data().type;
+    qDebug() << "on_comboBox_currentIndexChanged " << index << " " << _dataSensor->fullName();
+
+    if (oldFullName == ui->lineEdit->text())
+        ui->lineEdit->setText(_dataSensor->fullName());
+
+    emit signalGraphNameChanged();
+}
+
+void WidgetSensorForm::on_spinBox_valueChanged(int value)
+{
+    if (_dataSensor->data().type >= SNSTYPE_EXT0 && _dataSensor->data().type <= SNSTYPE_EXT3)
+    {
+        _dataSensor->updateValue(value);
+    }
+}
+
+void WidgetSensorForm::on_bShowGraph_clicked()
+{
+    _showInGraph = ui->bShowGraph->isChecked();
+
+    qDebug() << "WidgetSensorForm::on_bShowGraph_clicked " << _dataSensor->fullName() << ": visible: " << isVisible();
+    qDebug() << "WidgetSensorForm::on_bShowGraph_clicked " << _dataSensor->fullName() << ": showInGraph: " << showInGraph();
+
+    _seriesSensor->setSeriesVisible(_showInGraph);
+    _seriesSensor->setVisible(isVisible() && showInGraph());
+
+    emit signalShowGraph(_showInGraph);
+    emit signalShowGraphChanged();
+}
+
 void WidgetSensorForm::on_ColorSelector_colorChanged(const QColor &arg1)
 {
-    qDebug() << __PRETTY_FUNCTION__;
-    Q_UNUSED(arg1);
     _seriesSensor->setColor(arg1);
     emit signalGraphColorChanged();
 }

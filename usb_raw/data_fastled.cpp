@@ -25,11 +25,13 @@ QString DataFastLed::description() const
 
 void DataFastLed::update()
 {
+    if (_enabled)
     CommandQueueInstance().enqueue(std::move(std::unique_ptr<CommandUpdateFastLed>(new CommandUpdateFastLed(this))));
 }
 
 void DataFastLed::updateValues()
 {
+    if (_enabled)
     CommandQueueInstance().enqueue(
         std::move(std::unique_ptr<CommandUpdateFastLedState>(new CommandUpdateFastLedState(this))));
 }

@@ -24,6 +24,7 @@ WidgetFanForm::WidgetFanForm(std::shared_ptr<DataFan> dataFan, QWidget *parent) 
 
     showFanTypes();
     on_supportedFunctionsUpdated(SUPPORTED_NONE);
+    on_supportedFunctionsUpdated(SUPPORTED_FANMODE_LINEAR|SUPPORTED_FANMODE_LIN_TP|SUPPORTED_FANMODE_TP|SUPPORTED_FANMODE_PI);
 
     indexSensorLinear = dataFan->data().config.snsIdx;
     indexSensorPiController = dataFan->data().config.snsIdx;
@@ -178,6 +179,18 @@ void WidgetFanForm::updateLinearControllerChart()
 {
     _seriesLinearController->replace(0, 0.0, getLinearControllerPoint(0.0));
     _seriesLinearController->replace(1, 100.0, getLinearControllerPoint(100.0));
+
+    _seriesLinear20->replace(0, 0.0, getLinearControllerPoint(20.0));
+    _seriesLinear20->replace(1, 20.0, getLinearControllerPoint(20.0));
+
+    _seriesLinear60->replace(0, 0.0, getLinearControllerPoint(60.0));
+    _seriesLinear60->replace(1, 60.0, getLinearControllerPoint(60.0));
+
+    int sensorValue = getSensorValueByIndex(_dataFan->data().config.snsIdx);
+
+    _seriesLinearSensor->replace(0, 0.0, getLinearControllerPoint(sensorValue));
+    _seriesLinearSensor->replace(1, sensorValue, getLinearControllerPoint(sensorValue));
+    _seriesLinearSensor->replace(2, sensorValue, 0.0);
 }
 
 void WidgetFanForm::createLinearControllerChart()
@@ -195,18 +208,51 @@ void WidgetFanForm::createLinearControllerChart()
     ui->wLinearChart->setLayout(cLayout);
     cLayout->addWidget(chartView);
 
+    /*
     QLineSeries *seriesBase = new QLineSeries();
     seriesBase->setName("Linear");
     seriesBase->append(0.0, 0.0);
     seriesBase->append(100.0, 100.0);
+    */
 
     _seriesLinearController = new QLineSeries();
     _seriesLinearController->setName("Settings");
     _seriesLinearController->append(0.0, getLinearControllerPoint(0.0));
     _seriesLinearController->append(100.0, getLinearControllerPoint(100.0));
 
-    linearControllerChart->addSeries(seriesBase);
+    _seriesLinear20 = new QLineSeries();
+    _seriesLinear20->setName("Linear20");
+    _seriesLinear20->setPointsVisible(true);
+    _seriesLinear20->setPointLabelsVisible(true);
+    _seriesLinear20->setPointLabelsFormat("@xPoint/@yPoint");
+    _seriesLinear20->append(0.0, getLinearControllerPoint(20.0));
+    _seriesLinear20->append(20.0, getLinearControllerPoint(20.0));
+    _seriesLinear20->append(20.0, 0.0);
+
+    _seriesLinear60 = new QLineSeries();
+    _seriesLinear60->setName("Linear60");
+    _seriesLinear60->setPointsVisible(true);
+    _seriesLinear60->setPointLabelsVisible(true);
+    _seriesLinear60->setPointLabelsFormat("@xPoint/@yPoint");
+    _seriesLinear60->append(0.0, 60.0);
+    _seriesLinear60->append(60.0, getLinearControllerPoint(60.0));
+    _seriesLinear60->append(60.0, 0.0);
+
+    _seriesLinearSensor = new QLineSeries();
+    _seriesLinearSensor->setName("LinearSensor");
+    _seriesLinearSensor->setPointsVisible(true);
+    _seriesLinearSensor->setPointLabelsVisible(true);
+    _seriesLinearSensor->setPointLabelsFormat("@xPoint/@yPoint");
+    _seriesLinearSensor->append(0.0, getLinearControllerPoint(20.0));
+    _seriesLinearSensor->append(20.0, getLinearControllerPoint(20.0));
+    _seriesLinearSensor->append(getLinearControllerPoint(20.0), 0.0);
+
     linearControllerChart->addSeries(_seriesLinearController);
+    //linearControllerChart->addSeries(seriesBase);
+    linearControllerChart->addSeries(_seriesLinear20);
+    linearControllerChart->addSeries(_seriesLinear60);
+    linearControllerChart->addSeries(_seriesLinearSensor);
+
     linearControllerChart->createDefaultAxes();
 
     Q_ASSERT(linearControllerChart->axisX()->type() == QAbstractAxis::AxisType::AxisTypeValue);
@@ -245,6 +291,9 @@ void WidgetFanForm::showSensorSeries()
     _seriesSensor->setXAxis(_seriesFan->getXAxis());
     _seriesSensor->setYAxis(_seriesFan->getYAxis());
     _seriesSensor->addSeries(_chart);
+
+    _seriesSensor->setName(_dataSensor->fullName());
+    _seriesSensor->setVisible(true);
 }
 
 void WidgetFanForm::showSeriesByMode()
@@ -280,11 +329,6 @@ void WidgetFanForm::showSeriesByMode()
         _dataSensor = _dataSensors.front();
         break;
     }
-
-
-
-    if (_seriesSensor && _dataSensor)
-        _seriesSensor->setName(_dataSensor->fullName());
 }
 
 void WidgetFanForm::on_dataUpdated()
@@ -358,23 +402,38 @@ void WidgetFanForm::appendLastValueToSeries(QLineSeries *series, QContiguousCach
     series->append(timeSeriesData.last().dt.toMSecsSinceEpoch(), timeSeriesData.last().value);
 }
 
+int WidgetFanForm::getSensorValueByIndex(int sensorIndex)
+{
+    int sensorValue = 0;
+
+    for (auto &sensor : _dataSensors)
+    {
+        if (sensorIndex == sensor->channel())
+        {
+            sensorValue = sensor->data().value;
+            break;
+        }
+    }
+
+    return sensorValue;
+}
+
 void WidgetFanForm::on_valueUpdated()
 {
-    //qDebug() << __PRETTY_FUNCTION__;
+    //qDebug() << PRETTY_FUNCTION;
 
     ui->spValueRpm->setValue(_dataFan->getRPM());
     ui->spValueDuty->setValue(_dataFan->getScaledDuty());
     ui->statusFanStalled->setFanIsStalled(_dataFan->data().status.stalled);
 
-    int sensorIndex = _dataFan->data().config.snsIdx;
-    for (auto &sensor : _dataSensors)
-    {
-        if (sensorIndex == sensor->channel())
-        {
-            ui->spValueSensor->setValue(sensor->data().value);
-            break;
-        }
-    }
+    int sensorValue = getSensorValueByIndex(_dataFan->data().config.snsIdx);
+    ui->spValueSensor->setValue(sensorValue);
+
+    if (ui->tabLinear == ui->tabWidget->currentWidget())
+        updateLinearControllerChart();
+
+    if (ui->tabTripPoints == ui->tabWidget->currentWidget())
+        updateTripPointControllerChart();
 }
 
 void WidgetFanForm::on_cbType_currentIndexChanged(int index)
@@ -556,7 +615,7 @@ void WidgetFanForm::on_tbValue_5_editingFinished()
     updateTripPointValues();
 }
 
-void WidgetFanForm::on_tbDuty_1_valueChanged(int value)
+void WidgetFanForm::set_tbDuty_1_valueChanged(int value)
 {
     Q_UNUSED(value);
 
@@ -574,11 +633,11 @@ void WidgetFanForm::on_tbDuty_1_valueChanged(int value)
 
 void WidgetFanForm::on_tbDuty_1_editingFinished()
 {
-    on_tbDuty_1_valueChanged(ui->tbDuty_1->value());
+    set_tbDuty_1_valueChanged(ui->tbDuty_1->value());
     _dataFan->updateTripPoints();
 }
 
-void WidgetFanForm::on_tbDuty_2_valueChanged(int value)
+void WidgetFanForm::set_tbDuty_2_valueChanged(int value)
 {
     Q_UNUSED(value);
 
@@ -597,11 +656,11 @@ void WidgetFanForm::on_tbDuty_2_valueChanged(int value)
 
 void WidgetFanForm::on_tbDuty_2_editingFinished()
 {
-    on_tbDuty_2_valueChanged(ui->tbDuty_2->value());
+    set_tbDuty_2_valueChanged(ui->tbDuty_2->value());
     _dataFan->updateTripPoints();
 }
 
-void WidgetFanForm::on_tbDuty_3_valueChanged(int value)
+void WidgetFanForm::set_tbDuty_3_valueChanged(int value)
 {
     Q_UNUSED(value);
 
@@ -620,11 +679,11 @@ void WidgetFanForm::on_tbDuty_3_valueChanged(int value)
 
 void WidgetFanForm::on_tbDuty_3_editingFinished()
 {
-    on_tbDuty_3_valueChanged(ui->tbDuty_3->value());
+    set_tbDuty_3_valueChanged(ui->tbDuty_3->value());
     _dataFan->updateTripPoints();
 }
 
-void WidgetFanForm::on_tbDuty_4_valueChanged(int value)
+void WidgetFanForm::set_tbDuty_4_valueChanged(int value)
 {
     Q_UNUSED(value);
 
@@ -643,11 +702,11 @@ void WidgetFanForm::on_tbDuty_4_valueChanged(int value)
 
 void WidgetFanForm::on_tbDuty_4_editingFinished()
 {
-    on_tbDuty_4_valueChanged(ui->tbDuty_4->value());
+    set_tbDuty_4_valueChanged(ui->tbDuty_4->value());
     _dataFan->updateTripPoints();
 }
 
-void WidgetFanForm::on_tbDuty_5_valueChanged(int value)
+void WidgetFanForm::set_tbDuty_5_valueChanged(int value)
 {
     Q_UNUSED(value);
 
@@ -665,15 +724,26 @@ void WidgetFanForm::on_tbDuty_5_valueChanged(int value)
 
 void WidgetFanForm::on_tbDuty_5_editingFinished()
 {
-    on_tbDuty_5_valueChanged(ui->tbDuty_5->value());
+    set_tbDuty_5_valueChanged(ui->tbDuty_5->value());
     _dataFan->updateTripPoints();
 }
 
 void WidgetFanForm::on_currentTabChanged(int index)
 {
-    //if (index == _dataFan->channel())
+    Q_UNUSED(index);
+
+    if (isVisible())
     {
         updateSensorSelectors();
+        _seriesFan->setVisible(true);
+        if (_seriesSensor)
+            _seriesSensor->setVisible(true);
+    }
+    else
+    {        
+        _seriesFan->setVisible(false);
+        if (_seriesSensor)
+            _seriesSensor->setVisible(false);
     }
 }
 
@@ -727,10 +797,10 @@ void WidgetFanForm::showFanModes(int supportedFunctions)
 
 void WidgetFanForm::on_supportedFunctionsUpdated(int supportedFunctions)
 {
-    ui->tabWidget->setTabEnabled(1, supportedFunctions & SUPPORTED_FANMODE_LINEAR);
-    ui->tabWidget->setTabEnabled(2, supportedFunctions & (SUPPORTED_FANMODE_LIN_TP | SUPPORTED_FANMODE_TP));
-    ui->tabWidget->setTabEnabled(3, supportedFunctions & (SUPPORTED_FANMODE_PI));
-    ui->tabWidget->setTabEnabled(4, supportedFunctions & (SUPPORTED_FANMODE_FUZZY));
+    ui->tabWidget->setTabEnabled(ui->tabWidget->indexOf(ui->tabLinear), supportedFunctions & SUPPORTED_FANMODE_LINEAR);
+    ui->tabWidget->setTabEnabled(ui->tabWidget->indexOf(ui->tabTripPoints), supportedFunctions & (SUPPORTED_FANMODE_LIN_TP | SUPPORTED_FANMODE_TP));
+    ui->tabWidget->setTabEnabled(ui->tabWidget->indexOf(ui->tabPI), supportedFunctions & (SUPPORTED_FANMODE_PI));
+    ui->tabWidget->setTabEnabled(ui->tabWidget->indexOf(ui->tabFuzzy), supportedFunctions & (SUPPORTED_FANMODE_FUZZY));
 
     showFanModes(supportedFunctions);
 }

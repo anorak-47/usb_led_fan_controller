@@ -83,7 +83,14 @@ void DataDeviceProperties::settingsLoad()
 void DataDeviceProperties::settingsClear()
 {
     CommandQueueInstance().enqueue(
-        std::move(std::unique_ptr<CommandSettingsLoad>(new CommandSettingsLoad(true, this))));
+                std::move(std::unique_ptr<CommandSettingsLoad>(new CommandSettingsLoad(true, this))));
+}
+
+void DataDeviceProperties::updateDeviceName(const QString &device_name)
+{
+    setDeviceName(device_name);
+    CommandQueueInstance().enqueue(
+                std::move(std::unique_ptr<CommandPropertiesDeviceName>(new CommandPropertiesDeviceName(this))));
 }
 
 int DataDeviceProperties::getSupportedFunctions() const
@@ -153,6 +160,16 @@ void DataDeviceProperties::setVersionProtocol(unsigned char version_protocol)
     _version_protocol = version_protocol;
 }
 
+QString DataDeviceProperties::getDeviceName() const
+{
+    return _device_name;
+}
+
+void DataDeviceProperties::setDeviceName(const QString &device_name)
+{
+    _device_name = device_name;
+}
+
 unsigned char DataDeviceProperties::getVersionFirmwareMinor() const
 {
     return _version_firmware_minor;
@@ -194,3 +211,5 @@ bool DataDeviceProperties::handleEvent(CommandEvent *event)
 
     return false;
 }
+
+

@@ -30,6 +30,16 @@ bool DataObject::handleEvent(CommandEvent *event)
     return false;
 }
 
+bool DataObject::enabled() const
+{
+    return _enabled;
+}
+
+void DataObject::setEnabled(bool enabled)
+{
+    _enabled = enabled;
+}
+
 void DataObject::on_update()
 {
     update();

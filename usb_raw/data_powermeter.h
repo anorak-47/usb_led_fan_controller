@@ -33,7 +33,7 @@ protected:
     virtual bool handleEvent(CommandEvent *event) override;
 
 private:
-    unsigned int _power_mW;
-    unsigned int _current_mA;
-    unsigned int _load_mV;
+    unsigned int _power_mW = 0;
+    unsigned int _current_mA = 0;
+    unsigned int _load_mV = 0;
 };

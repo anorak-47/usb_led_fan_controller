@@ -32,11 +32,11 @@ void FanStalledWidget::setFanIsStalled(bool stalled)
 
     if (stalled)
     {        
-        pm = QIcon(":/pixmaps/gFanStalled.svg");
+        pm = QIcon(":/pixmaps/003-exclamation-mark.svg");
     }
     else
     {
-        pm = QIcon(":/pixmaps/gFanNotStalled.svg");
+        pm = QIcon(":/pixmaps/001-refresh-1.svg");
     }
 
     ui->pixmap->setPixmap(pm.pixmap(QSize(20, 20), QIcon::Normal));

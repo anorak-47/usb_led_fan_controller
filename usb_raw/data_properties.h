@@ -25,6 +25,8 @@ public:
     void settingsLoad();
     void settingsClear();
 
+    void updateDeviceName(const QString &device_name);
+
     int getSupportedFunctions() const;
     void setSupportedFunctions(int funcs);
 
@@ -55,6 +57,9 @@ public:
     QString getDeviceDevice() const;
     void setDeviceDevice(const QString &device_device);
 
+    QString getDeviceName() const;
+    void setDeviceName(const QString &device_name);
+
     QString getDeviceVendorString() const;
     QString getFirmwareVersionString() const;
     QString getVersionProtocolString() const;
@@ -81,4 +86,5 @@ private:
     QString _device_serial_number;
     QString _device_vendor;
     QString _device_device;
+    QString _device_name;
 };

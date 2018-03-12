@@ -32,11 +32,11 @@ void FeatureSupportedWidget::setFeatureIsSupported(bool supported)
 
     if (supported)
     {        
-        pm = QIcon(":/pixmaps/gHookGreen.svg");
+        pm = QIcon(":/pixmaps/005-checked.svg");
     }
     else
     {
-        pm = QIcon(":/pixmaps/gCrossRed.svg");
+        pm = QIcon(":/pixmaps/004-cancel-1.svg");
     }
 
     ui->pixmap->setPixmap(pm.pixmap(QSize(20, 20), QIcon::Normal));

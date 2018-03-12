@@ -21,9 +21,12 @@ public:
     virtual void update() = 0;
     virtual void updateValues() = 0;
 
-    virtual bool event(QEvent *event) override;
+    virtual bool event(QEvent *event) override;    
 
     QMutex *mutex() const;
+
+    bool enabled() const;
+    void setEnabled(bool enabled);
 
 public slots:
     void on_update();
@@ -38,6 +41,7 @@ signals:
 protected:
 	virtual bool handleEvent(CommandEvent *event);
 
+    bool _enabled = true;
     QMutex *_mutex;
 };
 

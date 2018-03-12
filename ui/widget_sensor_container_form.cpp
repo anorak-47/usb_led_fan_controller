@@ -75,7 +75,7 @@ void WidgetSensorContainerForm::restoreSplitter()
 
     int c = 0;
     QList <int> sizes;
-    for(int size : ui->splitter->sizes())
+    for(int i = 0; i < ui->splitter->sizes().size(); i++)
     {
         int restoredSize = settings.value(QString("SensorContainer/splitter-size-%1").arg(c++), 350).toInt();
         sizes.append(restoredSize);
@@ -83,7 +83,6 @@ void WidgetSensorContainerForm::restoreSplitter()
 
     ui->splitter->setSizes(sizes);
 }
-
 
 void WidgetSensorContainerForm::createSensorChart()
 {
@@ -98,7 +97,7 @@ void WidgetSensorContainerForm::createSensorChart()
 
     QDateTime now = QDateTime::currentDateTime();
     _axisX->setRange(now.addSecs(-_time_range_secs), now);
-    _axisY->setRange(0.0, 100.0);
+    _axisY->setRange(0.0, 75.0);
 
     _chart = new QChart();
     //_chart->legend()->hide();
@@ -124,6 +123,14 @@ void WidgetSensorContainerForm::createSensorChart()
 
     connect(csf, SIGNAL(signalPause(bool)), this, SLOT(on_pause(bool)));
     connect(csf, SIGNAL(signalTimeRangeChanged(QTime)), this, SLOT(on_timeRangeChanged(QTime)));
+}
+
+void WidgetSensorContainerForm::on_currentTabChanged(int index)
+{
+    Q_UNUSED(index);
+
+    qDebug() << "WidgetSensorContainerForm: visible: " << isVisible();
+
 }
 
 void WidgetSensorContainerForm::addWidgetSensor(WidgetSensorForm *sensor, bool hasSuccessor)
@@ -158,7 +165,8 @@ void WidgetSensorContainerForm::addWidgetSensor(WidgetSensorForm *sensor, bool h
 
 void WidgetSensorContainerForm::on_sensorValueUpdated(QWidget *sensorWidget)
 {	
-    WidgetSensorForm *sensorFromWidget = static_cast<WidgetSensorForm *>(sensorWidget);
+    Q_UNUSED(sensorWidget);
+    //WidgetSensorForm *sensorFromWidget = static_cast<WidgetSensorForm *>(sensorWidget);
 
     //qDebug() << "on_sensorValueUpdated " << sensorFromWidget->dataSensor()->fullName();
 
@@ -233,7 +241,8 @@ void WidgetSensorContainerForm::on_showGraphUpdated(QWidget *sensorWidget)
 
 void WidgetSensorContainerForm::on_nameGraphUpdated(QWidget *sensorWidget)
 {
-    WidgetSensorForm *sensorFromWidget = static_cast<WidgetSensorForm *>(sensorWidget);
+    Q_UNUSED(sensorWidget);
+    //WidgetSensorForm *sensorFromWidget = static_cast<WidgetSensorForm *>(sensorWidget);
 
     /*
     auto it = _lineSeries.find(sensorWidget);
@@ -247,7 +256,8 @@ void WidgetSensorContainerForm::on_nameGraphUpdated(QWidget *sensorWidget)
 
 void WidgetSensorContainerForm::on_colorGraphUpdated(QWidget *sensorWidget)
 {
-    WidgetSensorForm *sensorFromWidget = static_cast<WidgetSensorForm *>(sensorWidget);
+    Q_UNUSED(sensorWidget);
+    //WidgetSensorForm *sensorFromWidget = static_cast<WidgetSensorForm *>(sensorWidget);
 
     /*
     auto it = _lineSeries.find(sensorWidget);

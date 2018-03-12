@@ -7,13 +7,13 @@
     <x>0</x>
     <y>0</y>
     <width>847</width>
-    <height>481</height>
+    <height>558</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QGridLayout" name="gridLayout_9">
+  <layout class="QGridLayout" name="gridLayout_6">
    <property name="leftMargin">
     <number>0</number>
    </property>
@@ -26,302 +26,7 @@
    <property name="bottomMargin">
     <number>0</number>
    </property>
-   <item row="0" column="0" colspan="2">
-    <widget class="QLabel" name="lTitle">
-     <property name="text">
-      <string>Fan</string>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignCenter</set>
-     </property>
-    </widget>
-   </item>
-   <item row="3" column="0">
-    <widget class="QGroupBox" name="gbFanValues">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-       <horstretch>0</horstretch>
-       <verstretch>1</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="title">
-      <string>Current values for fan</string>
-     </property>
-     <layout class="QGridLayout" name="gridLayout_7">
-      <item row="0" column="1">
-       <widget class="QSpinBox" name="spValueDuty">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-          <horstretch>2</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="readOnly">
-         <bool>true</bool>
-        </property>
-        <property name="buttonSymbols">
-         <enum>QAbstractSpinBox::NoButtons</enum>
-        </property>
-        <property name="suffix">
-         <string>%</string>
-        </property>
-        <property name="maximum">
-         <number>100</number>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="0">
-       <widget class="QSpinBox" name="spValueRpm">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-          <horstretch>2</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="readOnly">
-         <bool>true</bool>
-        </property>
-        <property name="buttonSymbols">
-         <enum>QAbstractSpinBox::NoButtons</enum>
-        </property>
-        <property name="suffix">
-         <string>rpm</string>
-        </property>
-        <property name="maximum">
-         <number>30000</number>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="2">
-       <widget class="QSpinBox" name="spValueSensor">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-          <horstretch>2</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="readOnly">
-         <bool>true</bool>
-        </property>
-        <property name="buttonSymbols">
-         <enum>QAbstractSpinBox::NoButtons</enum>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="3">
-       <widget class="FanStalledWidget" name="statusFanStalled">
-        <property name="toolTip">
-         <string>FanStalledWidget</string>
-        </property>
-        <property name="whatsThis">
-         <string>FanStalledWidget.</string>
-        </property>
-        <property name="fanName">
-         <string>Stalled</string>
-        </property>
-        <property name="fanStalled" stdset="0">
-         <bool>false</bool>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </widget>
-   </item>
-   <item row="2" column="0">
-    <widget class="QGroupBox" name="gbFan">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-       <horstretch>0</horstretch>
-       <verstretch>6</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="title">
-      <string>Settings</string>
-     </property>
-     <layout class="QGridLayout" name="gridLayout_6">
-      <item row="0" column="2" colspan="3">
-       <widget class="QLineEdit" name="leDescription">
-        <property name="maxLength">
-         <number>256</number>
-        </property>
-       </widget>
-      </item>
-      <item row="7" column="1">
-       <spacer name="verticalSpacer_5">
-        <property name="orientation">
-         <enum>Qt::Vertical</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>20</width>
-          <height>42</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-      <item row="6" column="3">
-       <widget class="QLabel" name="label_38">
-        <property name="text">
-         <string>---</string>
-        </property>
-        <property name="buddy">
-         <cstring>spMinRpm</cstring>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="2" colspan="3">
-       <widget class="QComboBox" name="cbType">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-          <horstretch>2</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="0">
-       <widget class="QLabel" name="label_2">
-        <property name="text">
-         <string>Fan t&amp;ype:</string>
-        </property>
-        <property name="buddy">
-         <cstring>cbType</cstring>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="2" colspan="3">
-       <widget class="QComboBox" name="cbMode"/>
-      </item>
-      <item row="0" column="0" colspan="2">
-       <widget class="QLabel" name="label_17">
-        <property name="text">
-         <string>Description:</string>
-        </property>
-        <property name="buddy">
-         <cstring>leDescription</cstring>
-        </property>
-       </widget>
-      </item>
-      <item row="4" column="2" colspan="3">
-       <widget class="QSpinBox" name="spMinRpmStall">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="suffix">
-         <string>rpm</string>
-        </property>
-        <property name="maximum">
-         <number>3000</number>
-        </property>
-        <property name="value">
-         <number>300</number>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="0" colspan="2">
-       <widget class="QLabel" name="label_3">
-        <property name="text">
-         <string>Fa&amp;n control strategy:</string>
-        </property>
-        <property name="buddy">
-         <cstring>cbMode</cstring>
-        </property>
-       </widget>
-      </item>
-      <item row="4" column="0" colspan="2">
-       <widget class="QLabel" name="label_4">
-        <property name="toolTip">
-         <string>A fian with RPM below this value is detected as stalled.</string>
-        </property>
-        <property name="text">
-         <string>&amp;Min RPM before stall:</string>
-        </property>
-        <property name="buddy">
-         <cstring>spMinRpmStall</cstring>
-        </property>
-       </widget>
-      </item>
-      <item row="6" column="4">
-       <widget class="QSpinBox" name="spMaxRpm">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="suffix">
-         <string>%</string>
-        </property>
-        <property name="maximum">
-         <number>100</number>
-        </property>
-        <property name="value">
-         <number>100</number>
-        </property>
-       </widget>
-      </item>
-      <item row="6" column="0" colspan="2">
-       <widget class="QLabel" name="label_27">
-        <property name="text">
-         <string>Restrict D&amp;uty Cylce:</string>
-        </property>
-        <property name="buddy">
-         <cstring>spMinRpm</cstring>
-        </property>
-       </widget>
-      </item>
-      <item row="6" column="2">
-       <widget class="QSpinBox" name="spMinRpm">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="suffix">
-         <string>%</string>
-        </property>
-        <property name="maximum">
-         <number>100</number>
-        </property>
-        <property name="value">
-         <number>0</number>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="0">
-       <widget class="QLabel" name="label_28">
-        <property name="toolTip">
-         <string>If the calculated duty cycle is below this value, the fan is stopped.</string>
-        </property>
-        <property name="text">
-         <string>Min Duty Cycle:</string>
-        </property>
-        <property name="buddy">
-         <cstring>spMaxRpm</cstring>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="2" colspan="3">
-       <widget class="QSpinBox" name="sbMinDutyCycle">
-        <property name="suffix">
-         <string>%</string>
-        </property>
-        <property name="maximum">
-         <number>100</number>
-        </property>
-        <property name="value">
-         <number>25</number>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </widget>
-   </item>
-   <item row="2" column="1" rowspan="2">
+   <item row="2" column="0" rowspan="2" colspan="2">
     <widget class="QTabWidget" name="tabWidget">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
@@ -332,7 +37,196 @@
      <property name="currentIndex">
       <number>0</number>
      </property>
-     <widget class="QWidget" name="tab">
+     <widget class="QWidget" name="tabSettings">
+      <attribute name="title">
+       <string>Settings</string>
+      </attribute>
+      <layout class="QGridLayout" name="gridLayout_9" columnstretch="0,0,0,0" columnminimumwidth="0,0,0,0">
+       <item row="6" column="0" colspan="4">
+        <spacer name="verticalSpacer_5">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>738</width>
+           <height>66</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item row="4" column="1" colspan="2">
+        <widget class="QSpinBox" name="spMinRpmStall">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="suffix">
+          <string>rpm</string>
+         </property>
+         <property name="maximum">
+          <number>3000</number>
+         </property>
+         <property name="value">
+          <number>300</number>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="0">
+        <widget class="QLabel" name="label_28">
+         <property name="toolTip">
+          <string>If the calculated duty cycle is below this value, the fan is stopped.</string>
+         </property>
+         <property name="text">
+          <string>Min Duty Cycle:</string>
+         </property>
+         <property name="buddy">
+          <cstring>spMaxRpm</cstring>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="1" colspan="2">
+        <widget class="QComboBox" name="cbMode"/>
+       </item>
+       <item row="2" column="0">
+        <widget class="QLabel" name="label_3">
+         <property name="text">
+          <string>Fa&amp;n control strategy:</string>
+         </property>
+         <property name="buddy">
+          <cstring>cbMode</cstring>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="0">
+        <widget class="QLabel" name="label_17">
+         <property name="text">
+          <string>Description:</string>
+         </property>
+         <property name="buddy">
+          <cstring>leDescription</cstring>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1" colspan="3">
+        <widget class="QLineEdit" name="leDescription">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="maxLength">
+          <number>256</number>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="0">
+        <widget class="QLabel" name="label_4">
+         <property name="toolTip">
+          <string>A fian with RPM below this value is detected as stalled.</string>
+         </property>
+         <property name="text">
+          <string>&amp;Min RPM before stall:</string>
+         </property>
+         <property name="buddy">
+          <cstring>spMinRpmStall</cstring>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="1">
+        <widget class="QSpinBox" name="spMinRpm">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="suffix">
+          <string>%</string>
+         </property>
+         <property name="maximum">
+          <number>100</number>
+         </property>
+         <property name="value">
+          <number>0</number>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="1" colspan="2">
+        <widget class="QSpinBox" name="sbMinDutyCycle">
+         <property name="suffix">
+          <string>%</string>
+         </property>
+         <property name="maximum">
+          <number>100</number>
+         </property>
+         <property name="value">
+          <number>25</number>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0">
+        <widget class="QLabel" name="label_2">
+         <property name="text">
+          <string>Fan t&amp;ype:</string>
+         </property>
+         <property name="buddy">
+          <cstring>cbType</cstring>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="0">
+        <widget class="QLabel" name="label_27">
+         <property name="text">
+          <string>Restrict D&amp;uty Cylce:</string>
+         </property>
+         <property name="buddy">
+          <cstring>spMinRpm</cstring>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1" colspan="2">
+        <widget class="QComboBox" name="cbType"/>
+       </item>
+       <item row="5" column="2">
+        <widget class="QSpinBox" name="spMaxRpm">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="suffix">
+          <string>%</string>
+         </property>
+         <property name="maximum">
+          <number>100</number>
+         </property>
+         <property name="value">
+          <number>100</number>
+         </property>
+        </widget>
+       </item>
+      </layout>
+      <zorder>cbMode</zorder>
+      <zorder>label_4</zorder>
+      <zorder>label_27</zorder>
+      <zorder>label_17</zorder>
+      <zorder>cbType</zorder>
+      <zorder>label_3</zorder>
+      <zorder>spMinRpmStall</zorder>
+      <zorder>label_28</zorder>
+      <zorder>sbMinDutyCycle</zorder>
+      <zorder>leDescription</zorder>
+      <zorder>label_2</zorder>
+      <zorder>spMinRpm</zorder>
+      <zorder>verticalSpacer_5</zorder>
+      <zorder>spMaxRpm</zorder>
+     </widget>
+     <widget class="QWidget" name="tabFixed">
       <attribute name="title">
        <string>Fixed </string>
       </attribute>
@@ -353,7 +247,7 @@
        <item row="0" column="0">
         <widget class="QLabel" name="label_6">
          <property name="text">
-          <string>Fixed Duty Cycle:</string>
+          <string>Fi&amp;xed Duty Cycle:</string>
          </property>
          <property name="buddy">
           <cstring>spFixedDuty</cstring>
@@ -409,7 +303,7 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="tab_4">
+     <widget class="QWidget" name="tabLinear">
       <attribute name="title">
        <string>Linear</string>
       </attribute>
@@ -524,7 +418,7 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="tab_3">
+     <widget class="QWidget" name="tabTripPoints">
       <attribute name="title">
        <string>Trip Points</string>
       </attribute>
@@ -540,11 +434,29 @@
          <property name="title">
           <string>Tip Point Configuraton</string>
          </property>
+         <property name="flat">
+          <bool>true</bool>
+         </property>
          <layout class="QGridLayout" name="gridLayout_8">
+          <property name="leftMargin">
+           <number>0</number>
+          </property>
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <property name="rightMargin">
+           <number>0</number>
+          </property>
+          <property name="bottomMargin">
+           <number>0</number>
+          </property>
+          <property name="horizontalSpacing">
+           <number>6</number>
+          </property>
           <item row="0" column="0">
            <widget class="QLabel" name="label_26">
             <property name="text">
-             <string>Point</string>
+             <string/>
             </property>
            </widget>
           </item>
@@ -554,7 +466,7 @@
              <string>from</string>
             </property>
             <property name="alignment">
-             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+             <set>Qt::AlignCenter</set>
             </property>
            </widget>
           </item>
@@ -564,14 +476,17 @@
              <string>to</string>
             </property>
             <property name="alignment">
-             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+             <set>Qt::AlignCenter</set>
             </property>
            </widget>
           </item>
           <item row="0" column="5">
            <widget class="QLabel" name="label_37">
             <property name="text">
-             <string>Duty cycle</string>
+             <string>Duty Cycle</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
             </property>
            </widget>
           </item>
@@ -903,7 +818,7 @@
          </layout>
         </widget>
        </item>
-       <item row="0" column="0">
+       <item row="2" column="0">
         <layout class="QHBoxLayout" name="horizontalLayout">
          <item>
           <widget class="QLabel" name="label">
@@ -927,7 +842,7 @@
          </item>
         </layout>
        </item>
-       <item row="0" column="1" rowspan="2">
+       <item row="0" column="1" rowspan="3">
         <widget class="QWidget" name="wTripPointChart" native="true">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -939,7 +854,7 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="tab_2">
+     <widget class="QWidget" name="tabPI">
       <attribute name="title">
        <string>PI controller</string>
       </attribute>
@@ -1090,27 +1005,149 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="tab_5">
+     <widget class="QWidget" name="tabFuzzy">
       <attribute name="title">
        <string>Fuzzy</string>
       </attribute>
      </widget>
     </widget>
    </item>
-   <item row="1" column="0" colspan="2">
-    <widget class="Line" name="line">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
+   <item row="0" column="0" colspan="2">
+    <widget class="QLabel" name="lTitle">
+     <property name="text">
+      <string>Fan</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
      </property>
     </widget>
    </item>
    <item row="4" column="0" colspan="2">
+    <widget class="QGroupBox" name="gbFanValues">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+       <horstretch>0</horstretch>
+       <verstretch>1</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="title">
+      <string>Current values for fan</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_7">
+      <item row="0" column="0">
+       <widget class="QLabel" name="label_18">
+        <property name="text">
+         <string>Speed:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="3">
+       <widget class="QSpinBox" name="spValueDuty">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+          <horstretch>2</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
+        <property name="buttonSymbols">
+         <enum>QAbstractSpinBox::NoButtons</enum>
+        </property>
+        <property name="suffix">
+         <string>%</string>
+        </property>
+        <property name="maximum">
+         <number>100</number>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="2">
+       <widget class="QLabel" name="label_39">
+        <property name="text">
+         <string>Duty Cycle:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QSpinBox" name="spValueRpm">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+          <horstretch>2</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
+        <property name="buttonSymbols">
+         <enum>QAbstractSpinBox::NoButtons</enum>
+        </property>
+        <property name="suffix">
+         <string>rpm</string>
+        </property>
+        <property name="maximum">
+         <number>30000</number>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="6">
+       <widget class="FanStalledWidget" name="statusFanStalled">
+        <property name="toolTip">
+         <string>FanStalledWidget</string>
+        </property>
+        <property name="whatsThis">
+         <string>FanStalledWidget.</string>
+        </property>
+        <property name="fanName">
+         <string>Stalled</string>
+        </property>
+        <property name="fanStalled" stdset="0">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="5">
+       <widget class="QSpinBox" name="spValueSensor">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+          <horstretch>2</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
+        <property name="buttonSymbols">
+         <enum>QAbstractSpinBox::NoButtons</enum>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="4">
+       <widget class="QLabel" name="label_40">
+        <property name="text">
+         <string>Sensor Value:</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item row="5" column="0" colspan="2">
     <widget class="QWidget" name="wChart" native="true">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
        <horstretch>0</horstretch>
        <verstretch>10</verstretch>
       </sizepolicy>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="0" colspan="2">
+    <widget class="Line" name="line">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
      </property>
     </widget>
    </item>

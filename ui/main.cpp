@@ -79,6 +79,7 @@ int main(int argc, char *argv[])
 
         WidgetSensorForm *wsf = new WidgetSensorForm(sensor);
         sensorListWidget->addWidgetSensor(wsf, i != MAX_SNS - 1);
+        QObject::connect(&w, SIGNAL(currentChanged(int)), wsf, SLOT(on_currentTabChanged(int)));
 
         QObject::connect(properties.get(), SIGNAL(signalSupportedFunctionsUpdated(int)), wsf, SLOT(on_supportedFunctionsUpdated(int)));
 
@@ -91,6 +92,7 @@ int main(int argc, char *argv[])
 
 
     WidgetFanContainerForm *fanContainer = new WidgetFanContainerForm();
+    QObject::connect(&w, SIGNAL(currentChanged(int)), fanContainer, SLOT(on_currentTabChanged(int)));
 
     for (int i = 0; i < MAX_FANS; i++)
     {
@@ -115,6 +117,7 @@ int main(int argc, char *argv[])
 
         WidgetFanShowForm *wsf = new WidgetFanShowForm(fan);
         wsf->setDataSensors(dataSensors);
+        QObject::connect(&w, SIGNAL(currentChanged(int)), wsf, SLOT(on_currentTabChanged(int)));
 
         fanContainer->addWidgetFan(wsf, i != MAX_FANS - 1);
     }
@@ -132,10 +135,18 @@ int main(int argc, char *argv[])
         watcher.registerDataObject(fanout);
         updater.registerDataObject(fanout);
 
+
+
+        tester.registerDataObject(fanout);
+
+
+
         WidgetFanOutForm *wfof = new WidgetFanOutForm(fanout);
         wfof->setDataFans(dataFans);
         //fanoutListWidget->addWidgetFanout(wfof);
-        w.addWidget(MainWindow::Feature::FanOutput, wfof, fanout->name());
+        QObject::connect(&w, SIGNAL(currentChanged(int)), wfof, SLOT(on_currentTabChanged(int)));
+
+        w.addWidget(MainWindow::Feature::FanOutput, wfof, fanout->name());        
 
         QObject::connect(properties.get(), SIGNAL(signalSupportedFunctionsUpdated(int)), wfof, SLOT(on_supportedFunctionsUpdated(int)));
     }
@@ -175,11 +186,20 @@ int main(int argc, char *argv[])
         watcher.registerDataObject(powermeter);
         updater.registerDataObject(powermeter);
 
-        WidgetPowerMeterForm *wfof = new WidgetPowerMeterForm(powermeter);
-        //powermeterListWidget->addWidgetPowerMeter(wfof);
-        w.addWidget(MainWindow::Feature::PowerMeter, wfof, powermeter->name());
 
-        QObject::connect(properties.get(), SIGNAL(signalSupportedFunctionsUpdated(int)), wfof, SLOT(on_supportedFunctionsUpdated(int)));
+
+        tester.registerDataObject(powermeter);
+
+
+
+
+        WidgetPowerMeterForm *wpmf = new WidgetPowerMeterForm(powermeter);
+        //powermeterListWidget->addWidgetPowerMeter(wfof);
+        QObject::connect(&w, SIGNAL(currentChanged(int)), wpmf, SLOT(on_currentTabChanged(int)));
+
+        w.addWidget(MainWindow::Feature::PowerMeter, wpmf, powermeter->name());
+
+        QObject::connect(properties.get(), SIGNAL(signalSupportedFunctionsUpdated(int)), wpmf, SLOT(on_supportedFunctionsUpdated(int)));
     }
 
     //w.addWidget(powermeterListWidget, "Power");
@@ -209,7 +229,13 @@ int main(int argc, char *argv[])
 
     sensorListWidget->readSettings();
 
-    //tester.startUpdates();
+
+
+
+    tester.startUpdates();
+
+
+
 
     usbConnection->connectToDevice();
 

@@ -25,13 +25,15 @@ QString DataPowerMeter::description() const
 
 void DataPowerMeter::update()
 {
-    CommandQueueInstance().enqueue(std::move(std::unique_ptr<CommandUpdatePowerMeter>(new CommandUpdatePowerMeter(this))));
+    if (_enabled)
+        CommandQueueInstance().enqueue(std::move(std::unique_ptr<CommandUpdatePowerMeter>(new CommandUpdatePowerMeter(this))));
 }
 
 void DataPowerMeter::updateValues()
 {
-    CommandQueueInstance().enqueue(
-        std::move(std::unique_ptr<CommandUpdatePowerMeter>(new CommandUpdatePowerMeter(this))));
+    if (_enabled)
+        CommandQueueInstance().enqueue(
+                    std::move(std::unique_ptr<CommandUpdatePowerMeter>(new CommandUpdatePowerMeter(this))));
 }
 
 void DataPowerMeter::setCurrent_mA(unsigned int current)
@@ -74,11 +76,11 @@ bool DataPowerMeter::handleEvent(CommandEvent *event)
 {
     if (event->type() == (QEvent::Type)CommandEvents::EventValueUpdated)
     {
-        qDebug() << "EventValueUpdated event, channel: " << event->getChannel();
+        //qDebug() << "EventValueUpdated event, channel: " << event->getChannel();
 
         if (event->getChannel() == _channel)
         {
-            qDebug() << "EventValueUpdated: " << fullName();
+            //qDebug() << "EventValueUpdated: " << fullName();
             emit signalValueChanged();
             return true;
         }

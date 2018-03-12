@@ -1,0 +1,30 @@
+<RCC>
+    <qresource prefix="/ulf/icons">
+        <file>icons/svg/001-refresh-1.svg</file>
+        <file>icons/svg/002-refresh.svg</file>
+        <file>icons/svg/003-exclamation-mark.svg</file>
+        <file>icons/svg/004-cancel-1.svg</file>
+        <file>icons/svg/005-checked.svg</file>
+        <file>icons/svg/006-cancel.svg</file>
+        <file>icons/svg/007-maps-and-flags.svg</file>
+        <file>icons/svg/008-mark.svg</file>
+        <file>icons/svg/009-warning.svg</file>
+        <file>icons/svg/010-usb.svg</file>
+        <file>icons/svg/011-cpu.svg</file>
+        <file>icons/svg/012-cooler.svg</file>
+        <file>icons/svg/013-light-bulb.svg</file>
+        <file>icons/svg/014-pendrive.svg</file>
+        <file>icons/svg/015-microchip-1.svg</file>
+        <file>icons/svg/016-microchip.svg</file>
+        <file>icons/svg/017-idea.svg</file>
+        <file>icons/svg/018-computer.svg</file>
+        <file>icons/svg/019-pc.svg</file>
+        <file>icons/svg/020-cooling.svg</file>
+        <file>icons/svg/021-thermometer-1.svg</file>
+        <file>icons/svg/022-thermometer.svg</file>
+        <file>icons/svg/023-voltmeter-1.svg</file>
+        <file>icons/svg/024-voltmeter.svg</file>
+        <file>icons/svg/025-fan-1.svg</file>
+        <file>icons/svg/026-fan.svg</file>
+    </qresource>
+</RCC>

@@ -176,6 +176,31 @@ int usbfaceFirmwareVersion(hid_device *device, unsigned char *major, unsigned ch
     return res;
 }
 
+int usbfaceDeviceNameRead(hid_device *device, char *name)
+{
+    unsigned char output_data[21];
+
+    int res;
+    res = usbRequestData(device, CUSTOM_RQ_DEVICE_NAME_READ, 0, 0, 0, 7, output_data);
+    res = usbRequestData(device, CUSTOM_RQ_DEVICE_NAME_READ, 0, 0, 0, 7, output_data+7);
+    res = usbRequestData(device, CUSTOM_RQ_DEVICE_NAME_READ, 0, 0, 0, 6, output_data+7);
+
+    output_data[20] = '\0';
+    strncpy(name, (char*)output_data, 21);
+
+    return res;
+}
+
+int usbfaceDeviceNameWrite(hid_device *device, char const *name)
+{
+    int res;
+    unsigned char *string = (unsigned char*)name;
+    res = usbRequestData(device, CUSTOM_RQ_DEVICE_NAME_WRITE, 0, 7, string, 0, 0);
+    res = usbRequestData(device, CUSTOM_RQ_DEVICE_NAME_WRITE, 7, 7, string+7, 0, 0);
+    res = usbRequestData(device, CUSTOM_RQ_DEVICE_NAME_WRITE, 14, 6, string+7, 0, 0);
+    return res;
+}
+
 int usbfaceFuncsSupportedRead(hid_device *device, SUPPORTED *funcs)
 {
     int res = USBFACE_SUCCESS;

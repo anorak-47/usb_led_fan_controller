@@ -74,6 +74,9 @@ public:
 
     Fan &data();
 
+signals:
+    void signalSensorIndexChanged();
+
 protected:
     virtual bool handleEvent(CommandEvent *event) override;
 

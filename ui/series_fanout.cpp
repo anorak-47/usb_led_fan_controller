@@ -36,10 +36,14 @@ void SeriesFanOut::updateValues()
     _timeDataSeriesDuty.append(TimeSeriesData(_dataFanOut->data().rpm));
     _timeDataSeriesRpm.append(TimeSeriesData(_dataFanOut->data().rpm));
 
-    appendLastValueToSeries(_seriesFanRpm, _timeDataSeriesRpm);
-    appendLastValueToSeries(_seriesFanDuty, _timeDataSeriesDuty);
+    if (isVisible())
+    {
+        qDebug() << "SeriesFanOut:" << _dataFanOut->fullName() << " update graph";
+        appendLastValueToSeries(_seriesFanRpm, _timeDataSeriesRpm);
+        appendLastValueToSeries(_seriesFanDuty, _timeDataSeriesDuty);
 
-    rescaleXAxis(_timeDataSeriesRpm.first().dt);
+        rescaleXAxis(_timeDataSeriesRpm.first().dt);
+    }
 }
 
 void SeriesFanOut::addYAxis(QChart *chart)
@@ -75,8 +79,21 @@ void SeriesFanOut::rescaleYAxis()
 
 void SeriesFanOut::setVisible(bool visible)
 {
-    _seriesFanRpm->setVisible(visible);
-    _seriesFanDuty->setVisible(visible);
+    //qDebug() << "SeriesFanOut:" << _dataFanOut->fullName() << " visible: " << visible;
+
+    SeriesWithData::setVisible(visible);
+
+    if (visible)
+    {
+        {
+            QSignalBlocker b1(_seriesFanRpm);
+            QSignalBlocker b2(_seriesFanDuty);
+
+            copyFromTimeSeries(_seriesFanRpm, _timeDataSeriesRpm);
+            copyFromTimeSeries(_seriesFanDuty, _timeDataSeriesDuty);
+        }
+        rescaleXAxis(_timeDataSeriesRpm.first().dt);
+    }
 }
 
 void SeriesFanOut::setVisibleRpm(bool visible)

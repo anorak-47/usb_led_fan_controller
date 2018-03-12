@@ -190,6 +190,8 @@ void DataFan::updateSensorIndex(int index)
         return;
     _fan.config.snsIdx = index;
     CommandQueueInstance().enqueue(std::move(std::unique_ptr<CommandSetFanConfig>(new CommandSetFanConfig(this))));
+
+    emit signalSensorIndexChanged();
 }
 
 void DataFan::updateMinRpmStalled(double rpm)
@@ -248,6 +250,8 @@ void DataFan::updatePiControllerSetpoint(int snsIdx, double offset)
 
     CommandQueueInstance().enqueue(
         std::move(std::unique_ptr<CommandSetFanPiController>(new CommandSetFanPiController(this))));
+
+    emit signalSensorIndexChanged();
 }
 
 
@@ -305,6 +309,16 @@ bool DataFan::handleEvent(CommandEvent *event)
         {
             //qDebug() << "signalValueChanged: " << fullName();
             emit signalValueChanged();
+            return true;
+        }
+    }
+
+    else if (event->type() == (QEvent::Type)CommandEvents::EventAllDataUpdated)
+    {
+        if (event->getChannel() == _channel)
+        {
+            //qDebug() << "signalSensorIndexChanged: " << fullName();
+            emit signalSensorIndexChanged();
             return true;
         }
     }

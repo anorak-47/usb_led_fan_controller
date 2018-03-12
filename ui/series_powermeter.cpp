@@ -36,17 +36,20 @@ SeriesPowerMeter::~SeriesPowerMeter()
 
 void SeriesPowerMeter::updateValues()
 {
-    qDebug() << __PRETTY_FUNCTION__;
-
     _timeDataSeriesCurrent.append(TimeSeriesData(_dataPowerMeter->getCurrent_mA()));
     _timeDataSeriesPower.append(TimeSeriesData(_dataPowerMeter->getPower_mW()));
     _timeDataSeriesLoad.append(TimeSeriesData(_dataPowerMeter->getLoad_mV() / 1000));
 
-    appendLastValueToSeries(_seriesPower, _timeDataSeriesPower);
-    appendLastValueToSeries(_seriesCurrent, _timeDataSeriesCurrent);
-    appendLastValueToSeries(_seriesLoad, _timeDataSeriesLoad);
+    if (isVisible())
+    {
+        qDebug() << "SeriesPowerMeter:" << _dataPowerMeter->fullName() << " update graph";
 
-    rescaleXAxis(_timeDataSeriesPower.first().dt);
+        appendLastValueToSeries(_seriesPower, _timeDataSeriesPower);
+        appendLastValueToSeries(_seriesCurrent, _timeDataSeriesCurrent);
+        appendLastValueToSeries(_seriesLoad, _timeDataSeriesLoad);
+
+        rescaleXAxis(_timeDataSeriesPower.first().dt);
+    }
 }
 
 void SeriesPowerMeter::addYAxis(QChart *chart)
@@ -92,9 +95,23 @@ void SeriesPowerMeter::rescaleYAxis()
 
 void SeriesPowerMeter::setVisible(bool visible)
 {
-    setVisibleCurrent(visible);
-    setVisibleLoad(visible);
-    setVisibleLoad(visible);
+    //qDebug() << "SeriesPowerMeter:" << _dataPowerMeter->fullName() << " visible: " << visible;
+
+    SeriesWithData::setVisible(visible);
+
+    if (visible)
+    {
+        {
+            QSignalBlocker b1(_seriesPower);
+            QSignalBlocker b2(_seriesCurrent);
+            QSignalBlocker b3(_seriesLoad);
+
+            copyFromTimeSeries(_seriesLoad, _timeDataSeriesLoad);
+            copyFromTimeSeries(_seriesCurrent, _timeDataSeriesCurrent);
+            copyFromTimeSeries(_seriesPower, _timeDataSeriesPower);
+        }
+        rescaleXAxis(_timeDataSeriesLoad.first().dt);
+    }
 }
 
 void SeriesPowerMeter::setVisiblePower(bool visible)

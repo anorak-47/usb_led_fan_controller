@@ -21,7 +21,7 @@ MainWindow::MainWindow(QWidget *parent) :
     createTrayActions();
     createTrayIcon();
 
-    setIcon(QIcon(":/pixmaps/gFanStalled.svg"));
+    setIcon(QIcon(":/ulf/icons/icons/svg/026-fan.svg"));
     trayIcon->show();
 }
 
@@ -45,21 +45,41 @@ QIcon MainWindow::getIconByFeature(MainWindow::Feature feature, bool isTopLevel)
     {
         switch (feature)
         {
-
-        default:
-            return QIcon(":/pixmaps/gFanStalled.svg");
+        case MainWindow::Feature::Device:
+            return QIcon(":/ulf/icons/icons/svg/016-microchip.svg");
+            break;
+        case MainWindow::Feature::Fan:
+            return QIcon(":/ulf/icons/icons/svg/026-fan.svg");
+            break;
+        case MainWindow::Feature::FanOutput:
+            return QIcon(":/ulf/icons/icons/svg/020-cooling.svg");
+            break;
+        case MainWindow::Feature::LEDStripe:
+            return QIcon(":/ulf/icons/icons/svg/013-light-bulb.svg");
+            break;
+        case MainWindow::Feature::PowerMeter:
+            return QIcon(":/ulf/icons/icons/svg/024-voltmeter.svg");
+            break;
+        case MainWindow::Feature::Sensor:
+            return QIcon(":/ulf/icons/icons/svg/021-thermometer-1.svg");
             break;
         }
     }
 
     switch (feature)
     {
+    case MainWindow::Feature::Device:
+        return QIcon(":/ulf/icons/icons/svg/016-microchip.svg");
+        break;
+    case MainWindow::Feature::Sensor:
+        return QIcon(":/ulf/icons/icons/svg/021-thermometer-1.svg");
+        break;
     default:
-        return QIcon(":/pixmaps/gFanNotStalled.svg");
+        return QIcon();
         break;
     }
 
-       return QIcon();
+    return QIcon();
 }
 
 void MainWindow::addTopLevelItemsForFeatures()

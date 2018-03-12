@@ -16,10 +16,18 @@ SeriesWithData::~SeriesWithData()
 {
 }
 
+void SeriesWithData::scaleXAxis()
+{
+    QDateTime now = QDateTime::currentDateTime();
+    QDateTime then = now.addSecs(-_xaxis_display_range);
+    _axisX->setRange(then, now);
+}
+
 void SeriesWithData::rescaleXAxis(QDateTime const &oldestTimestamp)
 {
     if (_axisX == 0)
 		return;
+
     QDateTime now = QDateTime::currentDateTime();
     QDateTime then = now.addSecs(-_xaxis_display_range);
 
@@ -29,11 +37,22 @@ void SeriesWithData::rescaleXAxis(QDateTime const &oldestTimestamp)
         now = then.addSecs(_xaxis_display_range);
     }
 
-    _axisX->setRange(then, now);
+    if (then != _axisX->min() || now != _axisX->max())
+        _axisX->setRange(then, now);
 }
 
 void SeriesWithData::rescaleYAxis()
 {
+}
+
+void SeriesWithData::setVisible(bool visible)
+{
+    _is_visible = visible;
+}
+
+bool SeriesWithData::isVisible() const
+{
+    return _is_visible;
 }
 
 void SeriesWithData::setXAxis(QDateTimeAxis *x)
@@ -95,6 +114,17 @@ void SeriesWithData::appendLastValueToSeries(QLineSeries *series, QContiguousCac
     series->append(timeSeriesData.last().dt.toMSecsSinceEpoch(), timeSeriesData.last().value);
 }
 
+void SeriesWithData::copyFromTimeSeries(QLineSeries *lineseries, QContiguousCache<TimeSeriesData> const &timeSeries)
+{
+    lineseries->clear();
+    //qDebug() << "copyFromTimeSeries: timeSeries size " << timeSeries.size();
+    for (int i = 0; i < timeSeries.size(); i++)
+    {
+        TimeSeriesData const &point = timeSeries.at(i);
+        lineseries->append(point.dt.toMSecsSinceEpoch(), point.value);
+    }
+}
+
 QChart *SeriesWithData::createChart()
 {
 	QChart *chart = new QChart();
@@ -116,7 +146,7 @@ QChartView *SeriesWithData::createChartView(QChart *chart)
 	addYAxis(chart);
 	addSeries(chart);
 
-    rescaleXAxis();
+    scaleXAxis();
 	rescaleYAxis();
 
 	return chartView;

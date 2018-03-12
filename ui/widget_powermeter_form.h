@@ -29,7 +29,8 @@ public:
     ~WidgetPowerMeterForm();
 
 public slots:
-    void on_supportedFunctionsUpdated(int supportedFunctions);
+    void on_supportedFunctionsUpdated(int supportedFunctions);    
+    void on_currentTabChanged(int index);
 
 private slots:
     void on_dataUpdated();
